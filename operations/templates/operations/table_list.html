@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Mesas | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Mesas del restaurante</h1>
+
+    {% if can_manage %}
+        <div class="report-actions">
+            {% for venue in venues %}
+                <a
+                    class="btn btn-primary"
+                    href="{% url 'operations:table_create' venue.id %}"
+                >
+                    Agregar mesa en {{ venue.name }}
+                </a>
+            {% empty %}
+                <p>No hay locales disponibles.</p>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>
+            <small>
+                Tu rol permite consultar las mesas, pero no modificarlas.
+            </small>
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    {% if tables %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Local</th>
+                    <th>Mesa</th>
+                    <th>Zona</th>
+                    <th>Capacidad</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in tables %}
+                    <tr>
+                        <td>{{ table.venue.name }}</td>
+                        <td>{{ table.code }}</td>
+                        <td>{{ table.zone_name|default:"Sin zona" }}</td>
+                        <td>{{ table.capacity }}</td>
+                        <td>
+                            {% if table.is_active %}
+                                Activa
+                            {% else %}
+                                Inactiva
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay mesas registradas para tus locales.</p>
+    {% endif %}
+</section>
+{% endblock %}

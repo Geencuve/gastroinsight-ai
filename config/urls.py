@@ -1,0 +1,27 @@
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("core.urls", namespace="core")),
+    path("auth/",include("authentication.urls", namespace="authentication")),
+    path("venues/", include("venues.urls", namespace="venues")),
+    path("menus/", include("menus.urls", namespace="menus")),
+    path("cameras/", include("cameras.urls", namespace="cameras")),
+    path("ai/", include("ai_vision.urls", namespace="ai_vision")),
+    path("analytics/", include("analytics.urls", namespace="analytics")),
+    path("reports/", include("reports.urls", namespace="reports")),
+    path("operations/", include("operations.urls", namespace="operations")),
+    path("monitoring/", include("monitoring.urls", namespace="monitoring")),
+    path("privacy/", include("privacy.urls", namespace="privacy")),
+    path("api/", include("api.urls", namespace="api")),
+    path("assistant/", include("assistant_chat.urls", namespace="assistant_chat")),
+    path("sales/", include("sales.urls", namespace="sales")),
+]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Incidencias | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Incidencias de la plataforma</h1>
+
+    <p>
+        Este módulo concentra advertencias, errores e incidencias
+        de procesamiento, configuración y disponibilidad de fuentes.
+    </p>
+</section>
+
+<br>
+
+<section class="card">
+    {% if incidents %}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Local</th>
+                        <th>Módulo</th>
+                        <th>Título</th>
+                        <th>Severidad</th>
+                        <th>Estado</th>
+                        <th>Revisada por</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for incident in incidents %}
+                        <tr>
+                            <td>
+                                {{ incident.occurred_at|date:"d-m-Y H:i" }}
+                            </td>
+
+                            <td>
+                                {% if incident.venue %}
+                                    {{ incident.venue.name }}
+                                {% else %}
+                                    General
+                                {% endif %}
+                            </td>
+
+                            <td>{{ incident.module }}</td>
+                            <td>{{ incident.title }}</td>
+                            <td>{{ incident.get_severity_display }}</td>
+                            <td>{{ incident.get_status_display }}</td>
+
+                            <td>
+                                {% if incident.reviewed_by %}
+                                    {{ incident.reviewed_by.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if can_review %}
+                                    {% if incident.status == "open" %}
+                                        <form
+                                            method="post"
+                                            action="{% url 'monitoring:incident_review' incident.id %}"
+                                            style="display: inline;"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                class="btn btn-primary"
+                                                type="submit"
+                                            >
+                                                Revisar
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if incident.status != "resolved" %}
+                                        <form
+                                            method="post"
+                                            action="{% url 'monitoring:incident_resolve' incident.id %}"
+                                            style="display: inline;"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                class="btn btn-stop"
+                                                type="submit"
+                                            >
+                                                Resolver
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <span>Solo lectura</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>
+            No hay incidencias disponibles para tus locales.
+        </p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar evaluación | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <h1>Registrar evaluación voluntaria</h1>
+
+    <p>
+        Esta información corresponde a una valoración voluntaria.
+        No ingreses nombres, teléfonos, correos ni otros datos personales
+        del cliente.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="form-error">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <button class="btn btn-primary" type="submit">
+            Guardar evaluación
+        </button>
+
+        <a class="btn" href="{% url 'operations:evaluation_list' %}">
+            Cancelar
+        </a>
+    </form>
+</section>
+{% endblock %}

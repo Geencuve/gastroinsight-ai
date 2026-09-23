@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Ingresar | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <h1>Ingresar</h1>
+    <p>Accede a GastroInsight AI con tu cuenta.</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="form-error">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <button class="btn btn-primary" type="submit">
+            Ingresar
+        </button>
+    </form>
+
+    <p>
+        ¿No tienes cuenta?
+        <a href="{% url 'authentication:register' %}">
+            Regístrate aquí
+        </a>.
+    </p>
+    <p>
+        ¿Olvidaste tu contraseña?
+        <a href="{% url 'authentication:password_reset' %}">
+            Recuperarla aquí
+        </a>.
+    </p>
+</section>
+{% endblock %}

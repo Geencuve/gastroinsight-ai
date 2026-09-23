@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva sesión de atención | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <h1>Iniciar sesión de atención</h1>
+
+    <p>
+        Selecciona la mesa y registra la cantidad estimada de comensales.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">
+            Iniciar sesión
+        </button>
+
+        <a class="btn" href="{% url 'operations:session_list' %}">
+            Cancelar
+        </a>
+    </form>
+</section>
+{% endblock %}

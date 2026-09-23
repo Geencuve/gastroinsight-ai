@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Mi perfil | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Mi perfil</h1>
+
+    <p>
+        <strong>Usuario:</strong>
+        {{ request.user.username }}
+    </p>
+
+    <p>
+        <strong>Nombre:</strong>
+        {{ request.user.get_full_name|default:"No informado" }}
+    </p>
+
+    <p>
+        <strong>Correo:</strong>
+        {{ request.user.email|default:"No informado" }}
+    </p>
+
+    <p>
+        <strong>Rol:</strong>
+        {{ profile.get_role_display }}
+    </p>
+
+    <p>
+        <strong>Locales asignados:</strong>
+    </p>
+    <p>
+        <a
+            class="btn btn-primary"
+            href="{% url 'authentication:password_change' %}"
+        >
+            Cambiar contraseña
+        </a>
+    </p>
+    <ul>
+        {% for venue in profile.venues.all %}
+            <li>{{ venue.name }}</li>
+        {% empty %}
+            <li>No tienes locales asignados todavía.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

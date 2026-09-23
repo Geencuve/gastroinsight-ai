@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva mesa | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <h1>Registrar mesa</h1>
+
+    <p>
+        <strong>Local:</strong> {{ venue.name }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">
+            Guardar mesa
+        </button>
+
+        <a class="btn" href="{% url 'operations:table_list' %}">
+            Cancelar
+        </a>
+    </form>
+</section>
+{% endblock %}

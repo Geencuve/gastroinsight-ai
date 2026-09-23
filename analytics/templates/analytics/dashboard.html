@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-filter {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .dashboard-filter .form-group {
+        margin-bottom: 0;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .metric-card {
+        min-height: 140px;
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgb(15 23 42 / 8%);
+    }
+
+    .metric-label {
+        margin: 0;
+        color: #475569;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .metric-value {
+        margin: 0.55rem 0 0;
+        color: #1d4ed8;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .metric-note {
+        margin: 0.45rem 0 0;
+        color: #64748b;
+        font-size: 0.78rem;
+    }
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    .chart-box {
+        min-height: 340px;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 260px;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .dashboard-table th {
+        color: #1e3a8a;
+        background: #eff6ff;
+    }
+
+    .section-description {
+        color: #475569;
+    }
+
+    .warning-box {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        border-left: 4px solid #d97706;
+        border-radius: 6px;
+        background: #fffbeb;
+        color: #78350f;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Dashboard de operación e indicadores</h1>
+
+    <p class="section-description">
+        Consulta información operacional, evaluaciones voluntarias
+        y eventos visuales agregados para un período específico.
+    </p>
+
+    <form method="get" class="dashboard-filter">
+        <div class="form-group">
+            <label for="filter-date">Fecha</label>
+            <input
+                id="filter-date"
+                type="date"
+                name="date"
+                value="{{ selected_date|date:'Y-m-d' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="filter-venue">Local</label>
+            <select id="filter-venue" name="venue">
+                <option value="">Todos los locales autorizados</option>
+
+                {% for venue in venues %}
+                    <option
+                        value="{{ venue.id }}"
+                        {% if selected_venue_id == venue.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ venue.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filter-table">Mesa</label>
+            <select id="filter-table" name="table">
+                <option value="">Todas las mesas</option>
+
+                {% for table in tables %}
+                    <option
+                        value="{{ table.id }}"
+                        {% if selected_table_id == table.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ table.venue.name }} — {{ table.code }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filter-camera">Cámara</label>
+            <select id="filter-camera" name="camera">
+                <option value="">Todas las cámaras</option>
+
+                {% for camera in cameras %}
+                    <option
+                        value="{{ camera.id }}"
+                        {% if selected_camera_id == camera.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ camera.venue.name }} — {{ camera.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filter-session">Sesión de atención</label>
+            <select id="filter-session" name="service_session">
+                <option value="">Todas las sesiones</option>
+
+                {% for session in service_sessions %}
+                    <option
+                        value="{{ session.id }}"
+                        {% if selected_service_session_id == session.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        #{{ session.id }} —
+                        {{ session.table.venue.name }} /
+                        {{ session.table.code }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">
+                Aplicar filtros
+            </button>
+        </div>
+    </form>
+</section>
+
+<div class="warning-box">
+    <strong>Interpretación:</strong>
+    Las evaluaciones corresponden a retroalimentación voluntaria.
+    Los eventos visuales muestran detecciones acumuladas por frame,
+    no personas únicas, y no identifican a clientes.
+</div>
+
+<h2>Operación del restaurante</h2>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <p class="metric-label">Sesiones de atención</p>
+        <p class="metric-value">
+            {{ service_summary.service_sessions_count|default:0 }}
+        </p>
+        <p class="metric-note">
+            Sesiones iniciadas durante el período seleccionado.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Sesiones abiertas</p>
+        <p class="metric-value">
+            {{ service_summary.open_service_sessions|default:0 }}
+        </p>
+        <p class="metric-note">
+            Sesiones de atención aún no cerradas.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Promedio de comensales</p>
+        <p class="metric-value">
+            {{ service_summary.average_guests|default:0|floatformat:1 }}
+        </p>
+        <p class="metric-note">
+            Estimación registrada al iniciar la sesión.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Evaluaciones voluntarias</p>
+        <p class="metric-value">
+            {{ evaluation_summary.evaluations_count|default:0 }}
+        </p>
+        <p class="metric-note">
+            Registros directos de retroalimentación.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Promedio de evaluación</p>
+        <p class="metric-value">
+            {{ evaluation_summary.average_rating|default:0|floatformat:2 }}/5
+        </p>
+        <p class="metric-note">
+            Basado solo en evaluaciones disponibles.
+        </p>
+    </article>
+</section>
+
+<h2>Análisis visual agregado</h2>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <p class="metric-label">Sesiones de análisis completadas</p>
+        <p class="metric-value">
+            {{ analysis_summary.analysis_sessions_count|default:0 }}
+        </p>
+        <p class="metric-note">
+            Procesamientos finalizados durante el período.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Frames procesados</p>
+        <p class="metric-value">
+            {{ analysis_summary.frames_processed|default:0 }}
+        </p>
+        <p class="metric-note">
+            Fotogramas procesados por el pipeline.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Rostros acumulados en frames</p>
+        <p class="metric-value">
+            {{ analysis_summary.faces_detected|default:0 }}
+        </p>
+        <p class="metric-note">
+            No equivale a visitantes únicos.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Eventos visuales</p>
+        <p class="metric-value">
+            {{ event_summary.events_count|default:0 }}
+        </p>
+        <p class="metric-note">
+            Eventos muestreados y almacenados.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Promedio de rostros por evento</p>
+        <p class="metric-value">
+            {{ event_summary.average_faces|default:0|floatformat:2 }}
+        </p>
+        <p class="metric-note">
+            Indicador agregado de presencia visual.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Tiempo promedio de análisis</p>
+        <p class="metric-value">
+            {{ event_summary.average_processing_time|default:0|floatformat:0 }} ms
+        </p>
+        <p class="metric-note">
+            Tiempo de procesamiento por evento.
+        </p>
+    </article>
+</section>
+
+<section class="chart-grid">
+    <article class="chart-box">
+        <h2>Tendencia de detecciones visuales</h2>
+
+        {% if chart_labels %}
+            <div class="chart-container">
+                <canvas id="facesChart"></canvas>
+            </div>
+        {% else %}
+            <p>
+                No existen eventos visuales para los filtros seleccionados.
+            </p>
+        {% endif %}
+    </article>
+
+    <article class="chart-box">
+        <h2>Distribución de evaluaciones</h2>
+
+        {% if evaluation_summary.evaluations_count %}
+            <div class="chart-container">
+                <canvas id="ratingsChart"></canvas>
+            </div>
+        {% else %}
+            <p>
+                No existen evaluaciones voluntarias para los filtros
+                seleccionados.
+            </p>
+        {% endif %}
+    </article>
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Resumen de análisis por cámara</h2>
+
+    {% if sessions_by_camera %}
+        <div style="overflow-x: auto;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th>Cámara</th>
+                        <th>Sesiones</th>
+                        <th>Frames</th>
+                        <th>Rostros acumulados</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in sessions_by_camera %}
+                        <tr>
+                            <td>{{ item.camera__venue__name }}</td>
+                            <td>{{ item.camera__name }}</td>
+                            <td>{{ item.sessions_count }}</td>
+                            <td>{{ item.frames_processed|default:0 }}</td>
+                            <td>{{ item.faces_detected|default:0 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>
+            No hay sesiones de análisis completadas para los filtros
+            seleccionados.
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Últimas sesiones de atención</h2>
+
+    {% if recent_service_sessions %}
+        <div style="overflow-x: auto;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Local</th>
+                        <th>Mesa</th>
+                        <th>Comensales</th>
+                        <th>Inicio</th>
+                        <th>Término</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for session in recent_service_sessions %}
+                        <tr>
+                            <td>#{{ session.id }}</td>
+                            <td>{{ session.table.venue.name }}</td>
+                            <td>{{ session.table.code }}</td>
+                            <td>{{ session.guests_count }}</td>
+                            <td>
+                                {{ session.started_at|date:"d-m-Y H:i" }}
+                            </td>
+                            <td>
+                                {{ session.ended_at|date:"d-m-Y H:i"|default:"—" }}
+                            </td>
+                            <td>{{ session.get_status_display }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>
+            No hay sesiones de atención para la fecha y filtros seleccionados.
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Últimas sesiones de análisis visual</h2>
+
+    {% if recent_analysis_sessions %}
+        <div style="overflow-x: auto;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Local</th>
+                        <th>Cámara</th>
+                        <th>Estado</th>
+                        <th>Inicio</th>
+                        <th>Frames</th>
+                        <th>Rostros acumulados</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for session in recent_analysis_sessions %}
+                        <tr>
+                            <td>#{{ session.id }}</td>
+                            <td>{{ session.camera.venue.name }}</td>
+                            <td>{{ session.camera.name }}</td>
+                            <td>{{ session.get_status_display }}</td>
+                            <td>
+                                {{ session.started_at|date:"d-m-Y H:i"|default:"—" }}
+                            </td>
+                            <td>{{ session.frames_processed }}</td>
+                            <td>{{ session.total_faces_detected }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>
+            No hay sesiones de análisis visual para la fecha y filtros
+            seleccionados.
+        </p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_faces|json_script:"chart-faces" }}
+{{ rating_labels|json_script:"rating-labels" }}
+{{ rating_values|json_script:"rating-values" }}
+
+<script>
+    const chartLabels = JSON.parse(
+        document.getElementById("chart-labels").textContent
+    );
+
+    const chartFaces = JSON.parse(
+        document.getElementById("chart-faces").textContent
+    );
+
+    const ratingLabels = JSON.parse(
+        document.getElementById("rating-labels").textContent
+    );
+
+    const ratingValues = JSON.parse(
+        document.getElementById("rating-values").textContent
+    );
+
+    const facesCanvas = document.getElementById("facesChart");
+
+    if (facesCanvas && chartLabels.length > 0) {
+        new Chart(facesCanvas, {
+            type: "line",
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: "Rostros detectados por evento",
+                        data: chartFaces,
+                        borderColor: "#2563eb",
+                        backgroundColor: "rgba(37, 99, 235, 0.15)",
+                        fill: true,
+                        tension: 0.25,
+                        pointRadius: 3,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                        },
+                        title: {
+                            display: true,
+                            text: "Cantidad de rostros",
+                        },
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Hora del evento",
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    const ratingsCanvas = document.getElementById("ratingsChart");
+
+    if (ratingsCanvas && ratingValues.some(value => value > 0)) {
+        new Chart(ratingsCanvas, {
+            type: "bar",
+            data: {
+                labels: ratingLabels,
+                datasets: [
+                    {
+                        label: "Cantidad de evaluaciones",
+                        data: ratingValues,
+                        backgroundColor: [
+                            "#dc2626",
+                            "#f97316",
+                            "#eab308",
+                            "#22c55e",
+                            "#15803d",
+                        ],
+                        borderRadius: 6,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                        },
+                        title: {
+                            display: true,
+                            text: "Evaluaciones",
+                        },
+                    },
+                },
+            },
+        });
+    }
+</script>
+{% endblock %}

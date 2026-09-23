@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Privacidad | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Privacidad y tratamiento de datos</h1>
+
+    <p>
+        Gestiona las políticas de procesamiento visual autorizado,
+        retención de eventos agregados y autorizaciones asociadas a cada local.
+    </p>
+</section>
+
+<br>
+
+<section class="card">
+    {% if venue_rows %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Local</th>
+                    <th>Política</th>
+                    <th>Procesamiento visual</th>
+                    <th>Autorización vigente</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in venue_rows %}
+                    <tr>
+                        <td>{{ row.venue.name }}</td>
+
+                        <td>
+                            {% if row.policy %}
+                                Versión {{ row.policy.version }}
+                            {% else %}
+                                Sin política registrada
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row.policy and row.policy.processing_enabled %}
+                                Habilitado
+                            {% else %}
+                                Deshabilitado
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row.is_authorized %}
+                                Sí
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a
+                                class="btn btn-primary"
+                                href="{% url 'privacy:policy_edit' row.venue.id %}"
+                            >
+                                Configurar
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay locales disponibles.</p>
+    {% endif %}
+</section>
+{% endblock %}

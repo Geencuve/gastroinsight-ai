@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Política de privacidad | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <a href="{% url 'privacy:policy_list' %}">
+        ← Volver a privacidad
+    </a>
+
+    <h1>Política de privacidad</h1>
+
+    <p>
+        <strong>Local:</strong> {{ venue.name }}
+    </p>
+
+    <p>
+        El sistema debe procesar solo eventos agregados y no almacenar
+        imágenes originales, identidades ni perfiles biométricos.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">
+            Guardar política
+        </button>
+    </form>
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Autorizaciones de procesamiento</h2>
+
+    <a
+        class="btn btn-primary"
+        href="{% url 'privacy:authorization_create' venue.id %}"
+    >
+        Registrar autorización
+    </a>
+
+    <br><br>
+
+    {% if authorizations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Fuente / alcance</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Aceptada</th>
+                    <th>Vencimiento</th>
+                    <th>Registrada por</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for authorization in authorizations %}
+                    <tr>
+                        <td>{{ authorization.source_description }}</td>
+                        <td>{{ authorization.authorization_type }}</td>
+                        <td>{{ authorization.get_status_display }}</td>
+                        <td>
+                            {{ authorization.accepted_at|date:"d-m-Y H:i" }}
+                        </td>
+                        <td>
+                            {{ authorization.expires_at|date:"d-m-Y H:i"|default:"Sin vencimiento" }}
+                        </td>
+                        <td>
+                            {{ authorization.accepted_by.username|default:"—" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay autorizaciones registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

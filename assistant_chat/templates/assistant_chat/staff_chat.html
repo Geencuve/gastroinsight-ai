@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <h1>Asistente operacional</h1>
+        <p class="text-muted">
+            Consulta indicadores agregados de sesiones, atención,
+            platos, actividad, incidencias, cámaras y privacidad.
+        </p>
+    </div>
+
+    <div class="alert alert-info">
+        El asistente usa datos operacionales autorizados y agregados.
+        No identifica personas, no muestra imágenes y no reemplaza
+        la revisión del equipo responsable.
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Consultas sugeridas</h2>
+
+            <div class="d-flex flex-wrap gap-2">
+                {% for suggestion in suggestions %}
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        data-prompt="{{ suggestion.prompt }}"
+                    >
+                        {{ suggestion.label }}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <label
+                    class="form-label"
+                    for="{{ form.message.id_for_label }}"
+                >
+                    Escribe una consulta
+                </label>
+
+                {{ form.message }}
+
+                {% if form.message.errors %}
+                    <div class="text-danger mt-2">
+                        {{ form.message.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        Consultar asistente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll("[data-prompt]").forEach((button) => {
+        button.addEventListener("click", () => {
+            document.getElementById(
+                "{{ form.message.id_for_label }}"
+            ).value = button.dataset.prompt;
+        });
+    });
+</script>
+{% endblock %}

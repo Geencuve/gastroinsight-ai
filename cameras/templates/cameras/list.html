@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Cámaras | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Cámaras activas</h1>
+
+    {% if cameras %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Cámara</th>
+                    <th>Local</th>
+                    <th>Zona</th>
+                    <th>Fuente</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for camera in cameras %}
+                    <tr>
+                        <td>{{ camera.name }}</td>
+                        <td>{{ camera.venue.name }}</td>
+                        <td>{{ camera.zone_name|default:"Sin zona definida" }}</td>
+                        <td>{{ camera.get_source_type_display }}</td>
+                        <td>Activa</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay cámaras activas registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

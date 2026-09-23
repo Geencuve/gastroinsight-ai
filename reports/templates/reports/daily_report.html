@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte diario | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <a href="{% url 'reports:list' %}?date={{ report_date|date:'Y-m-d' }}">
+        ← Volver a reportes
+    </a>
+
+    <h1>Reporte diario</h1>
+
+    <p>
+        <strong>Local:</strong> {{ venue.name }}
+    </p>
+
+    <p>
+        <strong>Fecha:</strong> {{ report_date|date:"d-m-Y" }}
+    </p>
+
+    <div class="report-actions">
+        <a
+            class="btn btn-primary"
+            href="{% url 'reports:daily_csv' venue.id %}?date={{ report_date|date:'Y-m-d' }}"
+        >
+            Descargar CSV
+        </a>
+
+        <a
+            class="btn btn-pdf"
+            href="{% url 'reports:daily_pdf' venue.id %}?date={{ report_date|date:'Y-m-d' }}"
+        >
+            Descargar PDF
+        </a>
+    </div>
+</section>
+
+<br>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <p class="metric-label">Sesiones de atención</p>
+        <p class="metric-value">
+            {{ service_summary.sessions_count|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Promedio de comensales</p>
+        <p class="metric-value">
+            {{ service_summary.average_guests|default:0|floatformat:2 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Sesiones de análisis completadas</p>
+        <p class="metric-value">
+            {{ analysis_summary.analysis_sessions_count|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Frames procesados</p>
+        <p class="metric-value">
+            {{ analysis_summary.frames_processed|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Rostros acumulados</p>
+        <p class="metric-value">
+            {{ analysis_summary.faces_detected|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Eventos visuales</p>
+        <p class="metric-value">
+            {{ event_summary.events_count|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Evaluaciones voluntarias</p>
+        <p class="metric-value">
+            {{ evaluation_summary.evaluations_count|default:0 }}
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Promedio de evaluación</p>
+        <p class="metric-value">
+            {{ evaluation_summary.average_rating|default:0|floatformat:2 }}/5
+        </p>
+    </article>
+</section>
+
+<section class="card">
+    <h2>Resumen por cámara</h2>
+
+    {% if cameras_summary %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Cámara</th>
+                    <th>Zona</th>
+                    <th>Sesiones</th>
+                    <th>Frames</th>
+                    <th>Rostros acumulados</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in cameras_summary %}
+                    <tr>
+                        <td>{{ item.camera__name }}</td>
+                        <td>
+                            {{ item.camera__zone_name|default:"Sin zona definida" }}
+                        </td>
+                        <td>{{ item.sessions_count }}</td>
+                        <td>{{ item.frames_processed|default:0 }}</td>
+                        <td>{{ item.faces_detected|default:0 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            No hay sesiones completadas para la fecha seleccionada.
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Sesiones del período</h2>
+
+    {% if sessions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cámara</th>
+                    <th>Estado</th>
+                    <th>Inicio</th>
+                    <th>Término</th>
+                    <th>Frames</th>
+                    <th>Rostros acumulados</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>#{{ session.id }}</td>
+                        <td>{{ session.camera.name }}</td>
+                        <td>{{ session.get_status_display }}</td>
+                        <td>
+                            {{ session.started_at|date:"d-m-Y H:i:s"|default:"—" }}
+                        </td>
+                        <td>
+                            {{ session.ended_at|date:"d-m-Y H:i:s"|default:"—" }}
+                        </td>
+                        <td>{{ session.frames_processed }}</td>
+                        <td>{{ session.total_faces_detected }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            No existen sesiones registradas para esta fecha.
+        </p>
+    {% endif %}
+</section>
+
+<br>
+<section class="card">
+    <h2>Evaluaciones voluntarias del período</h2>
+
+    {% if evaluations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Mesa</th>
+                    <th>Plato</th>
+                    <th>Valoración</th>
+                    <th>Comentario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for evaluation in evaluations %}
+                    <tr>
+                        <td>{{ evaluation.service_session.table.code }}</td>
+                        <td>
+                            {{ evaluation.dish.name|default:"Sin plato asociado" }}
+                        </td>
+                        <td>{{ evaluation.rating }}/5</td>
+                        <td>
+                            {{ evaluation.comment|default:"Sin comentario" }}
+                        </td>
+                        <td>
+                            {{ evaluation.created_at|date:"d-m-Y H:i" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay evaluaciones voluntarias para este período.</p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Interpretación responsable</h2>
+
+    <p>
+        Las métricas de rostros corresponden a detecciones acumuladas
+        en frames procesados. No representan personas únicas, no permiten
+        identificar clientes y no deben interpretarse como una medición
+        directa de satisfacción.
+    </p>
+
+    <p>
+        Los datos presentados se utilizan como apoyo para el análisis
+        operativo del local y requieren interpretación humana.
+    </p>
+</section>
+{% endblock %}

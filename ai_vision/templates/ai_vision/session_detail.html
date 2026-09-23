@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Sesión #{{ session.id }} | GastroInsight AI
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>Sesión de análisis #{{ session.id }}</h1>
+        <p>
+            Revisión técnica de la ejecución asociada a la cámara
+            <strong>{{ camera.name }}</strong>.
+        </p>
+    </div>
+
+    <a
+        class="btn btn-secondary"
+        href="{% url 'ai_vision:session_list' %}"
+    >
+        Volver a sesiones
+    </a>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2>Vista previa de cámara</h2>
+            <p class="muted">
+                Transmisión local en vivo. No se almacenan imágenes
+                ni videos desde esta pantalla.
+            </p>
+        </div>
+
+        <a
+            class="btn btn-secondary"
+            href="{% url 'ai_vision:camera_preview' camera.id %}"
+            target="_blank"
+        >
+            Abrir en pestaña nueva
+        </a>
+    </div>
+
+    <div class="camera-preview-container">
+        <img
+            class="camera-preview"
+            src="{% url 'ai_vision:camera_preview' camera.id %}"
+            alt="Vista en vivo de {{ camera.name }}"
+        >
+    </div>
+</section>
+
+<section class="card">
+    <h2>Información general</h2>
+
+    <div class="metrics-grid">
+        <article class="metric-card">
+            <span class="metric-label">Cámara</span>
+            <strong>{{ camera.name }}</strong>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-label">Local</span>
+            <strong>{{ camera.venue.name }}</strong>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-label">Estado</span>
+            <strong class="status status-{{ session.status }}">
+                {{ session.get_status_display }}
+            </strong>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-label">Inicio</span>
+            <strong>
+                {% if session.started_at %}
+                    {{ session.started_at|date:"d/m/Y H:i:s" }}
+                {% else %}
+                    Pendiente
+                {% endif %}
+            </strong>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-label">Finalización</span>
+            <strong>
+                {% if session.ended_at %}
+                    {{ session.ended_at|date:"d/m/Y H:i:s" }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-label">Frames procesados</span>
+            <strong>{{ session.processed_frames|default:"0" }}</strong>
+        </article>
+    </div>
+</section>
+
+{% if session.error_message %}
+    <section class="card">
+        <h2>Información de ejecución</h2>
+        <p>{{ session.error_message }}</p>
+    </section>
+{% endif %}
+
+{% if can_operate and session.status == "running" %}
+    <section class="card">
+        <h2>Control de sesión</h2>
+        <p>La cámara está marcada como en ejecución.</p>
+
+        <form
+            method="post"
+            action="{% url 'ai_vision:stop_session' session.id %}"
+        >
+            {% csrf_token %}
+
+            <button class="btn btn-danger" type="submit">
+                Detener sesión
+            </button>
+        </form>
+    </section>
+{% endif %}
+{% endblock %}

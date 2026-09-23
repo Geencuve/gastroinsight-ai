@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Locales | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Locales registrados</h1>
+
+    {% if venues %}
+        <ul>
+            {% for venue in venues %}
+                <li>
+                    <strong>{{ venue.name }}</strong>
+                    {% if venue.address %}
+                        — {{ venue.address }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aún no hay locales registrados.</p>
+    {% endif %}
+</section>
+{% endblock %}

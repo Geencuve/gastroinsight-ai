@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva autorización | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <a href="{% url 'privacy:policy_edit' venue.id %}">
+        ← Volver a la política
+    </a>
+
+    <h1>Registrar autorización de procesamiento</h1>
+
+    <p>
+        <strong>Local:</strong> {{ venue.name }}
+    </p>
+
+    <p>
+        Esta autorización respalda el uso de una fuente visual bajo
+        la finalidad definida por la política de privacidad.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">
+            Registrar autorización
+        </button>
+    </form>
+</section>
+{% endblock %}

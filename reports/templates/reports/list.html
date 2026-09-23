@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Reportes de gestión</h1>
+
+    <p>
+        Genera reportes diarios, semanales o mensuales con información
+        operacional, evaluaciones voluntarias y métricas visuales agregadas.
+    </p>
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Reportes diarios</h2>
+
+    <form method="get" class="report-filter">
+        <div class="form-group">
+            <label for="daily-date">Fecha</label>
+            <input
+                id="daily-date"
+                type="date"
+                name="date"
+                value="{{ selected_date|date:'Y-m-d' }}"
+            >
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+            Actualizar fecha
+        </button>
+    </form>
+
+    <br>
+
+    {% if venues %}
+        <div class="report-grid">
+            {% for venue in venues %}
+                <article class="report-card">
+                    <h3>{{ venue.name }}</h3>
+
+                    {% if venue.address %}
+                        <p>{{ venue.address }}</p>
+                    {% endif %}
+
+                    <a
+                        class="btn btn-primary"
+                        href="{% url 'reports:daily' venue.id %}?date={{ selected_date|date:'Y-m-d' }}"
+                    >
+                        Ver reporte diario
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No tienes locales asignados para generar reportes.</p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    <h2>Reportes semanales y mensuales</h2>
+
+    <form method="get" class="report-filter">
+        <div class="form-group">
+            <label for="period-type">Tipo de reporte</label>
+            <select id="period-type" name="period">
+                <option
+                    value="week"
+                    {% if period_data.period_type == "week" %}
+                        selected
+                    {% endif %}
+                >
+                    Semanal
+                </option>
+                <option
+                    value="month"
+                    {% if period_data.period_type == "month" %}
+                        selected
+                    {% endif %}
+                >
+                    Mensual
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="period-start">
+                Inicio de semana o mes
+            </label>
+            <input
+                id="period-start"
+                type="date"
+                name="start"
+                value="{{ period_data.start_date|date:'Y-m-d' }}"
+            >
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+            Actualizar período
+        </button>
+    </form>
+
+    <p>
+        <strong>Período seleccionado:</strong>
+        {{ period_data.period_label }}
+    </p>
+
+    {% if venues %}
+        <div class="report-grid">
+            {% for venue in venues %}
+                <article class="report-card">
+                    <h3>{{ venue.name }}</h3>
+
+                    <p>
+                        {{ period_data.period_label }}
+                    </p>
+
+                    <a
+                        class="btn btn-primary"
+                        href="{% url 'reports:period' venue.id %}?period={{ period_data.period_type }}&start={{ period_data.start_date|date:'Y-m-d' }}"
+                    >
+                        Ver reporte
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

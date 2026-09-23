@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Registro | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+    <h1>Crear cuenta</h1>
+    <p>
+        Registra tu cuenta. Un administrador deberá asignarte
+        un rol y los locales a los que podrás acceder.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">
+            Crear cuenta
+        </button>
+    </form>
+
+    <p>
+        ¿Ya tienes cuenta?
+        <a href="{% url 'authentication:login' %}">
+            Ingresa aquí
+        </a>.
+    </p>
+</section>
+{% endblock %}

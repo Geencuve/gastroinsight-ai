@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ menu.name }} | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <a href="{% url 'menus:list' %}">← Volver a menús</a>
+
+    <h1>{{ menu.name }}</h1>
+    <p><strong>Local:</strong> {{ menu.venue.name }}</p>
+
+    {% if menu.description %}
+        <p>{{ menu.description }}</p>
+    {% endif %}
+
+    <h2>Platos disponibles</h2>
+
+    {% if dishes %}
+        <ul>
+            {% for dish in dishes %}
+                <li>
+                    <strong>{{ dish.name }}</strong>
+
+                    {% if dish.category %}
+                        — {{ dish.category }}
+                    {% endif %}
+
+                    — ${{ dish.price }}
+
+                    {% if dish.description %}
+                        <p>{{ dish.description }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay platos disponibles en este menú.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Menús | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Menús disponibles</h1>
+
+    {% if menus %}
+        <ul>
+            {% for menu in menus %}
+                <li>
+                    <a href="{% url 'menus:detail' menu.id %}">
+                        <strong>{{ menu.name }}</strong>
+                    </a>
+                    <span>— {{ menu.venue.name }}</span>
+
+                    {% if menu.description %}
+                        <p>{{ menu.description }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay menús activos registrados.</p>
+    {% endif %}
+</section>
+{% endblock %}

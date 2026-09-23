@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}GastroInsight AI{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="brand">
+            <a href="{% url 'core:home' %}">GastroInsight AI</a>
+        </div>
+
+        <nav class="main-nav">
+            <a href="{% url 'core:home' %}">Inicio</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'venues:list' %}">Locales</a>
+                <a href="{% url 'menus:list' %}">Menús</a>
+                <a href="{% url 'cameras:list' %}">Cámaras</a>
+                <a href="{% url 'operations:table_list' %}">Mesas</a>
+                <a href="{% url 'operations:session_list' %}">Atención</a>
+                <a href="{% url 'operations:evaluation_list' %}">Evaluaciones</a>
+                <a href="{% url 'ai_vision:session_list' %}">Sesiones IA</a>
+                <a href="{% url 'analytics:dashboard' %}">Dashboard</a>
+                <a href="{% url 'reports:list' %}">Reportes</a>
+                <a href="{% url 'authentication:profile' %}">Mi perfil</a>
+                <a href="{% url 'monitoring:incident_list' %}">Incidencias</a>
+                <a href="{% url 'privacy:policy_list' %}">Privacidad</a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
+                    </li>
+                <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
+
+
+            {% if user.is_superuser %}
+                <a href="{% url 'monitoring:audit_log_list' %}">Auditoría</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <a href="/admin/">Administración</a>
+            {% endif %}
+                <form method="post"action="{% url 'authentication:logout' %}"class="logout-form">
+                {% csrf_token %}
+                    <button class="nav-logout" type="submit">Cerrar sesión</button>
+                </form>
+            {% else %}
+                <a href="{% url 'authentication:login' %}">Ingresar</a>
+                <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
+                </li>
+            {% endif %}
+
+
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

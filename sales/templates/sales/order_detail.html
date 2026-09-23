@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Pedido #{{ order.id }} | GastroInsight AI
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>Pedido #{{ order.id }}</h1>
+        <p>
+            {{ order.service_session.table.venue.name }}
+            · Mesa {{ order.service_session.table.code }}
+            · Sesión #{{ order.service_session.id }}
+        </p>
+    </div>
+
+    <div>
+        <a
+            class="btn btn-secondary"
+            href="{% url 'sales:order_list' %}"
+        >
+            Volver a pedidos
+        </a>
+    </div>
+</section>
+
+{% if messages %}
+    <section class="messages" aria-live="polite">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </section>
+{% endif %}
+
+<section class="card order-summary">
+    <div class="summary-grid">
+        <div>
+            <span class="summary-label">Estado</span>
+            <span class="status-badge status-{{ order.status|lower }}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        <div>
+            <span class="summary-label">Apertura</span>
+            <strong>{{ order.opened_at|date:"d/m/Y H:i" }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Creado por</span>
+            <strong>{{ order.created_by.get_username }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Comensales</span>
+            <strong>{{ order.service_session.guests_count }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Subtotal</span>
+            <strong>${{ order.subtotal|floatformat:0 }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Descuento</span>
+            <strong>${{ order.discount_amount|floatformat:0 }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Total</span>
+            <strong class="order-total">
+                ${{ order.total|floatformat:0 }}
+            </strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Medio de pago</span>
+
+            {% if order.payment_method %}
+                <strong>{{ order.get_payment_method_display }}</strong>
+            {% else %}
+                <strong>Sin registrar</strong>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if order.notes %}
+        <div class="order-notes">
+            <span class="summary-label">Observaciones</span>
+            <p>{{ order.notes|linebreaksbr }}</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2>Productos del pedido</h2>
+            <p>
+                Los precios se conservan como registro histórico al
+                momento de agregar cada producto.
+            </p>
+        </div>
+    </div>
+
+    {% if order.items.all %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio unitario</th>
+                        <th>Total</th>
+                        <th>Observación</th>
+
+                        {% if can_operate and order.can_be_edited %}
+                            <th>Acción</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in order.items.all %}
+                        <tr>
+                            <td>{{ item.dish_name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.unit_price|floatformat:0 }}</td>
+                            <td>${{ item.line_total|floatformat:0 }}</td>
+
+                            <td>
+                                {% if item.notes %}
+                                    {{ item.notes }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            {% if can_operate and order.can_be_edited %}
+                                <td>
+                                    <form
+                                        method="post"
+                                        action="{% url 'sales:order_item_delete' order.id item.id %}"
+                                        onsubmit="return confirm('¿Eliminar este producto del pedido?');"
+                                    >
+                                        {% csrf_token %}
+
+                                        <button
+                                            class="btn btn-small btn-danger"
+                                            type="submit"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>El pedido aún no tiene productos</h3>
+            <p>
+                Agrega al menos un plato antes de confirmar el pedido.
+            </p>
+        </div>
+    {% endif %}
+</section>
+
+{% if can_operate and order.can_be_edited %}
+    <section class="two-column-grid">
+        <article class="card">
+            <h2>Agregar producto</h2>
+
+            <form
+                method="post"
+                action="{% url 'sales:order_item_add' order.id %}"
+                novalidate
+            >
+                {% csrf_token %}
+
+                {% if item_form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {{ item_form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ item_form.dish.id_for_label }}">
+                        {{ item_form.dish.label }}
+                    </label>
+
+                    {{ item_form.dish }}
+
+                    {% for error in item_form.dish.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ item_form.quantity.id_for_label }}">
+                        {{ item_form.quantity.label }}
+                    </label>
+
+                    {{ item_form.quantity }}
+
+                    {% for error in item_form.quantity.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ item_form.notes.id_for_label }}">
+                        {{ item_form.notes.label }}
+                    </label>
+
+                    {{ item_form.notes }}
+
+                    {% for error in item_form.notes.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <button class="btn btn-primary" type="submit">
+                    Agregar al pedido
+                </button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>Aplicar descuento</h2>
+
+            <p>
+                El descuento no puede ser mayor al subtotal actual
+                del pedido.
+            </p>
+
+            <form
+                method="post"
+                action="{% url 'sales:order_discount_update' order.id %}"
+                novalidate
+            >
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label
+                        for="{{ discount_form.discount_amount.id_for_label }}"
+                    >
+                        {{ discount_form.discount_amount.label }}
+                    </label>
+
+                    {{ discount_form.discount_amount }}
+
+                    {% for error in discount_form.discount_amount.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <button class="btn btn-secondary" type="submit">
+                    Actualizar descuento
+                </button>
+            </form>
+        </article>
+    </section>
+{% endif %}
+
+{% if can_operate %}
+    <section class="card">
+        <h2>Acciones del pedido</h2>
+
+        <div class="form-actions">
+            {% if order.status == "OPEN" %}
+                <form
+                    method="post"
+                    action="{% url 'sales:order_confirm' order.id %}"
+                    onsubmit="return confirm('¿Confirmar este pedido? Después no podrás modificar sus productos.');"
+                >
+                    {% csrf_token %}
+
+                    <button class="btn btn-primary" type="submit">
+                        Confirmar pedido
+                    </button>
+                </form>
+
+                <form
+                    method="post"
+                    action="{% url 'sales:order_cancel' order.id %}"
+                    onsubmit="return confirm('¿Anular este pedido?');"
+                >
+                    {% csrf_token %}
+
+                    <button class="btn btn-danger" type="submit">
+                        Anular pedido
+                    </button>
+                </form>
+            {% elif order.status == "CONFIRMED" %}
+                <form
+                    method="post"
+                    action="{% url 'sales:order_pay' order.id %}"
+                >
+                    {% csrf_token %}
+
+                    <label
+                        class="visually-hidden"
+                        for="{{ payment_form.payment_method.id_for_label }}"
+                    >
+                        {{ payment_form.payment_method.label }}
+                    </label>
+
+                    {{ payment_form.payment_method }}
+
+                    <button class="btn btn-primary" type="submit">
+                        Registrar pago
+                    </button>
+                </form>
+
+                <form
+                    method="post"
+                    action="{% url 'sales:order_cancel' order.id %}"
+                    onsubmit="return confirm('¿Anular este pedido confirmado?');"
+                >
+                    {% csrf_token %}
+
+                    <button class="btn btn-danger" type="submit">
+                        Anular pedido
+                    </button>
+                </form>
+            {% elif order.status == "PAID" %}
+                <p class="alert alert-success">
+                    Este pedido fue pagado el
+                    {{ order.paid_at|date:"d/m/Y H:i" }}.
+                </p>
+            {% elif order.status == "CANCELLED" %}
+                <p class="alert alert-warning">
+                    Este pedido fue anulado el
+                    {{ order.cancelled_at|date:"d/m/Y H:i" }}.
+                </p>
+            {% endif %}
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

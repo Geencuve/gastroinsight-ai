@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Sesiones de atención | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Sesiones de atención</h1>
+
+    <p>
+        Registra la apertura y cierre de atención por mesa.
+        Estas sesiones representan la operación del restaurante
+        y son distintas de las sesiones de análisis de cámara.
+    </p>
+
+    {% if can_operate %}
+        <a
+            class="btn btn-primary"
+            href="{% url 'operations:session_create' %}"
+        >
+            Iniciar sesión de atención
+        </a>
+    {% else %}
+        <p>
+            <small>
+                Tu rol permite consultar, pero no abrir sesiones.
+            </small>
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    {% if sessions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Local</th>
+                    <th>Mesa</th>
+                    <th>Comensales</th>
+                    <th>Inicio</th>
+                    <th>Término</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>#{{ session.id }}</td>
+                        <td>{{ session.table.venue.name }}</td>
+                        <td>{{ session.table.code }}</td>
+                        <td>{{ session.guests_count }}</td>
+                        <td>{{ session.started_at|date:"d-m-Y H:i" }}</td>
+                        <td>
+                            {{ session.ended_at|date:"d-m-Y H:i"|default:"—" }}
+                        </td>
+                        <td>{{ session.get_status_display }}</td>
+                        <td>
+                            {% if can_operate and session.status == "open" %}
+                                <form
+                                    method="post"
+                                    action="{% url 'operations:session_close' session.id %}"
+                                    style="display: inline;"
+                                >
+                                    {% csrf_token %}
+                                    <button class="btn btn-start" type="submit">
+                                        Cerrar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span>Sin acciones</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay sesiones de atención registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Sesiones de análisis | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>Sesiones de análisis</h1>
+        <p>
+            Supervisa las ejecuciones de cámara y los eventos
+            generados por el módulo de visión artificial.
+        </p>
+    </div>
+</section>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<section class="card">
+    <h2>Cámaras registradas</h2>
+
+    {% if cameras %}
+        <div class="actions-grid">
+            {% for camera in cameras %}
+                <article class="camera-card">
+                    <h3>{{ camera.name }}</h3>
+
+                    {% if camera.location %}
+                        <p><strong>Ubicación:</strong> {{ camera.location }}</p>
+                    {% endif %}
+
+                    <p>
+                        <strong>Estado técnico:</strong>
+                        Disponible para análisis
+                    </p>
+
+                    <p class="muted">
+                        Para iniciar el procesamiento técnico,
+                        usa actualmente el comando:
+                    </p>
+
+                    <code>
+                        python manage.py run_camera_analysis
+                        {{ camera.id }} --duration 30
+                    </code>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No hay cámaras registradas.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Historial de sesiones</h2>
+
+    {% if sessions %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cámara</th>
+                        <th>Estado</th>
+                        <th>Inicio</th>
+                        <th>Finalización</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for session in sessions %}
+                        <tr>
+                            <td>#{{ session.id }}</td>
+                            <td>{{ session.camera.name }}</td>
+                            <td>
+                                <span class="status status-{{ session.status }}">
+                                    {{ session.get_status_display|default:session.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ session.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}
+                            </td>
+                            <td>
+                                {{ session.ended_at|date:"d/m/Y H:i:s"|default:"—" }}
+                            </td>
+                            <td>
+                                <a
+                                    class="btn btn-secondary"
+                                    href="{% url 'ai_vision:session_detail' session.id %}"
+                                >
+                                    Ver resultado
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Aún no hay sesiones registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

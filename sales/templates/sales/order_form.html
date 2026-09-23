@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ title }} | GastroInsight AI
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>{{ title }}</h1>
+        <p>
+            Selecciona una sesión de atención abierta para iniciar
+            un pedido asociado a la mesa.
+        </p>
+    </div>
+
+    <div>
+        <a
+            class="btn btn-secondary"
+            href="{% url 'sales:order_list' %}"
+        >
+            Volver a pedidos
+        </a>
+    </div>
+</section>
+
+{% if messages %}
+    <section class="messages" aria-live="polite">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </section>
+{% endif %}
+
+<section class="card form-card">
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.service_session.id_for_label }}">
+                {{ form.service_session.label }}
+            </label>
+
+            {{ form.service_session }}
+
+            {% if form.service_session.help_text %}
+                <small>{{ form.service_session.help_text }}</small>
+            {% endif %}
+
+            {% for error in form.service_session.errors %}
+                <p class="field-error">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.notes.id_for_label }}">
+                {{ form.notes.label }}
+            </label>
+
+            {{ form.notes }}
+
+            {% for error in form.notes.errors %}
+                <p class="field-error">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">
+                Crear pedido y agregar productos
+            </button>
+
+            <a
+                class="btn btn-link"
+                href="{% url 'sales:order_list' %}"
+            >
+                Cancelar
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluaciones voluntarias | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Evaluaciones voluntarias</h1>
+
+    <p>
+        Registra retroalimentación directa y voluntaria asociada a una
+        sesión de atención. No se solicitan datos personales del cliente.
+    </p>
+
+    {% if can_register %}
+        <a
+            class="btn btn-primary"
+            href="{% url 'operations:evaluation_create' %}"
+        >
+            Registrar evaluación
+        </a>
+    {% else %}
+        <p>
+            <small>
+                Tu rol permite consultar evaluaciones, pero no registrarlas.
+            </small>
+        </p>
+    {% endif %}
+</section>
+
+<br>
+
+<section class="card">
+    {% if evaluations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Local</th>
+                    <th>Mesa</th>
+                    <th>Plato</th>
+                    <th>Valoración</th>
+                    <th>Comentario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for evaluation in evaluations %}
+                    <tr>
+                        <td>#{{ evaluation.id }}</td>
+                        <td>
+                            {{ evaluation.service_session.table.venue.name }}
+                        </td>
+                        <td>{{ evaluation.service_session.table.code }}</td>
+                        <td>
+                            {% if evaluation.dish %}
+                                {{ evaluation.dish.name }}
+                            {% else %}
+                                Sin plato asociado
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ evaluation.rating }}/5
+                            — {{ evaluation.get_rating_display }}
+                        </td>
+                        <td>
+                            {{ evaluation.comment|default:"Sin comentario" }}
+                        </td>
+                        <td>
+                            {{ evaluation.created_at|date:"d-m-Y H:i" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay evaluaciones voluntarias registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}
