@@ -1,0 +1,216 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Panel de correlación | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .corr-filter { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; align-items: end; }
+    .corr-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .corr-box { padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; }
+    .corr-chart { position: relative; height: 300px; }
+    .corr-warning { margin: 1.5rem 0; padding: 1rem; border-left: 4px solid #d97706; border-radius: 6px; background: #fffbeb; color: #78350f; }
+    .corr-table { width: 100%; border-collapse: collapse; }
+    .corr-table th, .corr-table td { padding: 0.6rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    .corr-table th { background: #eff6ff; color: #1e3a8a; }
+    .sig-yes { color: #15803d; font-weight: 700; }
+    .sig-no { color: #64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Panel de correlación</h1>
+    <p>
+        Evalúa la pregunta de investigación del proyecto: ¿existe correlación estadísticamente
+        significativa entre el tiempo de servicio (Ts) y la distribución agregada de expresiones
+        faciales observables registradas por mesa?
+    </p>
+    <p class="muted">
+        <strong>H1:</strong> existe correlación significativa entre Ts y las expresiones observables.
+        <strong>H0:</strong> no existe correlación, por la dominancia de factores contextuales.
+        Nivel de significancia: α = 0,05. Unidad de análisis: sesión de atención.
+    </p>
+
+    <form method="get" class="corr-filter">
+        <div class="form-group">
+            <label for="f-start">Desde</label>
+            <input id="f-start" type="date" name="start" value="{{ start_date|date:'Y-m-d' }}">
+        </div>
+        <div class="form-group">
+            <label for="f-end">Hasta</label>
+            <input id="f-end" type="date" name="end" value="{{ end_date|date:'Y-m-d' }}">
+        </div>
+        <div class="form-group">
+            <label for="f-venue">Local</label>
+            <select id="f-venue" name="venue">
+                <option value="">Todos los locales autorizados</option>
+                {% for venue in venues %}
+                    <option value="{{ venue.id }}" {% if selected_venue_id == venue.id|stringformat:"s" %}selected{% endif %}>{{ venue.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="f-table">Mesa</label>
+            <select id="f-table" name="table">
+                <option value="">Todas las mesas</option>
+                {% for table in tables %}
+                    <option value="{{ table.id }}" {% if selected_table_id == table.id|stringformat:"s" %}selected{% endif %}>{{ table.code }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="f-min">Mín. detecciones por sesión</label>
+            <input id="f-min" type="number" name="min" min="1" value="{{ min_detections }}">
+        </div>
+        <div class="form-group">
+            <label for="f-synthetic">Datos sintéticos</label>
+            <select id="f-synthetic" name="synthetic">
+                <option value="1" {% if include_synthetic %}selected{% endif %}>Incluir</option>
+                <option value="0" {% if not include_synthetic %}selected{% endif %}>Excluir (solo datos reales)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">Calcular</button>
+        </div>
+        <div class="form-group">
+            <a class="btn btn-secondary" href="{% url 'analytics:correlation_csv' %}?{{ request.GET.urlencode }}">Exportar CSV</a>
+        </div>
+    </form>
+</section>
+
+{% if synthetic_count %}
+    <div class="corr-warning">
+        <strong>Atención:</strong> este análisis incluye <strong>{{ synthetic_count }} sesiones con datos
+        sintéticos de demostración</strong> (cámaras demo). Esos datos se generaron para probar el panel
+        y <strong>no constituyen evidencia empírica</strong>. Sesiones con datos reales: {{ real_count }}.
+    </div>
+{% endif %}
+
+<section class="card">
+    <h2>Resultados estadísticos</h2>
+    <p class="muted">Sesiones de atención analizadas: <strong>{{ rows|length }}</strong></p>
+    <div style="overflow-x: auto;">
+        <table class="corr-table">
+            <thead>
+                <tr>
+                    <th>Análisis</th><th>n</th><th>Pearson r</th><th>p</th>
+                    <th>Spearman ρ</th><th>p</th><th>Interpretación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.label }}</td>
+                        <td>{{ result.n }}</td>
+                        <td>{% if result.pearson_r is not None %}{{ result.pearson_r|floatformat:3 }}{% else %}—{% endif %}</td>
+                        <td>{{ result.pearson_p_display }}</td>
+                        <td>{% if result.spearman_rho is not None %}{{ result.spearman_rho|floatformat:3 }}{% else %}—{% endif %}</td>
+                        <td>{{ result.spearman_p_display }}</td>
+                        <td class="{% if result.significant %}sig-yes{% else %}sig-no{% endif %}">{{ result.interpretation }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="corr-charts">
+    <article class="corr-box">
+        <h2>Ts vs % expresiones positivas</h2>
+        {% if chart_positive.points %}
+            <div class="corr-chart"><canvas id="chartPositive"></canvas></div>
+        {% else %}
+            <p>Sin datos para los filtros seleccionados.</p>
+        {% endif %}
+    </article>
+    <article class="corr-box">
+        <h2>Ts vs % expresiones negativas</h2>
+        {% if chart_negative.points %}
+            <div class="corr-chart"><canvas id="chartNegative"></canvas></div>
+        {% else %}
+            <p>Sin datos para los filtros seleccionados.</p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="card">
+    <h2>Datos por sesión de atención</h2>
+    {% if rows %}
+        <div style="overflow-x: auto;">
+            <table class="corr-table">
+                <thead>
+                    <tr>
+                        <th>Sesión</th><th>Mesa</th><th>Inicio</th><th>Ts (min)</th><th>Comensales</th>
+                        <th>Detecciones</th><th>% pos.</th><th>% neg.</th><th>% neutral</th>
+                        <th>Ventas</th><th>Valoración</th><th>Origen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows|slice:":100" %}
+                        <tr>
+                            <td>#{{ row.session_id }}</td>
+                            <td>{{ row.table }}</td>
+                            <td>{{ row.started_at|date:"d-m-Y H:i" }}</td>
+                            <td>{{ row.ts_minutes|floatformat:1 }}</td>
+                            <td>{{ row.guests }}</td>
+                            <td>{{ row.detections }}</td>
+                            <td>{{ row.positive_pct|floatformat:1 }}</td>
+                            <td>{{ row.negative_pct|floatformat:1 }}</td>
+                            <td>{{ row.neutral_pct|floatformat:1 }}</td>
+                            <td>${{ row.sales|floatformat:"0g" }}</td>
+                            <td>{% if row.rating is not None %}{{ row.rating|floatformat:1 }}/5{% else %}—{% endif %}</td>
+                            <td>{% if row.synthetic %}Sintético{% else %}Real{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if rows|length > 100 %}<p class="muted">Se muestran 100 de {{ rows|length }} sesiones. Exporta el CSV para ver todas.</p>{% endif %}
+    {% else %}
+        <p>No hay sesiones de atención con eventos visuales asociados para los filtros seleccionados.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Interpretación responsable</h2>
+    <p>
+        Una correlación indica asociación estadística, no causalidad. Las expresiones son estimaciones
+        automáticas agregadas (FER+), no identifican personas y no equivalen a una medición directa de
+        satisfacción. Los resultados deben interpretarse junto con el contexto operacional, el tamaño de
+        muestra y los factores que afectan la validez ecológica del modelo.
+    </p>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ chart_positive|json_script:"chart-positive" }}
+{{ chart_negative|json_script:"chart-negative" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    function drawScatter(canvasId, dataId, color, yLabel) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const data = JSON.parse(document.getElementById(dataId).textContent);
+        new Chart(canvas, {
+            type: "scatter",
+            data: {
+                datasets: [
+                    { label: "Sesiones de atención", data: data.points, backgroundColor: color, pointRadius: 4 },
+                    { label: "Tendencia lineal", data: data.trend, type: "line", borderColor: "#0f172a",
+                      borderDash: [6, 4], pointRadius: 0, fill: false },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: "Tiempo de servicio Ts (minutos)" } },
+                    y: { beginAtZero: true, title: { display: true, text: yLabel } },
+                },
+            },
+        });
+    }
+    drawScatter("chartPositive", "chart-positive", "rgba(22, 163, 74, 0.6)", "% expresiones positivas");
+    drawScatter("chartNegative", "chart-negative", "rgba(220, 38, 38, 0.6)", "% expresiones negativas");
+</script>
+{% endblock %}
