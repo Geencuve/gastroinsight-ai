@@ -175,6 +175,10 @@ class Order(models.Model):
 
         subtotal = values["calculated_subtotal"] or Decimal("0.00")
 
+        # Si se eliminan ítems, el descuento no puede superar el nuevo subtotal.
+        if self.discount_amount > subtotal:
+            self.discount_amount = subtotal
+
         total = max(
             Decimal("0.00"),
             subtotal - self.discount_amount,
@@ -187,6 +191,7 @@ class Order(models.Model):
             self.save(
                 update_fields=(
                     "subtotal",
+                    "discount_amount",
                     "total",
                     "updated_at",
                 )

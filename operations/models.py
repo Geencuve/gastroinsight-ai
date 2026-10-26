@@ -139,9 +139,28 @@ class ServiceSession(models.Model):
     def venue(self):
         return self.table.venue
 
+    PENDING_ORDER_STATUSES = ("OPEN", "CONFIRMED")
+
+    def pending_orders_count(self):
+        return self.orders.filter(
+            status__in=self.PENDING_ORDER_STATUSES
+        ).count()
+
+    def ensure_no_pending_orders(self, action="cerrar"):
+        pending = self.pending_orders_count()
+        if pending:
+            plural = "s" if pending != 1 else ""
+            raise ValidationError(
+                f"No puedes {action} la mesa {self.table.code}: "
+                f"tiene {pending} pedido{plural} sin pagar. "
+                f"Págalos o anúlalos primero."
+            )
+
     def close(self, user=None):
         if self.status != self.Status.OPEN:
             return False
+
+        self.ensure_no_pending_orders("cerrar")
 
         self.status = self.Status.CLOSED
         self.ended_at = timezone.now()
@@ -159,6 +178,8 @@ class ServiceSession(models.Model):
     def cancel(self, user=None):
         if self.status != self.Status.OPEN:
             return False
+
+        self.ensure_no_pending_orders("cancelar")
 
         self.status = self.Status.CANCELLED
         self.ended_at = timezone.now()

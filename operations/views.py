@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied,ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .forms import (
@@ -132,7 +133,12 @@ def service_session_list(request):
         request,
         "operations/session_list.html",
         {
-            "sessions": sessions[:50],
+            "sessions": sessions.annotate(
+                pending_orders=Count(
+                    "orders",
+                    filter=Q(orders__status__in=["OPEN", "CONFIRMED"]),
+                )
+            )[:50],
             "venues": venues,
             "can_operate": can_operate,
         },
@@ -222,7 +228,13 @@ def service_session_close(request, session_id):
             "No tienes permiso para cerrar esta sesión."
         )
 
-    if service_session.close(user=request.user):
+    try:
+        closed = service_session.close(user=request.user)
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+        return redirect("operations:session_list")
+
+    if closed:
         log_action(
             request,
             action=AuditLog.Action.STOP,
@@ -235,12 +247,10 @@ def service_session_close(request, session_id):
                 f"en mesa {service_session.table.code}."
             ),
         )
-
         messages.success(
             request,
             f"Sesión #{service_session.id} cerrada correctamente.",
         )
-    
     else:
         messages.warning(
             request,
@@ -253,18 +263,6 @@ def service_session_close(request, session_id):
 @require_POST
 @login_required
 def service_session_cancel(request, session_id):
-    log_action(
-    request,
-    action=AuditLog.Action.STOP,
-    module="operations",
-    venue=service_session.table.venue,
-    object_type="ServiceSession",
-    object_id=service_session.id,
-    description=(
-        f"Canceló sesión de atención #{service_session.id} "
-        f"en mesa {service_session.table.code}."
-    ),
-)
     service_session = get_object_or_404(
         ServiceSession.objects.select_related(
             "table",
@@ -281,7 +279,25 @@ def service_session_cancel(request, session_id):
             "No tienes permiso para cancelar esta sesión."
         )
 
-    if service_session.cancel(user=request.user):
+    try:
+        cancelled = service_session.cancel(user=request.user)
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+        return redirect("operations:session_list")
+
+    if cancelled:
+        log_action(
+            request,
+            action=AuditLog.Action.STOP,
+            module="operations",
+            venue=service_session.table.venue,
+            object_type="ServiceSession",
+            object_id=service_session.id,
+            description=(
+                f"Canceló sesión de atención #{service_session.id} "
+                f"en mesa {service_session.table.code}."
+            ),
+        )
         messages.success(
             request,
             f"Sesión #{service_session.id} cancelada.",
@@ -293,6 +309,7 @@ def service_session_cancel(request, session_id):
         )
 
     return redirect("operations:session_list")
+
 
 @login_required
 def evaluation_list(request):

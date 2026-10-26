@@ -58,7 +58,11 @@
                         </td>
                         <td>{{ session.get_status_display }}</td>
                         <td>
-                            {% if can_operate and session.status == "open" %}
+                            {% if can_operate and session.status == "open" and session.pending_orders %}
+                                <a href="{% url 'sales:order_list' %}">
+                                    {{ session.pending_orders }} pedido{{ session.pending_orders|pluralize }} sin pagar
+                                </a>
+                            {% elif can_operate and session.status == "open" %}
                                 <form
                                     method="post"
                                     action="{% url 'operations:session_close' session.id %}"
