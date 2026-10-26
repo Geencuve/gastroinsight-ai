@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Sesiones de análisis | GastroInsight AI{% endblock %}
 
@@ -6,50 +6,42 @@
 <section class="page-header">
     <div>
         <h1>Sesiones de análisis</h1>
-        <p>
-            Supervisa las ejecuciones de cámara y los eventos
-            generados por el módulo de visión artificial.
-        </p>
+        <p>Crea, inicia y supervisa el análisis visual no biométrico de cada cámara.</p>
     </div>
+    <a class="btn btn-secondary" href="{% url 'analytics:correlation' %}">Panel de correlación</a>
 </section>
-
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
 
 <section class="card">
     <h2>Cámaras registradas</h2>
-
     {% if cameras %}
-        <div class="actions-grid">
-            {% for camera in cameras %}
-                <article class="camera-card">
-                    <h3>{{ camera.name }}</h3>
-
-                    {% if camera.location %}
-                        <p><strong>Ubicación:</strong> {{ camera.location }}</p>
-                    {% endif %}
-
-                    <p>
-                        <strong>Estado técnico:</strong>
-                        Disponible para análisis
-                    </p>
-
-                    <p class="muted">
-                        Para iniciar el procesamiento técnico,
-                        usa actualmente el comando:
-                    </p>
-
-                    <code>
-                        python manage.py run_camera_analysis
-                        {{ camera.id }} --duration 30
-                    </code>
-                </article>
-            {% endfor %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr><th>Cámara</th><th>Local</th><th>Mesa monitoreada</th><th>Tipo</th><th>Acción</th></tr>
+                </thead>
+                <tbody>
+                    {% for camera in cameras %}
+                        <tr>
+                            <td>{{ camera.name }}</td>
+                            <td>{{ camera.venue.name }}</td>
+                            <td>{{ camera.table.code|default:"Sin mesa" }}</td>
+                            <td>{{ camera.get_source_type_display }}</td>
+                            <td>
+                                {% if camera.source_type == "demo" %}
+                                    <span class="muted">Datos sintéticos de demostración</span>
+                                {% elif can_operate %}
+                                    <form method="post" action="{% url 'ai_vision:create_session' camera.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-primary" type="submit">Crear sesión</button>
+                                    </form>
+                                {% else %}
+                                    <span class="muted">Solo lectura</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <p>No hay cámaras registradas.</p>
@@ -58,44 +50,50 @@
 
 <section class="card">
     <h2>Historial de sesiones</h2>
-
     {% if sessions %}
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Cámara</th>
-                        <th>Estado</th>
-                        <th>Inicio</th>
-                        <th>Finalización</th>
-                        <th>Acción</th>
+                        <th>ID</th><th>Cámara</th><th>Mesa</th><th>Estado</th>
+                        <th>Inicio</th><th>Finalización</th><th>Eventos</th><th>Acciones</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {% for session in sessions %}
                         <tr>
                             <td>#{{ session.id }}</td>
                             <td>{{ session.camera.name }}</td>
+                            <td>{{ session.camera.table.code|default:"—" }}</td>
+                            <td><span class="status status-{{ session.status }}">{{ session.get_status_display }}</span></td>
+                            <td>{{ session.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}</td>
+                            <td>{{ session.ended_at|date:"d/m/Y H:i:s"|default:"—" }}</td>
+                            <td>{{ session.events_count }}</td>
                             <td>
-                                <span class="status status-{{ session.status }}">
-                                    {{ session.get_status_display|default:session.status }}
-                                </span>
-                            </td>
-                            <td>
-                                {{ session.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}
-                            </td>
-                            <td>
-                                {{ session.ended_at|date:"d/m/Y H:i:s"|default:"—" }}
-                            </td>
-                            <td>
-                                <a
-                                    class="btn btn-secondary"
-                                    href="{% url 'ai_vision:session_detail' session.id %}"
-                                >
-                                    Ver resultado
-                                </a>
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <a class="btn btn-secondary" href="{% url 'ai_vision:session_detail' session.id %}">Ver resultado</a>
+                                    {% if can_operate and session.status == "pending" and session.camera.source_type != "demo" %}
+                                        <form method="post" action="{% url 'ai_vision:start_session' session.id %}"
+                                              style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                            {% csrf_token %}
+                                            <select name="duration" aria-label="Duración del análisis">
+                                                <option value="30">30 s</option>
+                                                <option value="60" selected>1 min</option>
+                                                <option value="300">5 min</option>
+                                                <option value="0">Sin límite</option>
+                                            </select>
+                                            <label style="display: flex; gap: 0.25rem; align-items: center;">
+                                                <input type="checkbox" name="preview" value="1" checked> Ventana de video
+                                            </label>
+                                            <button class="btn btn-primary" type="submit">Iniciar análisis</button>
+                                        </form>
+                                    {% elif can_operate and session.status == "running" %}
+                                        <form method="post" action="{% url 'ai_vision:stop_session' session.id %}">
+                                            {% csrf_token %}
+                                            <button class="btn btn-danger" type="submit">Detener</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -105,5 +103,14 @@
     {% else %}
         <p>Aún no hay sesiones registradas.</p>
     {% endif %}
+</section>
+
+<section class="card">
+    <h2>Privacidad</h2>
+    <p>
+        El análisis procesa los fotogramas solo en memoria y los descarta de inmediato: no se guardan
+        imágenes, videos ni rostros. Solo se registran conteos y distribuciones agregadas de expresiones,
+        y el procesamiento requiere una política de privacidad y una autorización vigentes.
+    </p>
 </section>
 {% endblock %}

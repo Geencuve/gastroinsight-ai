@@ -12,6 +12,7 @@
                 <tr>
                     <th>Cámara</th>
                     <th>Local</th>
+                    <th>Mesa</th>
                     <th>Zona</th>
                     <th>Fuente</th>
                     <th>Estado</th>
@@ -22,6 +23,7 @@
                     <tr>
                         <td>{{ camera.name }}</td>
                         <td>{{ camera.venue.name }}</td>
+                        <td>{{ camera.table.code|default:"—" }}</td>
                         <td>{{ camera.zone_name|default:"Sin zona definida" }}</td>
                         <td>{{ camera.get_source_type_display }}</td>
                         <td>Activa</td>

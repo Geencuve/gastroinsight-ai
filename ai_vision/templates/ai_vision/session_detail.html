@@ -2,72 +2,66 @@
 
 {% block title %}Sesión #{{ session.id }} | GastroInsight AI{% endblock %}
 
+{% block extra_css %}
+{% if session.status == "pending" or session.status == "running" %}
+    <meta http-equiv="refresh" content="5">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="page-header">
     <div>
         <h1>Sesión de análisis #{{ session.id }}</h1>
-        <p>
-            Revisión técnica de la ejecución asociada a la cámara
-            <strong>{{ camera.name }}</strong>.
-        </p>
+        <p>Cámara <strong>{{ camera.name }}</strong> · {{ camera.venue.name }}</p>
     </div>
     <a class="btn btn-secondary" href="{% url 'ai_vision:session_list' %}">Volver a sesiones</a>
 </section>
 
-<section class="card">
-    <div class="section-heading">
-        <div>
-            <h2>Vista previa de cámara</h2>
-            <p class="muted">Transmisión local en vivo. No se almacenan imágenes ni videos.</p>
-        </div>
-        {% if session.status != "running" %}
-            <a class="btn btn-secondary" href="{% url 'ai_vision:camera_preview' camera.id %}" target="_blank">
-                Abrir en pestaña nueva
-            </a>
-        {% endif %}
-    </div>
-    {% if session.status == "running" %}
-        <p>
-            La cámara está siendo utilizada por el análisis en curso.
-            La vista previa se habilita cuando la sesión finaliza.
-        </p>
-    {% else %}
-        <div class="camera-preview-container">
-            <img class="camera-preview" src="{% url 'ai_vision:camera_preview' camera.id %}"
-                 alt="Vista en vivo de {{ camera.name }}">
-        </div>
-    {% endif %}
-</section>
+{% if session.status == "pending" or session.status == "running" %}
+    <p class="muted">Esta página se actualiza automáticamente cada 5 segundos.</p>
+{% endif %}
+
+{% if can_operate and session.status == "pending" and camera.source_type != "demo" %}
+    <section class="card">
+        <h2>Iniciar análisis</h2>
+        <form method="post" action="{% url 'ai_vision:start_session' session.id %}"
+              style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            {% csrf_token %}
+            <select name="duration" aria-label="Duración del análisis">
+                <option value="30">30 s</option>
+                <option value="60" selected>1 min</option>
+                <option value="300">5 min</option>
+                <option value="0">Sin límite</option>
+            </select>
+            <label style="display: flex; gap: 0.25rem; align-items: center;">
+                <input type="checkbox" name="preview" value="1" checked> Mostrar ventana de video
+            </label>
+            <button class="btn btn-primary" type="submit">Iniciar análisis</button>
+        </form>
+    </section>
+{% endif %}
+
+{% if can_operate and session.status == "running" %}
+    <section class="card">
+        <h2>Análisis en curso</h2>
+        <p>La cámara está siendo procesada. Los eventos aparecen abajo a medida que se registran.</p>
+        <form method="post" action="{% url 'ai_vision:stop_session' session.id %}">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Detener sesión</button>
+        </form>
+    </section>
+{% endif %}
 
 <section class="card">
     <h2>Información general</h2>
     <div class="metrics-grid">
-        <article class="metric-card"><span class="metric-label">Cámara</span><strong>{{ camera.name }}</strong></article>
-        <article class="metric-card"><span class="metric-label">Local</span><strong>{{ camera.venue.name }}</strong></article>
-        <article class="metric-card">
-            <span class="metric-label">Mesa monitoreada</span>
-            <strong>{{ camera.table.code|default:"Sin mesa asignada" }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Estado</span>
-            <strong class="status status-{{ session.status }}">{{ session.get_status_display }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Inicio</span>
-            <strong>{{ session.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Finalización</span>
-            <strong>{{ session.ended_at|date:"d/m/Y H:i:s"|default:"—" }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Fotogramas procesados</span>
-            <strong>{{ session.frames_processed }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Rostros acumulados</span>
-            <strong>{{ session.total_faces_detected }}</strong>
-        </article>
+        <article class="metric-card"><span class="metric-label">Mesa monitoreada</span><strong>{{ camera.table.code|default:"Sin mesa asignada" }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Tipo de fuente</span><strong>{{ camera.get_source_type_display }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Estado</span><strong class="status status-{{ session.status }}">{{ session.get_status_display }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Inicio</span><strong>{{ session.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Finalización</span><strong>{{ session.ended_at|date:"d/m/Y H:i:s"|default:"—" }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Fotogramas procesados</span><strong>{{ session.frames_processed }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Rostros acumulados</span><strong>{{ session.total_faces_detected }}</strong></article>
     </div>
 </section>
 
@@ -75,26 +69,11 @@
     <h2>Calidad del procesamiento</h2>
     <p class="muted">Umbrales del proyecto: confianza del detector ≥ 0,70 y latencia menor a 200 ms por fotograma.</p>
     <div class="metrics-grid">
-        <article class="metric-card">
-            <span class="metric-label">Eventos agregados</span>
-            <strong>{{ stats.events_count }}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Latencia promedio</span>
-            <strong>{% if stats.average_latency is not None %}{{ stats.average_latency|floatformat:0 }} ms{% else %}—{% endif %}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Eventos bajo 200 ms</span>
-            <strong>{% if stats.under_200_percent is not None %}{{ stats.under_200_percent|floatformat:1 }}%{% else %}—{% endif %}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Confianza del detector</span>
-            <strong>{% if stats.average_detector_confidence is not None %}{{ stats.average_detector_confidence|floatformat:3 }}{% else %}—{% endif %}</strong>
-        </article>
-        <article class="metric-card">
-            <span class="metric-label">Confianza de expresión (FER+)</span>
-            <strong>{% if stats.average_emotion_confidence is not None %}{{ stats.average_emotion_confidence|floatformat:3 }}{% else %}—{% endif %}</strong>
-        </article>
+        <article class="metric-card"><span class="metric-label">Eventos agregados</span><strong>{{ stats.events_count }}</strong></article>
+        <article class="metric-card"><span class="metric-label">Latencia promedio</span><strong>{% if stats.average_latency is not None %}{{ stats.average_latency|floatformat:0 }} ms{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Eventos bajo 200 ms</span><strong>{% if stats.under_200_percent is not None %}{{ stats.under_200_percent|floatformat:1 }}%{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Confianza del detector</span><strong>{% if stats.average_detector_confidence is not None %}{{ stats.average_detector_confidence|floatformat:3 }}{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Confianza de expresión (FER+)</span><strong>{% if stats.average_emotion_confidence is not None %}{{ stats.average_emotion_confidence|floatformat:3 }}{% else %}—{% endif %}</strong></article>
     </div>
 </section>
 
@@ -111,7 +90,7 @@
             </tbody>
         </table>
     {% else %}
-        <p>Esta sesión no tiene expresiones estimadas.</p>
+        <p>Esta sesión aún no tiene expresiones estimadas.</p>
     {% endif %}
 </section>
 
@@ -133,23 +112,26 @@
     </section>
 {% endif %}
 
-{% if can_operate and session.status == "running" %}
+{% if camera.source_type != "demo" and session.status != "pending" and session.status != "running" %}
     <section class="card">
-        <h2>Control de sesión</h2>
-        <p>La cámara está marcada como en ejecución.</p>
-        <form method="post" action="{% url 'ai_vision:stop_session' session.id %}">
-            {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Detener sesión</button>
-        </form>
+        <h2>Vista previa de cámara</h2>
+        <p class="muted">
+            Transmisión en vivo opcional, sin almacenamiento. Ciérrala antes de iniciar un nuevo
+            análisis: la webcam no puede ser usada por dos procesos a la vez.
+        </p>
+        <a class="btn btn-secondary" href="{% url 'ai_vision:camera_preview' camera.id %}" target="_blank">
+            Abrir vista previa en pestaña nueva
+        </a>
     </section>
 {% endif %}
 
 <section class="card">
     <h2>Interpretación responsable</h2>
     <p>
-        Las expresiones son estimaciones automáticas del modelo FER+, agregadas por
-        ventana de fotogramas. No identifican personas, no se guardan imágenes y no
-        equivalen a una medición directa de satisfacción.
+        Las expresiones son estimaciones automáticas del modelo FER+, agregadas por ventana de
+        fotogramas. No identifican personas, no se guardan imágenes y no equivalen a una medición
+        directa de satisfacción.
+        {% if camera.source_type == "demo" %}<strong>Esta sesión contiene datos sintéticos de demostración.</strong>{% endif %}
     </p>
 </section>
 {% endblock %}
@@ -175,6 +157,7 @@
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false,
                 plugins: { legend: { display: false } },
                 scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
             },

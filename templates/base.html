@@ -8,6 +8,18 @@
     <title>{% block title %}GastroInsight AI{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .nav-group { position: relative; }
+        .nav-group > summary { cursor: pointer; list-style: none; color: inherit; font-weight: 600; }
+        .nav-group > summary::-webkit-details-marker { display: none; }
+        .nav-group > summary::after { content: " ▾"; font-size: 0.8em; }
+        .nav-menu { position: absolute; top: calc(100% + 0.5rem); left: 0; z-index: 1000; min-width: 220px;
+                    display: flex; flex-direction: column; padding: 0.4rem 0; background: #ffffff;
+                    border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 25px rgb(15 23 42 / 15%); }
+        .nav-menu a { padding: 0.55rem 1rem; color: #1e293b; text-decoration: none; white-space: nowrap; }
+        .nav-menu a:hover { background: #eff6ff; color: #1d4ed8; }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -20,44 +32,52 @@
 
         <nav class="main-nav">
             <a href="{% url 'core:home' %}">Inicio</a>
-
             {% if user.is_authenticated %}
-                <a href="{% url 'venues:list' %}">Locales</a>
-                <a href="{% url 'menus:list' %}">Menús</a>
-                <a href="{% url 'cameras:list' %}">Cámaras</a>
-                <a href="{% url 'operations:table_list' %}">Mesas</a>
-                <a href="{% url 'operations:session_list' %}">Atención</a>
-                <a href="{% url 'operations:evaluation_list' %}">Evaluaciones</a>
-                <a href="{% url 'ai_vision:session_list' %}">Sesiones IA</a>
-                <a href="{% url 'analytics:dashboard' %}">Dashboard</a>
-                <a href="{% url 'analytics:correlation' %}">Correlación</a>
-                <a href="{% url 'reports:list' %}">Reportes</a>
+                <details class="nav-group">
+                    <summary>Operación</summary>
+                    <div class="nav-menu">
+                        <a href="{% url 'operations:session_list' %}">Atención de mesas</a>
+                        <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
+                        <a href="{% url 'operations:evaluation_list' %}">Evaluaciones</a>
+                        <a href="{% url 'operations:table_list' %}">Mesas</a>
+                    </div>
+                </details>
+                <details class="nav-group">
+                    <summary>Visión IA</summary>
+                    <div class="nav-menu">
+                        <a href="{% url 'ai_vision:session_list' %}">Sesiones de análisis</a>
+                        <a href="{% url 'cameras:list' %}">Cámaras</a>
+                        <a href="{% url 'analytics:correlation' %}">Panel de correlación</a>
+                    </div>
+                </details>
+                <details class="nav-group">
+                    <summary>Análisis</summary>
+                    <div class="nav-menu">
+                        <a href="{% url 'analytics:dashboard' %}">Dashboard</a>
+                        <a href="{% url 'reports:list' %}">Reportes</a>
+                    </div>
+                </details>
+                <details class="nav-group">
+                    <summary>Gestión</summary>
+                    <div class="nav-menu">
+                        <a href="{% url 'venues:list' %}">Locales</a>
+                        <a href="{% url 'menus:list' %}">Menús</a>
+                        <a href="{% url 'monitoring:incident_list' %}">Incidencias</a>
+                        <a href="{% url 'privacy:policy_list' %}">Privacidad</a>
+                        {% if user.is_superuser %}<a href="{% url 'monitoring:audit_log_list' %}">Auditoría</a>{% endif %}
+                        {% if user.is_staff %}<a href="/admin/">Administración</a>{% endif %}
+                    </div>
+                </details>
+                <a href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
                 <a href="{% url 'authentication:profile' %}">Mi perfil</a>
-                <a href="{% url 'monitoring:incident_list' %}">Incidencias</a>
-                <a href="{% url 'privacy:policy_list' %}">Privacidad</a>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
-                    </li>
-                <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
-
-
-            {% if user.is_superuser %}
-                <a href="{% url 'monitoring:audit_log_list' %}">Auditoría</a>
-            {% endif %}
-            {% if user.is_staff %}
-                <a href="/admin/">Administración</a>
-            {% endif %}
-                <form method="post"action="{% url 'authentication:logout' %}"class="logout-form">
-                {% csrf_token %}
+                <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
+                    {% csrf_token %}
                     <button class="nav-logout" type="submit">Cerrar sesión</button>
                 </form>
             {% else %}
                 <a href="{% url 'authentication:login' %}">Ingresar</a>
                 <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
-                <a href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
             {% endif %}
-
-
         </nav>
     </header>
 
@@ -142,6 +162,22 @@
                 </button>
             </div>
         {% endif %}
+    <script>
+        document.querySelectorAll(".nav-group").forEach((group) => {
+            group.addEventListener("toggle", () => {
+                if (group.open) {
+                    document.querySelectorAll(".nav-group").forEach((other) => {
+                        if (other !== group) other.open = false;
+                    });
+                }
+            });
+        });
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest(".nav-group")) {
+                document.querySelectorAll(".nav-group[open]").forEach((group) => { group.open = false; });
+            }
+        });
+    </script>
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>

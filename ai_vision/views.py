@@ -22,6 +22,7 @@ from monitoring.services.audit import log_action
 from privacy.models import PrivacyPolicy
 
 from .models import AnalysisSession, DetectionEvent
+from .services.launcher import launch_analysis
 
 
 @login_required
@@ -49,7 +50,11 @@ def session_list(request):
     return render(
         request,
         "ai_vision/session_list.html",
-        {"cameras": cameras, "sessions": sessions[:25], "can_operate": can_operate},
+        {
+            "cameras": cameras.select_related("table"),
+            "sessions": sessions.select_related("camera__table").annotate(events_count=Count("events"))[:25],
+            "can_operate": can_operate,
+        },
     )
 
 
@@ -111,17 +116,43 @@ def start_session(request, session_id):
     )
     if not user_can_operate_camera(request.user, session.camera.venue):
         raise PermissionDenied("No tienes permiso para iniciar esta sesión.")
+
     if session.status != AnalysisSession.Status.PENDING:
         messages.warning(request, "Solo se pueden iniciar sesiones pendientes.")
-    else:
-        messages.info(
-            request,
-            (
-                f"Sesión #{session.id} preparada. Ejecuta en la terminal: "
-                f"python manage.py run_camera_analysis {session.id} --no-preview"
-            ),
-        )
-    return redirect("ai_vision:session_list")
+        return redirect("ai_vision:session_list")
+    if session.camera.source_type == Camera.SourceType.DEMO:
+        messages.warning(request, "Las cámaras demo no procesan video real: solo contienen datos sintéticos.")
+        return redirect("ai_vision:session_list")
+
+    preview = request.POST.get("preview") == "1"
+    try:
+        duration = min(max(int(request.POST.get("duration") or 0), 0), 3600)
+    except ValueError:
+        duration = 60
+
+    try:
+        pid, log_path = launch_analysis(session.id, preview=preview, duration=duration)
+    except OSError as error:
+        messages.error(request, f"No se pudo iniciar el análisis: {error}")
+        return redirect("ai_vision:session_list")
+
+    log_action(
+        request,
+        action=AuditLog.Action.START,
+        module="ai_vision",
+        venue=session.camera.venue,
+        object_type="AnalysisSession",
+        object_id=session.id,
+        description=(
+            f"Inició desde la interfaz el análisis de la sesión #{session.id} "
+            f"(proceso {pid}, duración {duration or 'sin límite'} s)."
+        ),
+    )
+    messages.success(
+        request,
+        f"Análisis de la sesión #{session.id} iniciado. Los resultados aparecerán en unos segundos.",
+    )
+    return redirect("ai_vision:session_detail", session_id=session.id)
 
 
 @require_POST
