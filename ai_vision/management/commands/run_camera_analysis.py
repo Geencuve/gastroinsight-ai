@@ -40,6 +40,8 @@ class Command(BaseCommand):
                             help="Duración máxima en segundos; 0 = sin límite.")
         parser.add_argument("--threshold", type=float, default=0.70,
                             help="Confianza mínima del detector de rostros. Por defecto: 0.70.")
+        parser.add_argument("--check-every-seconds", type=float, default=1.0,
+                            help="Cada cuántos segundos verificar estado, cámara y privacidad. Por defecto: 1.")
         parser.add_argument("--no-preview", action="store_true",
                             help="Ejecutar sin abrir una ventana de OpenCV.")
 
@@ -61,13 +63,11 @@ class Command(BaseCommand):
         )
 
     def session_is_running(self, session_id):
-        close_old_connections()
         return AnalysisSession.objects.filter(
             pk=session_id, status=AnalysisSession.Status.RUNNING,
         ).exists()
 
     def policy_is_authorized(self, venue_id):
-        close_old_connections()
         try:
             policy = PrivacyPolicy.objects.get(venue_id=venue_id)
         except PrivacyPolicy.DoesNotExist:
@@ -105,6 +105,7 @@ class Command(BaseCommand):
         sample_every = max(1, options["sample_every"])
         max_frames = max(0, options["max_frames"])
         duration = max(0, options["duration"])
+        check_every = max(0.0, options["check_every_seconds"])
         preview_enabled = not options["no_preview"]
 
         try:
@@ -158,38 +159,52 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Sesión #{session.id} iniciada para: {camera.name} ({mesa})"))
         self.stdout.write(
             f"Fuente: {camera.source} | Evento agregado cada {sample_every} fotogramas | "
-            f"Umbral detector: {options['threshold']:.2f}"
+            f"Umbral detector: {options['threshold']:.2f} | Controles cada {check_every:.1f} s"
         )
 
         window = EventWindow()
         frame_number = 0
         total_faces = 0
         events_saved = 0
+        timing = {"lectura": 0.0, "analisis": 0.0, "controles": 0.0}
         started_at = time.monotonic()
+        last_check = None
         stop_reason = ""
         failure_message = ""
 
         try:
             while True:
-                if not self.session_is_running(session.id):
-                    stop_reason = "detenida desde la interfaz"
-                    break
-                close_old_connections()
-                camera.refresh_from_db(fields=["is_active"])
-                if not camera.is_active:
-                    failure_message = "Procesamiento detenido: la cámara fue desactivada."
-                    break
-                if not self.policy_is_authorized(camera.venue_id):
-                    failure_message = "Procesamiento detenido: la autorización visual ya no está vigente."
-                    break
+                # Controles de estado, cámara y privacidad: una vez por intervalo, no en cada fotograma.
+                now_monotonic = time.monotonic()
+                if last_check is None or now_monotonic - last_check >= check_every:
+                    t0 = time.perf_counter()
+                    close_old_connections()
+                    running = self.session_is_running(session.id)
+                    camera.refresh_from_db(fields=["is_active"])
+                    authorized = self.policy_is_authorized(camera.venue_id)
+                    timing["controles"] += time.perf_counter() - t0
+                    last_check = now_monotonic
+                    if not running:
+                        stop_reason = "detenida desde la interfaz"
+                        break
+                    if not camera.is_active:
+                        failure_message = "Procesamiento detenido: la cámara fue desactivada."
+                        break
+                    if not authorized:
+                        failure_message = "Procesamiento detenido: la autorización visual ya no está vigente."
+                        break
 
+                t0 = time.perf_counter()
                 success, frame = capture.read()
+                timing["lectura"] += time.perf_counter() - t0
                 if not success:
                     failure_message = "No fue posible leer un fotograma de la cámara."
                     break
 
                 frame_number += 1
+                t0 = time.perf_counter()
                 result = pipeline.analyze(frame)
+                timing["analisis"] += time.perf_counter() - t0
                 total_faces += result["faces_count"]
                 window.add(result)
 
@@ -261,9 +276,15 @@ class Command(BaseCommand):
         else:
             final_status = "detenida desde la interfaz"
 
+        per_frame = {k: (v * 1000 / frame_number if frame_number else 0) for k, v in timing.items()}
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(f"Sesión #{session.id} {final_status}."))
         self.stdout.write(f"Fotogramas procesados: {frame_number}")
         self.stdout.write(f"Rostros acumulados: {total_faces}")
         self.stdout.write(f"Eventos agregados guardados: {events_saved}")
         self.stdout.write(f"Duración real: {elapsed_seconds:.2f} s | FPS promedio: {average_fps:.2f}")
+        self.stdout.write(
+            "Tiempo promedio por fotograma: "
+            f"lectura {per_frame['lectura']:.1f} ms | análisis {per_frame['analisis']:.1f} ms | "
+            f"controles {per_frame['controles']:.1f} ms"
+        )
