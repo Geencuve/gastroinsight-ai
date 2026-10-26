@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta
+﻿from datetime import datetime, time, timedelta
 
 from django.db.models import Avg, Count, Sum
 from django.db.models.functions import TruncDate
@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from ai_vision.models import AnalysisSession, DetectionEvent
 from operations.models import SatisfactionEvaluation, ServiceSession
+from reports.services.sales_data import get_sales_data
 
 
 def parse_date(raw_date, default_date=None):
@@ -230,6 +231,7 @@ def get_report_data(venue, start_date, end_date):
     ]
 
     return {
+        **get_sales_data(venue, start_datetime, end_datetime),
         "venue": venue,
         "start_date": start_date,
         "end_date": end_date,
