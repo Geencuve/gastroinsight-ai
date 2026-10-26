@@ -35,6 +35,15 @@ class Camera(models.Model):
         ),
         verbose_name="Origen",
     )
+    table = models.ForeignKey(
+        "operations.RestaurantTable",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+        verbose_name="Mesa monitoreada",
+        help_text="Mesa que cubre esta cámara; permite asociar eventos a sesiones de atención.",
+    )
     zone_name = models.CharField(
         max_length=120,
         blank=True,

@@ -1,8 +1,11 @@
+from collections import Counter
+
 import cv2
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import close_old_connections, transaction
+from django.db.models import Avg, Count, Q
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -18,7 +21,7 @@ from monitoring.models import AuditLog
 from monitoring.services.audit import log_action
 from privacy.models import PrivacyPolicy
 
-from .models import AnalysisSession
+from .models import AnalysisSession, DetectionEvent
 
 
 @login_required
@@ -174,10 +177,56 @@ def session_detail(request, session_id):
         or profile.is_venue_admin
         or profile.role == Profile.Role.OPERATOR
     )
+    events = session.events.all()
+    stats = events.aggregate(
+        events_count=Count("id"),
+        average_latency=Avg("processing_time_ms"),
+        average_detector_confidence=Avg("detector_confidence"),
+        average_emotion_confidence=Avg("confidence"),
+        under_200=Count("id", filter=Q(processing_time_ms__lt=200)),
+    )
+    stats["under_200_percent"] = (
+        100 * stats["under_200"] / stats["events_count"] if stats["events_count"] else None
+    )
+
+    distribution = Counter()
+    for item in events.values_list("emotion_distribution", flat=True):
+        for label, count in (item or {}).items():
+            distribution[label] += count
+    if not distribution:
+        # Eventos antiguos sin distribución: se usa la expresión estimada.
+        for label in events.exclude(
+            estimated_emotion=DetectionEvent.Emotion.UNKNOWN
+        ).values_list("estimated_emotion", flat=True):
+            distribution[label] += 1
+
+    labels = dict(DetectionEvent.Emotion.choices)
+    total = sum(distribution.values())
+    emotion_rows = [
+        {"label": labels.get(key, key), "count": value, "percent": 100 * value / total}
+        for key, value in distribution.most_common()
+    ]
+
+    linked_sessions = (
+        events.filter(service_session__isnull=False)
+        .values("service_session_id", "service_session__table__code")
+        .distinct()
+        .order_by("service_session_id")
+    )
+
     return render(
         request,
         "ai_vision/session_detail.html",
-        {"session": session, "camera": session.camera, "can_operate": can_operate},
+        {
+            "session": session,
+            "camera": session.camera,
+            "can_operate": can_operate,
+            "stats": stats,
+            "emotion_rows": emotion_rows,
+            "chart_labels": [row["label"] for row in emotion_rows],
+            "chart_values": [row["count"] for row in emotion_rows],
+            "linked_sessions": linked_sessions,
+        },
     )
 
 

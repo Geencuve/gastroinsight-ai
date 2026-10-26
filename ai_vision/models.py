@@ -92,6 +92,9 @@ class DetectionEvent(models.Model):
         SAD = "sad", "Negativa / triste"
         SURPRISED = "surprised", "Sorpresa"
         ANGRY = "angry", "Enojo"
+        DISGUST = "disgust", "Disgusto"
+        FEAR = "fear", "Miedo"
+        CONTEMPT = "contempt", "Desprecio"
 
     session = models.ForeignKey(
         AnalysisSession,
@@ -125,6 +128,35 @@ class DetectionEvent(models.Model):
         null=True,
         blank=True,
         verbose_name="Tiempo de procesamiento (ms)",
+    )
+    detector_confidence = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        verbose_name="Confianza del detector",
+    )
+    emotion_distribution = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Distribución de expresiones",
+        help_text="Conteo agregado de expresiones en la ventana de fotogramas.",
+    )
+    table = models.ForeignKey(
+        "operations.RestaurantTable",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="detection_events",
+        verbose_name="Mesa asociada",
+    )
+    service_session = models.ForeignKey(
+        "operations.ServiceSession",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="detection_events",
+        verbose_name="Sesión de atención asociada",
     )
 
     class Meta:
