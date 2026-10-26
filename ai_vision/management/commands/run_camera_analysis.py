@@ -1,4 +1,4 @@
-﻿import time
+import time
 from decimal import Decimal
 
 import cv2
@@ -247,6 +247,11 @@ class Command(BaseCommand):
             if preview_enabled:
                 cv2.destroyAllWindows()
             close_old_connections()
+
+        # Guardar la ventana final incompleta para no perder detecciones.
+        if window.frames and not failure_message and self.session_is_running(session.id):
+            self.save_event(session, camera, window)
+            events_saved += 1
 
         elapsed_seconds = time.monotonic() - started_at
         average_fps = frame_number / elapsed_seconds if elapsed_seconds > 0 else 0
