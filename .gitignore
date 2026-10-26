@@ -95,3 +95,5 @@ arquitectura*.txt
 resultado_*.txt
 modelos_*.txt
 vistas_*.txt
+vistas_*.txt
+ai_vision/ml_models/*.onnx
