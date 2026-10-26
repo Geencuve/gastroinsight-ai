@@ -212,6 +212,69 @@
     no personas únicas, y no identifican a clientes.
 </div>
 
+<h2>Ventas del día</h2>
+
+<section class="metrics-grid">
+    <article class="metric-card">
+        <p class="metric-label">Ventas totales del día</p>
+        <p class="metric-value">${{ sales_summary.revenue|default:0|floatformat:"0g" }}</p>
+        <p class="metric-note">Pedidos pagados en la fecha seleccionada.</p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Pedidos pagados</p>
+        <p class="metric-value">{{ sales_summary.orders_count|default:0 }}</p>
+        <p class="metric-note">Pedidos cerrados con pago registrado.</p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Ticket promedio</p>
+        <p class="metric-value">${{ sales_summary.average_ticket|default:0|floatformat:"0g" }}</p>
+        <p class="metric-note">Monto promedio por pedido pagado.</p>
+    </article>
+
+    <article class="metric-card">
+        <p class="metric-label">Pedidos en curso</p>
+        <p class="metric-value">{{ sales_summary.in_progress|default:0 }}</p>
+        <p class="metric-note">Abiertos o confirmados, aún sin pagar.</p>
+    </article>
+</section>
+
+<section class="chart-grid">
+    <article class="chart-box">
+        <h2>Ventas por hora</h2>
+        {% if sales_hourly_labels %}
+            <div class="chart-container">
+                <canvas id="salesHourChart"></canvas>
+            </div>
+        {% else %}
+            <p>No hay ventas pagadas para los filtros seleccionados.</p>
+        {% endif %}
+    </article>
+
+    <article class="chart-box">
+        <h2>Platos más vendidos</h2>
+        {% if sales_top_dishes %}
+            <table class="dashboard-table">
+                <thead><tr><th>Plato</th><th>Unidades</th><th>Ventas</th></tr></thead>
+                <tbody>
+                    {% for item in sales_top_dishes %}
+                        <tr>
+                            <td>{{ item.dish_name }}</td>
+                            <td>{{ item.units }}</td>
+                            <td>${{ item.revenue|floatformat:"0g" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Sin ventas para los filtros seleccionados.</p>
+        {% endif %}
+    </article>
+</section>
+
+<br>
+
 <h2>Operación del restaurante</h2>
 
 <section class="metrics-grid">
@@ -493,12 +556,14 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 {{ chart_labels|json_script:"chart-labels" }}
 {{ chart_faces|json_script:"chart-faces" }}
 {{ rating_labels|json_script:"rating-labels" }}
 {{ rating_values|json_script:"rating-values" }}
+{{ sales_hourly_labels|json_script:"sales-hour-labels" }}
+{{ sales_hourly_values|json_script:"sales-hour-values" }}
 
 <script>
     const chartLabels = JSON.parse(
@@ -595,6 +660,52 @@
                         title: {
                             display: true,
                             text: "Evaluaciones",
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    const salesHourCanvas = document.getElementById("salesHourChart");
+
+    if (salesHourCanvas) {
+        const salesHourLabels = JSON.parse(
+            document.getElementById("sales-hour-labels").textContent
+        );
+        const salesHourValues = JSON.parse(
+            document.getElementById("sales-hour-values").textContent
+        );
+
+        new Chart(salesHourCanvas, {
+            type: "bar",
+            data: {
+                labels: salesHourLabels,
+                datasets: [
+                    {
+                        label: "Ventas (CLP)",
+                        data: salesHourValues,
+                        backgroundColor: "#b45309",
+                        borderRadius: 6,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => "$" + Math.round(ctx.parsed.y).toLocaleString("es-CL"),
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => "$" + Number(value).toLocaleString("es-CL"),
                         },
                     },
                 },

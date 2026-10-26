@@ -104,6 +104,95 @@ def add_csv_summary_rows(writer, data):
     )
 
 
+def format_clp(value):
+    return "$" + f"{int(value or 0):,}".replace(",", ".")
+
+
+def add_csv_sales_rows(writer, data):
+    sales = data["sales_summary"]
+
+    writer.writerow([])
+    writer.writerow(["Ventas", "Valor"])
+    writer.writerow(["Pedidos pagados", sales["orders_count"] or 0])
+    writer.writerow(["Ventas totales (CLP)", int(sales["revenue"])])
+    writer.writerow(["Ticket promedio (CLP)", int(sales["average_ticket"])])
+    writer.writerow(["Descuentos aplicados (CLP)", int(sales["discounts"])])
+    writer.writerow(["Pedidos anulados", sales["cancelled_count"]])
+
+    writer.writerow([])
+    writer.writerow(["Medio de pago", "Pedidos", "Ventas (CLP)"])
+    for item in data["sales_by_payment"]:
+        writer.writerow([item["method"], item["orders_count"], int(item["revenue"] or 0)])
+
+    writer.writerow([])
+    writer.writerow(["Plato más vendido", "Unidades", "Ventas (CLP)"])
+    for item in data["sales_top_dishes"]:
+        writer.writerow([item["dish_name"], item["units"], int(item["revenue"] or 0)])
+
+    writer.writerow([])
+    writer.writerow(["Fecha", "Pedidos pagados", "Ventas (CLP)"])
+    for item in data["sales_daily"]:
+        writer.writerow([
+            item["day"].strftime("%d-%m-%Y"),
+            item["orders_count"],
+            int(item["revenue"] or 0),
+        ])
+
+
+def build_pdf_sales_section(data, styles):
+    from reportlab.lib import colors
+    from reportlab.lib.units import cm
+    from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
+
+    sales = data["sales_summary"]
+    table_style = TableStyle(
+        [
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#b45309")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+            ("PADDING", (0, 0), (-1, -1), 5),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ]
+    )
+
+    summary_rows = [
+        ["Indicador de ventas", "Valor"],
+        ["Pedidos pagados", str(sales["orders_count"] or 0)],
+        ["Ventas totales", format_clp(sales["revenue"])],
+        ["Ticket promedio", format_clp(sales["average_ticket"])],
+        ["Descuentos aplicados", format_clp(sales["discounts"])],
+        ["Pedidos anulados", str(sales["cancelled_count"])],
+    ]
+
+    dish_rows = [["Plato más vendido", "Unidades", "Ventas"]] + [
+        [item["dish_name"], str(item["units"]), format_clp(item["revenue"])]
+        for item in data["sales_top_dishes"]
+    ]
+    if len(dish_rows) == 1:
+        dish_rows.append(["Sin ventas", "0", "$0"])
+
+    payment_rows = [["Medio de pago", "Pedidos", "Ventas"]] + [
+        [item["method"], str(item["orders_count"]), format_clp(item["revenue"])]
+        for item in data["sales_by_payment"]
+    ]
+    if len(payment_rows) == 1:
+        payment_rows.append(["Sin ventas", "0", "$0"])
+
+    elements = [Paragraph("Ventas", styles["Heading2"])]
+    for rows, widths in (
+        (summary_rows, [11.5 * cm, 6 * cm]),
+        (dish_rows, [9.5 * cm, 3 * cm, 5 * cm]),
+        (payment_rows, [9.5 * cm, 3 * cm, 5 * cm]),
+    ):
+        table = Table(rows, colWidths=widths)
+        table.setStyle(table_style)
+        elements.append(table)
+        elements.append(Spacer(1, 0.4 * cm))
+
+    elements.append(Spacer(1, 0.15 * cm))
+    return elements
+
+
 def build_csv_response(data, filename, title, period_label):
     response = HttpResponse(
         content_type="text/csv; charset=utf-8",
@@ -115,7 +204,7 @@ def build_csv_response(data, filename, title, period_label):
 
     response.write("\ufeff")
 
-    writer = csv.writer(response)
+    writer = csv.writer(response, delimiter=";")
 
     writer.writerow([title])
     writer.writerow(["Local", data["venue"].name])
@@ -123,6 +212,7 @@ def build_csv_response(data, filename, title, period_label):
     writer.writerow([])
 
     add_csv_summary_rows(writer, data)
+    add_csv_sales_rows(writer, data)
 
     writer.writerow([])
     writer.writerow(
@@ -361,6 +451,7 @@ def build_pdf_response(data, filename, title, period_label):
 
     story.append(summary_table)
     story.append(Spacer(1, 0.55 * cm))
+    story.extend(build_pdf_sales_section(data, styles))
 
     story.append(
         Paragraph("Resumen por cámara", styles["Heading2"])
@@ -491,6 +582,7 @@ def daily_report(request, venue_id):
         "%d-%m-%Y"
     )
     report_data["report_type"] = "daily"
+    report_data["report_date"] = report_date
 
     log_action(
     request,

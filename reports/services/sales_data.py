@@ -1,4 +1,4 @@
-﻿from decimal import Decimal
+from decimal import Decimal
 
 from django.db.models import Avg, Count, Sum
 from django.db.models.functions import ExtractHour, TruncDate
@@ -73,4 +73,6 @@ def get_sales_data(venue, start_datetime, end_datetime):
         "sales_hourly": hourly,
         "sales_chart_labels": [row["day"].strftime("%d-%m") for row in daily],
         "sales_chart_values": [float(row["revenue"]) for row in daily],
+        "sales_hourly_labels": [f"{row['hour']:02d}:00" for row in hourly],
+        "sales_hourly_values": [float(row["revenue"]) for row in hourly],
     }

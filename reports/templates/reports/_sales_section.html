@@ -1,0 +1,123 @@
+<style>
+    .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
+    .sales-box { padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; }
+    .sales-box table { width: 100%; }
+    .sales-chart { position: relative; height: 260px; }
+</style>
+
+<section class="card">
+    <h2>Ventas</h2>
+    <p>Pedidos pagados en el período, según su fecha de pago.</p>
+
+    <div class="metrics-grid">
+        <article class="metric-card">
+            <p class="metric-label">Ventas totales</p>
+            <p class="metric-value">${{ sales_summary.revenue|default:0|floatformat:"0g" }}</p>
+        </article>
+        <article class="metric-card">
+            <p class="metric-label">Pedidos pagados</p>
+            <p class="metric-value">{{ sales_summary.orders_count|default:0 }}</p>
+        </article>
+        <article class="metric-card">
+            <p class="metric-label">Ticket promedio</p>
+            <p class="metric-value">${{ sales_summary.average_ticket|default:0|floatformat:"0g" }}</p>
+        </article>
+        <article class="metric-card">
+            <p class="metric-label">Descuentos aplicados</p>
+            <p class="metric-value">${{ sales_summary.discounts|default:0|floatformat:"0g" }}</p>
+        </article>
+        <article class="metric-card">
+            <p class="metric-label">Pedidos anulados</p>
+            <p class="metric-value">{{ sales_summary.cancelled_count|default:0 }}</p>
+        </article>
+    </div>
+
+    <div class="sales-grid">
+        <article class="sales-box">
+            <h3>{% if report_type == "daily" %}Ventas por hora{% else %}Ventas por día{% endif %}</h3>
+            {% if sales_summary.orders_count %}
+                <div class="sales-chart"><canvas id="salesChart"></canvas></div>
+            {% else %}
+                <p>No hay ventas pagadas en este período.</p>
+            {% endif %}
+        </article>
+
+        <article class="sales-box">
+            <h3>Platos más vendidos</h3>
+            {% if sales_top_dishes %}
+                <table>
+                    <thead><tr><th>Plato</th><th>Unidades</th><th>Ventas</th></tr></thead>
+                    <tbody>
+                        {% for item in sales_top_dishes %}
+                            <tr>
+                                <td>{{ item.dish_name }}</td>
+                                <td>{{ item.units }}</td>
+                                <td>${{ item.revenue|floatformat:"0g" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Sin ventas en este período.</p>
+            {% endif %}
+        </article>
+
+        <article class="sales-box">
+            <h3>Medios de pago</h3>
+            {% if sales_by_payment %}
+                <table>
+                    <thead><tr><th>Medio</th><th>Pedidos</th><th>Ventas</th></tr></thead>
+                    <tbody>
+                        {% for item in sales_by_payment %}
+                            <tr>
+                                <td>{{ item.method }}</td>
+                                <td>{{ item.orders_count }}</td>
+                                <td>${{ item.revenue|floatformat:"0g" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Sin ventas en este período.</p>
+            {% endif %}
+        </article>
+    </div>
+</section>
+
+<br>
+
+{% if report_type == "daily" %}
+    {{ sales_hourly_labels|json_script:"sales-labels" }}
+    {{ sales_hourly_values|json_script:"sales-values" }}
+{% else %}
+    {{ sales_chart_labels|json_script:"sales-labels" }}
+    {{ sales_chart_values|json_script:"sales-values" }}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("salesChart");
+        if (!canvas || typeof Chart === "undefined") return;
+        const labels = JSON.parse(document.getElementById("sales-labels").textContent);
+        const values = JSON.parse(document.getElementById("sales-values").textContent);
+        new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{ label: "Ventas (CLP)", data: values, backgroundColor: "#b45309", borderRadius: 6 }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (ctx) => "$" + Math.round(ctx.parsed.y).toLocaleString("es-CL") } },
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: (value) => "$" + Number(value).toLocaleString("es-CL") } },
+                },
+            },
+        });
+    });
+</script>

@@ -37,6 +37,8 @@
 
 <br>
 
+{% include "reports/_sales_section.html" %}
+
 <section class="metrics-grid">
     <article class="metric-card">
         <p class="metric-label">Sesiones de atención</p>
@@ -136,7 +138,7 @@
 <section class="card">
     <h2>Sesiones del período</h2>
 
-    {% if sessions %}
+    {% if analysis_sessions %}
         <table>
             <thead>
                 <tr>
@@ -151,7 +153,7 @@
             </thead>
 
             <tbody>
-                {% for session in sessions %}
+                {% for session in analysis_sessions %}
                     <tr>
                         <td>#{{ session.id }}</td>
                         <td>{{ session.camera.name }}</td>

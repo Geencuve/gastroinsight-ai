@@ -2,6 +2,7 @@ from datetime import datetime, time, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Q, Sum
+from django.db.models.functions import ExtractHour
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -13,6 +14,7 @@ from operations.models import (
     SatisfactionEvaluation,
     ServiceSession,
 )
+from sales.models import Order, OrderItem
 from venues.models import Venue
 
 
@@ -294,6 +296,50 @@ def dashboard_view(request):
         "-created_at"
     )[:10]
 
+    orders = Order.objects.filter(
+        service_session__table__venue__in=accessible_venues,
+    )
+
+    if selected_venue:
+        orders = orders.filter(service_session__table__venue=selected_venue)
+
+    if selected_table:
+        orders = orders.filter(service_session__table=selected_table)
+
+    if selected_service_session:
+        orders = orders.filter(service_session=selected_service_session)
+
+    paid_orders = orders.filter(
+        status=Order.Status.PAID,
+        paid_at__gte=day_start,
+        paid_at__lt=day_end,
+    )
+
+    sales_summary = paid_orders.aggregate(
+        orders_count=Count("id"),
+        revenue=Sum("total"),
+        average_ticket=Avg("total"),
+    )
+    sales_summary["in_progress"] = orders.filter(
+        status__in=[Order.Status.OPEN, Order.Status.CONFIRMED],
+    ).count()
+
+    sales_top_dishes = list(
+        OrderItem.objects.filter(order__in=paid_orders)
+        .values("dish_name")
+        .annotate(units=Sum("quantity"), revenue=Sum("line_total"))
+        .order_by("-units", "dish_name")[:5]
+    )
+
+    sales_hourly = list(
+        paid_orders.annotate(hour=ExtractHour("paid_at"))
+        .values("hour")
+        .annotate(revenue=Sum("total"))
+        .order_by("hour")
+    )
+    sales_hourly_labels = [f"{row['hour']:02d}:00" for row in sales_hourly]
+    sales_hourly_values = [float(row["revenue"]) for row in sales_hourly]
+
     context = {
         "selected_date": selected_date,
         "selected_venue_id": selected_venue_id or "",
@@ -321,6 +367,10 @@ def dashboard_view(request):
         "chart_faces": chart_faces,
         "rating_labels": rating_labels,
         "rating_values": rating_values,
+        "sales_summary": sales_summary,
+        "sales_top_dishes": sales_top_dishes,
+        "sales_hourly_labels": sales_hourly_labels,
+        "sales_hourly_values": sales_hourly_values,
     }
 
     return render(
