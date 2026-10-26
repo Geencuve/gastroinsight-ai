@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db import models
 from django.db.models import F, Q, Sum
 from django.utils import timezone
@@ -155,7 +155,7 @@ class Order(models.Model):
 
         if self.service_session_id:
             if self.service_session.status == ServiceSession.Status.CLOSED:
-                errors["service_session"] = (
+                errors[NON_FIELD_ERRORS] = (
                     "No puedes crear o modificar pedidos "
                     "en una sesión cerrada."
                 )
@@ -351,7 +351,7 @@ class OrderItem(models.Model):
         errors = {}
 
         if self.order_id and not self.order.can_be_edited:
-            errors["order"] = (
+            errors[NON_FIELD_ERRORS] = (
                 "Solo puedes modificar los ítems de un pedido abierto."
             )
 
