@@ -50,7 +50,7 @@ def get_period_from_message(message):
         start = today - timedelta(days=today.weekday())
         return start, today, "esta semana"
 
-    if "mes" in text:
+    if re.search(r"\b(?:este mes|mes actual|mensual)\b", text):
         start = today.replace(day=1)
         return start, today, "este mes"
 
@@ -515,6 +515,54 @@ def build_staff_response(user, message):
             {},
         )
 
+    text = normalize_text(message)
+
+    asks_sessions = any(
+        word in text
+        for word in ("sesiones", "sesión", "sesion", "mesas", "comensales")
+    )
+    asks_quality = any(
+        word in text
+        for word in ("evaluaciones", "evaluación", "evaluacion",
+                     "atención", "atencion", "calidad")
+    )
+
+    if asks_sessions and asks_quality:
+        session_metrics = get_sessions_summary(
+            venues, start_date, end_date
+        )
+        quality_metrics = get_service_quality(
+            venues, start_date, end_date
+        )
+
+        if quality_metrics["total_evaluations"]:
+            quality_text = (
+                f"se registraron {quality_metrics['total_evaluations']} "
+                f"evaluaciones con un promedio de "
+                f"{quality_metrics['average_rating']}/5"
+            )
+        else:
+            quality_text = "no se registraron evaluaciones"
+
+        return (
+            f"Para {period_name} hubo "
+            f"{session_metrics['total_sessions']} sesiones, "
+            f"{session_metrics['open_sessions']} abiertas y "
+            f"{session_metrics['total_guests']} comensales registrados; "
+            f"respecto de la atención, {quality_text}. "
+            "Las evaluaciones registradas no permiten concluir "
+            "cómo se sintió cada cliente individualmente.",
+            "sessions_and_quality",
+            {
+                "sessions": session_metrics,
+                "quality": quality_metrics,
+                "tools_used": [
+                    "get_sessions_summary",
+                    "get_service_quality",
+                ],
+            },
+        )
+
     if intent == "sessions_summary":
         metrics = get_sessions_summary(
             venues,
@@ -647,7 +695,35 @@ def build_staff_response(user, message):
 
     if intent == "camera_status":
         cameras = get_camera_status(venues)
+        if "autorizad" in normalize_text(message):
+                policies = get_privacy_status(venues)
+                authorized_count = sum(
+                    1
+                    for policy in policies
+                    if policy.is_processing_authorized
+                )
+                active_count = cameras.filter(is_active=True).count()
 
+                return (
+                    f"Hay {cameras.count()} cámaras registradas, "
+                    f"{active_count} activas y {authorized_count} "
+                    f"políticas de privacidad con procesamiento visual "
+                    f"autorizado, de {policies.count()} configuradas. "
+                    "Estos son datos agregados: una cámara activa no queda "
+                    "autorizada automáticamente. Revisa la política del "
+                    "local correspondiente antes de procesar imágenes.",
+                    intent,
+                    {
+                        "camera_count": cameras.count(),
+                        "active_camera_count": active_count,
+                        "policies": policies.count(),
+                        "authorized_policies": authorized_count,
+                        "tools_used": [
+                            "get_camera_status",
+                            "get_privacy_status",
+                        ],
+                    },
+                )
         if not cameras.exists():
             return (
                 "No hay cámaras registradas en los locales autorizados.",

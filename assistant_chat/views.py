@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-
+from django.db import transaction
+from django.http import JsonResponse
 from authentication.permissions import get_or_create_profile
 from venues.models import Venue
+from django.views.decorators.http import require_GET
 
 from .catalog import (
     CUSTOMER_SUGGESTIONS,
@@ -226,4 +228,102 @@ def staff_continue_conversation(request, conversation_id):
     return redirect(
         "assistant_chat:staff_conversation",
         conversation_id=conversation.id,
+    )
+
+
+@login_required
+@require_POST
+def staff_widget_message(request):
+    form = ChatMessageForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse(
+            {"error": "Escribe una consulta válida."},
+            status=400,
+        )
+
+    venues = get_user_venues(request.user)
+
+    if not venues.exists():
+        return JsonResponse(
+            {"error": "No tienes locales activos asignados."},
+            status=403,
+        )
+
+    content = form.cleaned_data["message"]
+    conversation_id = request.POST.get("conversation_id")
+
+    with transaction.atomic():
+        if conversation_id:
+            conversation = get_object_or_404(
+                ChatConversation,
+                id=conversation_id,
+                audience=ChatConversation.Audience.STAFF,
+                user=request.user,
+            )
+        else:
+            conversation = ChatConversation.objects.create(
+                user=request.user,
+                audience=ChatConversation.Audience.STAFF,
+                title=content[:80],
+            )
+
+        ChatMessage.objects.create(
+            conversation=conversation,
+            sender=ChatMessage.Sender.USER,
+            content=content,
+        )
+
+        response_text, intent, metadata = build_staff_response(
+            request.user,
+            content,
+        )
+
+        ChatMessage.objects.create(
+            conversation=conversation,
+            sender=ChatMessage.Sender.ASSISTANT,
+            content=response_text,
+            intent=intent,
+            metadata=metadata,
+        )
+
+    return JsonResponse(
+        {
+            "conversation_id": conversation.id,
+            "user_message": content,
+            "assistant_message": response_text,
+        }
+    )
+
+@login_required
+@require_GET
+def staff_widget_history(request, conversation_id):
+    if not get_user_venues(request.user).exists():
+        return JsonResponse(
+            {"error": "No tienes locales activos asignados."},
+            status=403,
+        )
+
+    conversation = get_object_or_404(
+        ChatConversation,
+        id=conversation_id,
+        audience=ChatConversation.Audience.STAFF,
+        user=request.user,
+    )
+
+    recent_messages = list(
+        conversation.messages.order_by("-created_at", "-id")[:30]
+    )
+
+    return JsonResponse(
+        {
+            "conversation_id": conversation.id,
+            "messages": [
+                {
+                    "sender": message.sender,
+                    "content": message.content,
+                }
+                for message in reversed(recent_messages)
+            ],
+        }
     )

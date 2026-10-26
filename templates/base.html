@@ -53,9 +53,7 @@
             {% else %}
                 <a href="{% url 'authentication:login' %}">Ingresar</a>
                 <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
-                </li>
+                <a href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
             {% endif %}
 
 
@@ -74,6 +72,75 @@
         {% block content %}{% endblock %}
     </main>
 
+        {% if show_staff_assistant_widget %}
+            <div class="assistant-widget">
+                <section
+                    id="assistant-widget-panel"
+                    class="assistant-widget-panel"
+                    aria-label="Asistente operacional"
+                    hidden
+                >
+                    <div class="assistant-widget-header">
+                        <h2>Asistente operacional</h2>
+                        <button
+                            type="button"
+                            id="assistant-widget-close"
+                            class="assistant-widget-close"
+                            aria-label="Cerrar asistente"
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="assistant-widget-body">
+                        <div
+                            id="assistant-widget-messages"
+                            class="assistant-widget-messages"
+                            role="log"
+                            aria-live="polite"
+                        >
+                            <p>Escribe una consulta sobre tus locales autorizados.</p>
+                        </div>
+
+                        <form
+                            id="assistant-widget-form"
+                            data-url="{% url 'assistant_chat:staff_widget_message' %}"
+                            data-history-url="{% url 'assistant_chat:staff_widget_history' 0 %}"
+                            data-user-id="{{ user.pk }}"
+                        >
+                            {% csrf_token %}
+                            <label for="assistant-widget-input">Tu consulta</label>
+                            <textarea
+                                id="assistant-widget-input"
+                                name="message"
+                                rows="2"
+                                maxlength="600"
+                                required
+                            ></textarea>
+                            <button type="submit" class="assistant-widget-send">
+                                Enviar
+                            </button>
+                        </form>
+
+                        <p id="assistant-widget-error" role="alert" hidden></p>
+
+                        <a href="{% url 'assistant_chat:staff_chat' %}">
+                            Abrir chat completo
+                        </a>
+                    </div>
+                </section>
+
+                <button
+                    type="button"
+                    id="assistant-widget-toggle"
+                    class="assistant-widget-toggle"
+                    aria-controls="assistant-widget-panel"
+                    aria-expanded="false"
+                >
+                    Asistente IA
+                </button>
+            </div>
+        {% endif %}
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>

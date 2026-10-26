@@ -30,4 +30,14 @@ urlpatterns = [
         views.staff_continue_conversation,
         name="staff_continue_conversation",
     ),
+    path(
+        "staff/widget/message/",
+        views.staff_widget_message,
+        name="staff_widget_message",
+    ),
+    path(
+        "staff/widget/conversations/<int:conversation_id>/",
+        views.staff_widget_history,
+        name="staff_widget_history",
+    ),
 ]
