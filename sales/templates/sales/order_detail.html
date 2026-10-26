@@ -25,15 +25,6 @@
     </div>
 </section>
 
-{% if messages %}
-    <section class="messages" aria-live="polite">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </section>
-{% endif %}
 
 <section class="card order-summary">
     <div class="summary-grid">
@@ -335,6 +326,18 @@
                     Este pedido fue pagado el
                     {{ order.paid_at|date:"d/m/Y H:i" }}.
                 </p>
+
+                {% if order.service_session.status == "open" %}
+                    <form
+                        method="post"
+                        action="{% url 'operations:session_close' order.service_session.id %}"
+                    >
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">
+                            Cerrar mesa {{ order.service_session.table.code }}
+                        </button>
+                    </form>
+                {% endif %}
             {% elif order.status == "CANCELLED" %}
                 <p class="alert alert-warning">
                     Este pedido fue anulado el

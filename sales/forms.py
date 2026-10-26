@@ -31,7 +31,7 @@ class OrderCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         queryset = Order.service_session.field.related_model.objects.filter(
-            status="OPEN",
+            status="open",  # ServiceSession usa valores en minúscula
             table__is_active=True,
         ).select_related(
             "table",
@@ -151,7 +151,7 @@ class OrderDiscountForm(forms.ModelForm):
             "discount_amount": forms.NumberInput(
                 attrs={
                     "min": "0",
-                    "step": "0.01",
+                    "step": "1",
                 }
             ),
         }

@@ -228,7 +228,8 @@ def order_item_add(request, order_id):
     else:
         messages.error(
             request,
-            "No se pudo agregar el ítem. Revisa los datos.",
+            "No se pudo agregar el ítem. "
+            + " ".join(e for errs in form.errors.values() for e in errs),
         )
 
     return redirect(
@@ -358,7 +359,8 @@ def order_discount_update(request, order_id):
     else:
         messages.error(
             request,
-            "No se pudo actualizar el descuento.",
+            "No se pudo actualizar el descuento. "
+            + " ".join(e for errs in form.errors.values() for e in errs),
         )
 
     return redirect(
