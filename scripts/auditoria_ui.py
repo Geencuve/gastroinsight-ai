@@ -1,10 +1,13 @@
-﻿"""Auditoría automática de la interfaz: errores visibles, textos, imágenes y tiempos de respuesta."""
+"""Auditoría automática de la interfaz: errores visibles, textos, imágenes y tiempos de respuesta."""
 import logging
 import os
 import re
 import statistics
 import time
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django  # noqa: E402
