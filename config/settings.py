@@ -60,6 +60,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'assistant_chat.context_processors.assistant_widget_access',
+                'assistant_chat.branding.assistant_brand',
             ],
         },
     },
@@ -133,3 +134,5 @@ REST_FRAMEWORK = {
     ),
     "PAGE_SIZE": 25,
 }
+
+ASSISTANT_NAME = config("ASSISTANT_NAME", default="Sazón")

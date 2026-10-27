@@ -1,25 +1,50 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}Asistente IA | GastroInsight AI{% endblock %}
+{% block title %}{{ assistant_name }} | GastroInsight AI{% endblock %}
 
 {% block content %}
-<div class="chat-wrap">
-    <section class="page-header">
-        <div>
-            <h1>✨ Asistente IA</h1>
-            <p class="muted">Pregunta en lenguaje natural por ventas, platos, clientes o mesas, o pide ideas para vender más. Responde con los datos de tus locales.</p>
-        </div>
-    </section>
-    <section class="card">
+<div class="assistant-shell">
+    <section class="chat-panel">
+        <header class="chat-panel-head">
+            <span class="aw-avatar" aria-hidden="true"></span>
+            <div class="aw-title"><strong>{{ assistant_name }}</strong><span>{{ assistant_tagline }} · responde con los datos de tus locales</span></div>
+        </header>
         <div class="chat-log" id="chat-log">
-            <div class="bubble bubble-assistant">Hola 👋 Soy tu asistente de gestión. Elige una sugerencia o escríbeme, por ejemplo:
-• ¿Cuánto vendimos esta semana?
-• ¿Qué debería promocionar?
-• ¿Cómo le va al Tiramisú?</div>
+            <div class="welcome">
+                <span class="aw-avatar lg" aria-hidden="true"></span>
+                <h2>Hola, {{ user.first_name|default:user.username }}. Soy {{ assistant_name }}.</h2>
+                <p class="muted">Pregúntame por ventas, platos, clientes o mesas, o pídeme ideas para vender más.</p>
+                <div class="prompt-grid">
+                    <div class="prompt-group">
+                        <h3>💰 Ventas</h3>
+                        <button type="button" data-prompt="¿Cuánto vendimos esta semana?">Ventas de la semana</button>
+                        <button type="button" data-prompt="¿Cuál es el ticket promedio del mes?">Ticket promedio</button>
+                        <button type="button" data-prompt="¿Cuál es nuestro día más flojo?">Día más flojo</button>
+                    </div>
+                    <div class="prompt-group">
+                        <h3>🍽️ Carta</h3>
+                        <button type="button" data-prompt="¿Cuáles son los platos más vendidos?">Más vendidos</button>
+                        {% if side_top_dish %}<button type="button" data-prompt="¿Cómo le va al {{ side_top_dish }}?">¿Cómo le va al {{ side_top_dish }}?</button>{% endif %}
+                        <button type="button" data-prompt="¿Qué dicen los clientes?">Qué dicen los clientes</button>
+                    </div>
+                    <div class="prompt-group">
+                        <h3>📡 Operación</h3>
+                        <button type="button" data-prompt="¿Cómo están las mesas ahora?">Mesas ahora</button>
+                        <button type="button" data-prompt="¿Qué hay por cobrar?">Por cobrar</button>
+                        <button type="button" data-prompt="¿Cuánto se demoran las mesas?">Tiempos de atención</button>
+                    </div>
+                    <div class="prompt-group">
+                        <h3>📣 Crecer</h3>
+                        <button type="button" data-prompt="¿Qué debería promocionar? Dame ideas de marketing">¿Qué promociono?</button>
+                        <button type="button" data-prompt="¿Cómo vendo más? Dame recomendaciones">Ideas para vender más</button>
+                        <button type="button" data-prompt="¿Los clientes están más contentos cuando atendemos rápido?">Expresiones y espera</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        {% include "assistant_chat/_chips.html" %}
         {% url 'assistant_chat:staff_chat' as action_url %}
-        {% include "assistant_chat/_chat_form.html" with action=action_url %}
+        {% include "assistant_chat/_chat_form.html" with action=action_url placeholder="Pregúntale a Sazón…" %}
     </section>
+    {% include "assistant_chat/_sidebar.html" %}
 </div>
 {% endblock %}

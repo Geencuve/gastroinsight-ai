@@ -74,3 +74,13 @@ class AssistantTests(TestCase):
         self.assertEqual(get_period_from_message("ticket promedio del mes")[2], "este mes")
         self.assertEqual(get_period_from_message("ventas de la semana")[2], "esta semana")
         self.assertEqual(get_period_from_message("ventas del mes pasado")[2], "el mes pasado")
+
+    def test_interfaz_de_sazon(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/assistant/staff/")
+        self.assertContains(response, "Sazón")
+        self.assertContains(response, "composer-send")
+        self.assertContains(response, "Herramientas de mejora")
+        data = self.client.post("/assistant/staff/widget/message/", {"message": "ventas de hoy"}).json()
+        self.assertTrue(data["metrics"])
+        self.assertEqual(data["metrics"][0]["label"], "Ventas")

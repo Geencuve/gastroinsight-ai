@@ -16,6 +16,7 @@ from .catalog import (
 )
 from .forms import ChatMessageForm
 from .models import ChatConversation, ChatMessage
+from .sidebar import assistant_sidebar
 from .services import (
     build_customer_response,
     build_staff_response,
@@ -152,6 +153,7 @@ def staff_chat(request):
             "form": form,
             "venues": venues,
             "suggestions": suggestions,
+            **assistant_sidebar(request.user),
         },
     )
 
@@ -178,6 +180,7 @@ def staff_conversation(request, conversation_id):
         {
             "conversation": conversation,
             "suggestions": suggestions,
+            **assistant_sidebar(request.user),
         },
     )
 
@@ -293,6 +296,8 @@ def staff_widget_message(request):
             "user_message": content,
             "assistant_message": response_text,
             "links": metadata.get("links", []),
+            "metrics": metadata.get("metrics", []),
+            "bars": metadata.get("bars", []),
         }
     )
 

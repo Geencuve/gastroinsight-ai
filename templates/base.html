@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=7">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -86,7 +86,7 @@
                         {% if user.is_staff %}<a href="/admin/">Administración</a>{% endif %}
                     </div>
                 </details>
-                <a href="{% url 'assistant_chat:staff_chat' %}">Asistente IA</a>
+                <a href="{% url 'assistant_chat:staff_chat' %}">✨ {{ assistant_name }}</a>
                 <a href="{% url 'authentication:profile' %}">Mi perfil</a>
                 <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
                     {% csrf_token %}
@@ -114,74 +114,42 @@
     </main>
 
         {% if show_staff_assistant_widget %}
-            <div class="assistant-widget">
-                <section
-                    id="assistant-widget-panel"
-                    class="assistant-widget-panel"
-                    aria-label="Asistente operacional"
-                    hidden
-                >
-                    <div class="assistant-widget-header">
-                        <h2>Asistente operacional</h2>
-                        <button
-                            type="button"
-                            id="assistant-widget-close"
-                            class="assistant-widget-close"
-                            aria-label="Cerrar asistente"
-                        >
-                            &times;
-                        </button>
-                    </div>
-
-                    <div class="assistant-widget-body">
-                        <div
-                            id="assistant-widget-messages"
-                            class="assistant-widget-messages"
-                            role="log"
-                            aria-live="polite"
-                        >
-                            <p>Escribe una consulta sobre tus locales autorizados.</p>
+        <div class="assistant-widget">
+            <section id="assistant-widget-panel" class="assistant-widget-panel" aria-label="{{ assistant_name }}" hidden>
+                <header class="aw-header">
+                    <span class="aw-avatar" aria-hidden="true"></span>
+                    <div class="aw-title"><strong>{{ assistant_name }}</strong><span>{{ assistant_tagline }}</span></div>
+                    <a class="aw-icon-btn" href="{% url 'assistant_chat:staff_chat' %}" title="Abrir conversación completa" aria-label="Abrir conversación completa"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></a>
+                    <button type="button" id="assistant-widget-close" class="aw-icon-btn" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                </header>
+                <div id="assistant-widget-messages" class="aw-messages" role="log" aria-live="polite">
+                    <div class="aw-empty" id="aw-empty">
+                        <span class="aw-avatar lg" aria-hidden="true"></span>
+                        <p>Hola, soy <strong>{{ assistant_name }}</strong>. ¿Qué quieres saber de tu local?</p>
+                        <div class="aw-chips">
+                            <button type="button" class="chip" data-aw-prompt="¿Cómo están las mesas ahora?">📡 Mesas ahora</button>
+                            <button type="button" class="chip" data-aw-prompt="¿Cuánto vendimos hoy?">💰 Ventas de hoy</button>
+                            <button type="button" class="chip" data-aw-prompt="¿Qué debería promocionar?">📣 Qué promociono</button>
                         </div>
-
-                        <form
-                            id="assistant-widget-form"
-                            data-url="{% url 'assistant_chat:staff_widget_message' %}"
-                            data-history-url="{% url 'assistant_chat:staff_widget_history' 0 %}"
-                            data-user-id="{{ user.pk }}"
-                        >
-                            {% csrf_token %}
-                            <label for="assistant-widget-input">Tu consulta</label>
-                            <textarea
-                                id="assistant-widget-input"
-                                name="message"
-                                rows="2"
-                                maxlength="600"
-                                required
-                            ></textarea>
-                            <button type="submit" class="assistant-widget-send">
-                                Enviar
-                            </button>
-                        </form>
-
-                        <p id="assistant-widget-error" role="alert" hidden></p>
-
-                        <a href="{% url 'assistant_chat:staff_chat' %}">
-                            Abrir chat completo
-                        </a>
                     </div>
-                </section>
-
-                <button
-                    type="button"
-                    id="assistant-widget-toggle"
-                    class="assistant-widget-toggle"
-                    aria-controls="assistant-widget-panel"
-                    aria-expanded="false"
-                >
-                    Asistente IA
-                </button>
-            </div>
-        {% endif %}
+                </div>
+                <p id="assistant-widget-error" class="aw-error" role="alert" hidden></p>
+                <form id="assistant-widget-form" class="composer"
+                      data-url="{% url 'assistant_chat:staff_widget_message' %}"
+                      data-history-url="{% url 'assistant_chat:staff_widget_history' 0 %}"
+                      data-user-id="{{ user.pk }}">
+                    {% csrf_token %}
+                    <label for="assistant-widget-input" class="visually-hidden">Tu consulta</label>
+                    <textarea id="assistant-widget-input" name="message" rows="1" maxlength="600" required
+                              placeholder="Pregúntale a {{ assistant_name }}…"></textarea>
+                    <button type="submit" class="composer-send" aria-label="Enviar" disabled><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></button>
+                </form>
+            </section>
+            <button type="button" id="assistant-widget-toggle" class="aw-toggle" aria-controls="assistant-widget-panel" aria-expanded="false">
+                <span class="aw-avatar" aria-hidden="true"></span><span>{{ assistant_name }}</span>
+            </button>
+        </div>
+    {% endif %}
     <script>
         document.querySelectorAll(".nav-group").forEach((group) => {
             group.addEventListener("toggle", () => {
@@ -229,7 +197,7 @@
             window.addEventListener("load", applyChartTheme);
         })();
     </script>
-    <script src="{% static 'js/main.js' %}?v=6"></script>
+    <script src="{% static 'js/main.js' %}?v=7"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

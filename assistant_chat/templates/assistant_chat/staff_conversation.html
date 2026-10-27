@@ -1,23 +1,24 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}Asistente IA | GastroInsight AI{% endblock %}
+{% block title %}{{ assistant_name }} | GastroInsight AI{% endblock %}
 
 {% block content %}
-<div class="chat-wrap">
-    <section class="page-header">
-        <div>
-            <h1>✨ Asistente IA</h1>
-            <p class="muted">Respuestas con los datos de tus locales.</p>
-        </div>
-        <a class="btn btn-secondary" href="{% url 'assistant_chat:staff_chat' %}">Nueva conversación</a>
-    </section>
-    <section class="card">
+<div class="assistant-shell">
+    <section class="chat-panel">
+        <header class="chat-panel-head">
+            <span class="aw-avatar" aria-hidden="true"></span>
+            <div class="aw-title"><strong>{{ assistant_name }}</strong><span>{{ assistant_tagline }}</span></div>
+            <a class="aw-icon-btn" href="{% url 'assistant_chat:staff_chat' %}" title="Nueva conversación" aria-label="Nueva conversación">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </a>
+        </header>
         <div class="chat-log" id="chat-log">
             {% include "assistant_chat/_bubbles.html" with messages_list=conversation.messages.all %}
         </div>
         {% include "assistant_chat/_chips.html" %}
         {% url 'assistant_chat:staff_continue_conversation' conversation.id as action_url %}
-        {% include "assistant_chat/_chat_form.html" with action=action_url %}
+        {% include "assistant_chat/_chat_form.html" with action=action_url placeholder="Sigue preguntando…" %}
     </section>
+    {% include "assistant_chat/_sidebar.html" %}
 </div>
 {% endblock %}

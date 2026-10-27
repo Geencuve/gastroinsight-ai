@@ -1,0 +1,33 @@
+﻿{% load gi_format %}
+<aside class="assistant-side">
+    <section class="side-card">
+        <h3>Hoy</h3>
+        <div class="side-kpis">
+            <div class="side-kpi"><span>Vendido</span><strong>{{ side_summary.sales_today|clp }}</strong></div>
+            <div class="side-kpi"><span>Ticket</span><strong>{{ side_summary.average_ticket|clp }}</strong></div>
+            <div class="side-kpi"><span>Mesas en vivo</span><strong>{{ side_live.live_tables }}/{{ side_live.tables }}</strong></div>
+            <div class="side-kpi"><span>IEO promedio</span><strong>{% if side_live.average_ieo is not None %}{{ side_live.average_ieo|floatformat:0 }}{% else %}—{% endif %}</strong></div>
+        </div>
+        {% for alert in side_alerts %}<a class="side-alert" href="{{ alert.url }}">{{ alert.icon }} {{ alert.title }}</a>{% endfor %}
+    </section>
+    {% if side_ideas %}
+        <section class="side-card">
+            <h3>Ideas destacadas</h3>
+            {% for idea in side_ideas %}
+                <div class="side-idea">
+                    <strong>{{ idea.icon }} {{ idea.title }}</strong>
+                    {% if idea.impact %}<span class="idea-impact">{{ idea.impact }}</span>{% endif %}
+                    {% if idea.promo_url %}<a href="{{ idea.promo_url }}">🎨 Crear promo</a>{% endif %}
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+    <section class="side-card">
+        <h3>Herramientas de mejora</h3>
+        <nav class="tool-list">
+            {% for tool in side_tools %}
+                <a href="{{ tool.url }}"><span class="tool-icon">{{ tool.icon }}</span><span>{{ tool.label }}<small>{{ tool.hint }}</small></span></a>
+            {% endfor %}
+        </nav>
+    </section>
+</aside>

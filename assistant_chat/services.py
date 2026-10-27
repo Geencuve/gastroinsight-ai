@@ -103,6 +103,12 @@ def _fmt(value, decimals=1):
     return f"{value:.{decimals}f}".replace(".", ",")
 
 
+def _bars(pairs, formatter=str, scale=None):
+    pairs = [(label, value) for label, value in pairs if value is not None]
+    top = scale or max((float(v) for _, v in pairs), default=0) or 1
+    return [{"label": label, "value": formatter(value), "pct": max(2, round(100 * float(value) / top))} for label, value in pairs]
+
+
 def get_user_venues(user):
     profile = get_or_create_profile(user)
     if profile.is_platform_admin:
@@ -282,7 +288,15 @@ def answer_sales(venues, message):
            .annotate(units=Sum("quantity")).order_by("-units").first())
     if top:
         text += f"\nLo más vendido: {top['dish_name']} ({top['units']} unidades)."
-    return text, {"links": links, "orders": agg["count"], "total": float(agg["revenue"])}
+    change = 100 * (float(agg["revenue"]) - float(previous)) / float(previous) if previous else None
+    metrics = [
+        {"label": "Ventas", "value": clp(agg["revenue"])},
+        {"label": "Pedidos", "value": str(agg["count"])},
+        {"label": "Ticket", "value": clp(agg["avg"])},
+    ]
+    if change is not None:
+        metrics.append({"label": "Vs. anterior", "value": f"{change:+.0f}%", "tone": "up" if change >= 0 else "down"})
+    return text, {"links": links, "orders": agg["count"], "total": float(agg["revenue"]), "metrics": metrics}
 
 
 def answer_ticket(venues, message):
@@ -298,7 +312,11 @@ def answer_ticket(venues, message):
     if guests:
         text += f"\nGasto promedio por comensal: {clp(float(agg['revenue']) / guests)}."
     text += "\n💡 Para subirlo: sugiere una entrada para compartir, ofrece postre al retirar los fondos y arma combos con bebida."
-    return text, {"links": links}
+    return text, {"links": links, "metrics": [
+        {"label": "Ticket por pedido", "value": clp(agg["avg"])},
+        {"label": "Por comensal", "value": clp(float(agg["revenue"]) / guests) if guests else "—"},
+        {"label": "Pedidos", "value": str(agg["count"])},
+    ]}
 
 
 def answer_top_dishes(venues, message, lowest=False):
@@ -315,13 +333,13 @@ def answer_top_dishes(venues, message, lowest=False):
             return "No hay platos disponibles registrados.", {"links": links}
         text = f"🗒️ Platos menos vendidos ({label}):\n" + "\n".join(f"• {name}: {units} unidades" for name, units in items)
         text += "\n💡 Recomiéndalos como sugerencia del chef, prueba una promoción de lanzamiento o reemplázalos por una novedad."
-        return text, {"links": links}
+        return text, {"links": links, "bars": _bars(items, lambda v: f"{v} u.")}
     if not rows:
         return f"No hay ventas de platos para {label}.", {"links": links}
     text = f"🔥 Lo más vendido ({label}):\n" + "\n".join(
         f"{i}. {row['dish_name']}: {row['units']} unidades · {clp(row['total'])}" for i, row in enumerate(rows[:5], 1))
     text += "\n💡 Destaca el primero en redes sociales y asegura su stock en hora punta."
-    return text, {"links": links}
+    return text, {"links": links, "bars": _bars([(r["dish_name"], r["units"]) for r in rows[:5]], lambda v: f"{v} u.")}
 
 
 def answer_dish_performance(venues, message):
@@ -408,7 +426,9 @@ def answer_service_time(venues, message):
                  f"más rápida: {fastest} ({by_table[fastest]:.0f} min).")
         if by_table[slowest] > average * 1.1:
             text += f"\n💡 Revisa la asignación de personal y la distancia a cocina de la mesa {slowest}."
-    return text, {"links": links}
+    return text, {"links": links, "metrics": [{"label": "Promedio", "value": f"{average:.0f} min"},
+                                              {"label": "Atenciones", "value": str(len(values))}],
+                  "bars": _bars(sorted(by_table.items(), key=lambda i: -i[1]), lambda v: f"{v:.0f} min")}
 
 
 def answer_weekday(venues, message):
@@ -428,7 +448,7 @@ def answer_weekday(venues, message):
     text = ("📅 Venta promedio por día (últimas 4 semanas):\n" + "\n".join(lines)
             + f"\nMejor día: {WEEKDAY_NAMES[best]} · más flojo: {WEEKDAY_NAMES[worst]}."
             + f"\n💡 Crea una promoción exclusiva para el {WEEKDAY_NAMES[worst].lower()} y anúnciala en redes el día anterior.")
-    return text, {"links": links}
+    return text, {"links": links, "bars": _bars([(WEEKDAY_NAMES[wd], averages[wd]) for wd in range(7)], clp)}
 
 
 def answer_payments(venues, message):
@@ -442,7 +462,8 @@ def answer_payments(venues, message):
     grand = sum(float(row["total"]) for row in rows)
     lines = [f"• {labels.get(row['payment_method'], row['payment_method'])}: {clp(row['total'])} "
              f"({row['count']} pedidos · {100 * float(row['total']) / grand:.0f}%)" for row in rows]
-    return f"💳 Medios de pago ({label}):\n" + "\n".join(lines), {"links": links}
+    return f"💳 Medios de pago ({label}):\n" + "\n".join(lines), {"links": links, "bars": _bars(
+        [(labels.get(r["payment_method"], r["payment_method"]), r["total"]) for r in rows], clp)}
 
 
 def answer_pending(venues):
@@ -523,7 +544,12 @@ def answer_dish(venues, dish, message):
     return text, {"links": [
         _link("Ver en la carta", "menus:detail", dish.menu_id),
         {"label": "🎨 Crear promo", "url": reverse("core:promo_generator") + f"?tipo=estrella&plato={dish.id}"},
-    ], "dish": dish.name}
+    ], "dish": dish.name, "metrics": [
+        {"label": "Precio", "value": clp(dish.price)},
+        {"label": "Unidades", "value": str(units)},
+        {"label": "Ranking", "value": f"#{rank}" if rank else "—"},
+        {"label": "Valoración", "value": f"{_fmt(rating['avg'])}/5" if rating["count"] else "—"},
+    ]}
 
 
 def answer_live(venues):
@@ -540,7 +566,11 @@ def answer_live(venues):
         value = f"IEO {card['ieo']:.0f}" if card["ieo"] is not None else "sin lectura"
         detail = "; ".join(card["reasons"]) or "sin alertas"
         text += f"\n• Mesa {card['table']}: {value} · {detail}"
-    return text, {"links": links}
+    return text, {"links": links, "metrics": [
+        {"label": "Mesas en vivo", "value": f"{s['live_tables']}/{s['tables']}"},
+        {"label": "IEO promedio", "value": ieo},
+        {"label": "Alertas", "value": str(s["alerts"]), "tone": "down" if s["alerts"] else "up"},
+    ], "bars": _bars([(f"Mesa {c['table']}", c["ieo"]) for c in state["cards"][:8]], lambda v: f"{v:.0f}", scale=100)}
 
 
 def answer_daily_summary(venues):
@@ -557,7 +587,12 @@ def answer_daily_summary(venues):
     if ideas:
         text += f"\n💡 Idea del día: {ideas[0]['title']} → {ideas[0]['action']}"
     text += "\n\nPregúntame por ventas, platos, clientes, mesas o pídeme ideas de marketing."
-    return text, {"links": [_link("Ver inicio", "core:home"), _link("Dashboard", "analytics:dashboard")]}
+    return text, {"links": [_link("Ver inicio", "core:home"), _link("Dashboard", "analytics:dashboard")], "metrics": [
+        {"label": "Vendido hoy", "value": clp(summary["sales_today"])},
+        {"label": "Pedidos", "value": str(summary["orders_today"])},
+        {"label": "Mesas abiertas", "value": str(summary["open_tables"])},
+        {"label": "Por cobrar", "value": str(summary["pending_orders"])},
+    ]}
 
 
 def build_staff_response(user, message):
