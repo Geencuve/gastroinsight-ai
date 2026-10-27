@@ -1,16 +1,143 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+{% load gi_format %}
 
 {% block title %}Inicio | GastroInsight AI{% endblock %}
 
+{% block extra_css %}
+<style>
+    .home-hello h1 { margin-bottom: 0.2rem; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1.25rem 0 1.5rem; }
+    .kpi { padding: 1rem 1.1rem; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; }
+    .kpi-label { margin: 0; color: #64748b; font-size: 0.82rem; font-weight: 600; }
+    .kpi-value { margin: 0.35rem 0 0; color: #0f172a; font-size: 1.6rem; font-weight: 800; }
+    .kpi-note { margin: 0.2rem 0 0; color: #94a3b8; font-size: 0.75rem; }
+    .now-box { margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: 14px; background: #fff7ed; border: 1px solid #fed7aa; }
+    .now-box h2 { margin: 0 0 0.5rem; font-size: 1.05rem; color: #9a3412; }
+    .now-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+    .now-box li { color: #431407; }
+    .now-box a { font-weight: 600; margin-left: 0.25rem; }
+    .idea-section { margin-bottom: 1.75rem; }
+    .idea-section > h2 { margin: 0; }
+    .idea-section > p { margin: 0.2rem 0 0.9rem; color: #64748b; }
+    .idea-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .idea { display: flex; flex-direction: column; gap: 0.55rem; padding: 1.2rem; border-radius: 16px; background: #ffffff;
+            border: 1px solid #e2e8f0; box-shadow: 0 6px 18px rgb(15 23 42 / 6%); }
+    .idea-icon { font-size: 1.8rem; line-height: 1; }
+    .idea h3 { margin: 0; font-size: 1.08rem; color: #0f172a; }
+    .idea-why { margin: 0; color: #475569; font-size: 0.92rem; }
+    .idea-action { margin: 0; padding: 0.65rem 0.8rem; border-radius: 10px; background: #f1f5f9; color: #0f172a; font-size: 0.92rem; }
+    .idea-impact { margin: 0; padding: 0.45rem 0.75rem; border-radius: 999px; align-self: flex-start;
+                   background: #dcfce7; color: #166534; font-size: 0.82rem; font-weight: 700; }
+    .idea a { margin-top: auto; font-weight: 600; text-decoration: none; }
+    .idea-empty { color: #94a3b8; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+    .footnote { color: #94a3b8; font-size: 0.8rem; }
+    .hero { padding: 2rem; }
+    .hero ul { line-height: 1.8; }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="card">
-    <h1>Bienvenido a GastroInsight AI</h1>
-    <p>
-        Plataforma de análisis de emociones y satisfacción para restaurantes.
+{% if user.is_authenticated %}
+    <section class="home-hello">
+        <h1>{{ greeting }}, {{ user.first_name|default:user.username }} 👋</h1>
+        <p class="muted">Esto es lo que tus datos dicen hoy, {{ today|date:"l d \d\e F" }}.</p>
+    </section>
+
+    <section class="kpi-grid">
+        <article class="kpi">
+            <p class="kpi-label">Vendido hoy</p>
+            <p class="kpi-value">{{ summary.sales_today|clp }}</p>
+            <p class="kpi-note">{{ summary.orders_today }} pedido{{ summary.orders_today|pluralize }} pagado{{ summary.orders_today|pluralize }}</p>
+        </article>
+        <article class="kpi">
+            <p class="kpi-label">Ticket promedio hoy</p>
+            <p class="kpi-value">{{ summary.average_ticket|clp }}</p>
+            <p class="kpi-note">Por pedido pagado</p>
+        </article>
+        <article class="kpi">
+            <p class="kpi-label">Mesas atendiéndose</p>
+            <p class="kpi-value">{{ summary.open_tables }}</p>
+            <p class="kpi-note">En este momento</p>
+        </article>
+        <article class="kpi">
+            <p class="kpi-label">Por cobrar</p>
+            <p class="kpi-value">{{ summary.pending_orders }}</p>
+            <p class="kpi-note">Pedidos aún sin pago</p>
+        </article>
+        <article class="kpi">
+            <p class="kpi-label">Clientes satisfechos</p>
+            <p class="kpi-value">{% if summary.satisfied_pct is not None %}{{ summary.satisfied_pct|floatformat:0 }}%{% else %}—{% endif %}</p>
+            <p class="kpi-note">Nota 4 o 5 · {{ summary.ratings_count }} evaluaciones (7 días)</p>
+        </article>
+    </section>
+
+    {% if now_items %}
+        <section class="now-box">
+            <h2>⚠️ Para atender ahora</h2>
+            <ul>
+                {% for item in now_items %}
+                    <li>{{ item.icon }} <strong>{{ item.title }}</strong> — {{ item.action }}
+                        {% if item.url %}<a href="{{ item.url }}">Ver →</a>{% endif %}</li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+    {% for section in sections %}
+        <section class="idea-section">
+            <h2>{{ section.icon }} {{ section.title }}</h2>
+            <p>{{ section.subtitle }}</p>
+            {% if section.items %}
+                <div class="idea-grid">
+                    {% for item in section.items %}
+                        <article class="idea">
+                            <div class="idea-icon">{{ item.icon }}</div>
+                            <h3>{{ item.title }}</h3>
+                            <p class="idea-why">{{ item.why }}</p>
+                            <p class="idea-action">💡 <strong>Qué hacer:</strong> {{ item.action }}</p>
+                            {% if item.impact %}<p class="idea-impact">Potencial estimado: {{ item.impact }}</p>{% endif %}
+                            {% if item.url %}<a href="{{ item.url }}">Ver detalle →</a>{% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="idea-empty">Aún no hay suficientes datos para sugerencias en esta área.</p>
+            {% endif %}
+        </section>
+    {% endfor %}
+
+    <section class="card">
+        <h2>Accesos rápidos</h2>
+        <div class="quick-actions">
+            <a class="btn btn-primary" href="{% url 'operations:session_create' %}">Abrir mesa</a>
+            <a class="btn btn-primary" href="{% url 'sales:order_create' %}">Nuevo pedido</a>
+            <a class="btn btn-secondary" href="{% url 'operations:evaluation_create' %}">Registrar evaluación</a>
+            <a class="btn btn-secondary" href="{% url 'ai_vision:session_list' %}">Análisis visual</a>
+            <a class="btn btn-secondary" href="{% url 'analytics:dashboard' %}">Dashboard</a>
+            <a class="btn btn-secondary" href="{% url 'analytics:correlation' %}">Panel de correlación</a>
+        </div>
+    </section>
+
+    <p class="footnote">
+        Las sugerencias se generan automáticamente con los datos de las últimas semanas; los potenciales son estimaciones simples para orientar decisiones.
+        {% if uses_synthetic %}Las sugerencias de experiencia basadas en análisis visual usan datos sintéticos de demostración.{% endif %}
     </p>
-    <p>
-        El sistema permitirá administrar locales, menús, cámaras,
-        análisis de IA y reportes.
-    </p>
-</section>
+{% else %}
+    <section class="card hero">
+        <h1>GastroInsight AI</h1>
+        <p>
+            Testbed experimental que integra la operación de un restaurante con métricas de visión
+            artificial <strong>no biométrica</strong>, para evaluar si el tiempo de servicio se relaciona
+            con las expresiones faciales observables de forma agregada.
+        </p>
+        <ul>
+            <li>Gestión de mesas, atención, pedidos, ventas y evaluaciones voluntarias.</li>
+            <li>Detección de rostros y estimación agregada de expresiones por mesa, sin guardar imágenes ni identificar personas.</li>
+            <li>Panel de correlación con Pearson, Spearman y significancia estadística.</li>
+            <li>Sugerencias de ventas, marketing y experiencia generadas a partir de los datos.</li>
+        </ul>
+        <a class="btn btn-primary" href="{% url 'authentication:login' %}">Ingresar</a>
+    </section>
+{% endif %}
 {% endblock %}

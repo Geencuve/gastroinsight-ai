@@ -7,11 +7,27 @@
 
     <title>{% block title %}GastroInsight AI{% endblock %}</title>
 
+    <script>
+        (function () {
+            var theme = "dark";
+            try { theme = localStorage.getItem("gi-theme") || "dark"; } catch (e) {}
+            document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "dark");
+        })();
+    </script>
+    <meta name="theme-color" content="#05070b">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
-        .nav-group > summary { cursor: pointer; list-style: none; color: inherit; font-weight: 600; }
+        .site-header .brand a { white-space: nowrap; }
+        .main-nav { gap: 1.25rem; justify-content: flex-end; }
+        .nav-group > summary { cursor: pointer; list-style: none; color: #f1f5f9; font-weight: 500; padding: 0.25rem 0; }
+        .nav-group > summary:hover, .nav-group[open] > summary { color: #93c5fd; }
+        .logout-form { margin: 0; }
         .nav-group > summary::-webkit-details-marker { display: none; }
         .nav-group > summary::after { content: " ▾"; font-size: 0.8em; }
         .nav-menu { position: absolute; top: calc(100% + 0.5rem); left: 0; z-index: 1000; min-width: 220px;
@@ -31,7 +47,6 @@
         </div>
 
         <nav class="main-nav">
-            <a href="{% url 'core:home' %}">Inicio</a>
             {% if user.is_authenticated %}
                 <details class="nav-group">
                     <summary>Operación</summary>
@@ -78,6 +93,8 @@
                 <a href="{% url 'authentication:login' %}">Ingresar</a>
                 <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
             {% endif %}
+            <button type="button" class="theme-toggle" id="theme-toggle"
+                    aria-label="Cambiar entre tema oscuro y claro" title="Cambiar tema">☀</button>
         </nav>
     </header>
 
@@ -177,6 +194,37 @@
                 document.querySelectorAll(".nav-group[open]").forEach((group) => { group.open = false; });
             }
         });
+    </script>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const toggle = document.getElementById("theme-toggle");
+
+            function css(name) {
+                return getComputedStyle(root).getPropertyValue(name).trim();
+            }
+            function applyChartTheme() {
+                if (!window.Chart) return;
+                Chart.defaults.color = css("--muted");
+                Chart.defaults.borderColor = css("--border");
+                Object.values(Chart.instances || {}).forEach((chart) => chart.update("none"));
+            }
+            function setTheme(theme) {
+                root.setAttribute("data-theme", theme);
+                try { localStorage.setItem("gi-theme", theme); } catch (e) {}
+                if (toggle) toggle.textContent = theme === "dark" ? "☀" : "☾";
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute("content", theme === "dark" ? "#05070b" : "#f6f7fb");
+                applyChartTheme();
+            }
+            if (toggle) {
+                toggle.textContent = root.getAttribute("data-theme") === "dark" ? "☀" : "☾";
+                toggle.addEventListener("click", () => {
+                    setTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+                });
+            }
+            window.addEventListener("load", applyChartTheme);
+        })();
     </script>
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

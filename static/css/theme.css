@@ -1,0 +1,275 @@
+﻿/* =========================================================
+   GastroInsight AI · Sistema visual (oscuro / claro)
+   Se aplica con html[data-theme] para tener prioridad sobre
+   estilos anteriores y estilos propios de cada página.
+   ========================================================= */
+
+html[data-theme="dark"] {
+    --bg: #05070b;
+    --bg-glow: radial-gradient(1100px 600px at 8% -10%, rgba(34, 211, 238, 0.09), transparent 60%),
+               radial-gradient(900px 520px at 105% -5%, rgba(139, 92, 246, 0.11), transparent 60%);
+    --surface: #0b0e15;
+    --surface-2: #11151f;
+    --surface-3: #171c28;
+    --border: #1c2231;
+    --border-strong: #2a3244;
+    --text: #e6e9f0;
+    --text-strong: #ffffff;
+    --muted: #8a93a7;
+    --accent: #22d3ee;
+    --accent-2: #8b5cf6;
+    --accent-soft: rgba(34, 211, 238, 0.12);
+    --success: #34d399;
+    --success-soft: rgba(52, 211, 153, 0.13);
+    --warning: #fbbf24;
+    --warning-soft: rgba(251, 191, 36, 0.12);
+    --danger: #fb7185;
+    --danger-soft: rgba(251, 113, 133, 0.13);
+    --info: #60a5fa;
+    --info-soft: rgba(96, 165, 250, 0.13);
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --header-bg: rgba(5, 7, 11, 0.72);
+    color-scheme: dark;
+}
+
+html[data-theme="light"] {
+    --bg: #f6f7fb;
+    --bg-glow: radial-gradient(1100px 600px at 8% -10%, rgba(8, 145, 178, 0.07), transparent 60%),
+               radial-gradient(900px 520px at 105% -5%, rgba(124, 58, 237, 0.07), transparent 60%);
+    --surface: #ffffff;
+    --surface-2: #f2f4f8;
+    --surface-3: #e9edf4;
+    --border: #e2e6ee;
+    --border-strong: #cdd4e1;
+    --text: #141821;
+    --text-strong: #05070b;
+    --muted: #5c6577;
+    --accent: #0891b2;
+    --accent-2: #7c3aed;
+    --accent-soft: rgba(8, 145, 178, 0.10);
+    --success: #059669;
+    --success-soft: rgba(5, 150, 105, 0.10);
+    --warning: #b45309;
+    --warning-soft: rgba(217, 119, 6, 0.10);
+    --danger: #e11d48;
+    --danger-soft: rgba(225, 29, 72, 0.08);
+    --info: #2563eb;
+    --info-soft: rgba(37, 99, 235, 0.08);
+    --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    --header-bg: rgba(255, 255, 255, 0.78);
+    color-scheme: light;
+}
+
+/* ---------- Base ---------- */
+html[data-theme] body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-glow), var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+html[data-theme] h1, html[data-theme] h2, html[data-theme] h3, html[data-theme] h4 {
+    font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+    color: var(--text-strong);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+html[data-theme] h1 { font-size: 1.9rem; margin: 0 0 0.4rem; }
+html[data-theme] h2 { font-size: 1.2rem; margin: 0 0 0.6rem; }
+html[data-theme] h3 { font-size: 1.02rem; margin: 0 0 0.4rem; }
+html[data-theme] p { color: var(--text); }
+html[data-theme] a { color: var(--accent); }
+html[data-theme] .muted, html[data-theme] small, html[data-theme] .section-description { color: var(--muted); }
+html[data-theme] ::selection { background: var(--accent-soft); color: var(--text-strong); }
+html[data-theme] code { background: var(--surface-2); color: var(--accent); padding: 0.1rem 0.4rem; border-radius: 6px; }
+html[data-theme] hr { border: 0; border-top: 1px solid var(--border); }
+html[data-theme] .container { max-width: 1200px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+
+/* ---------- Encabezado y menú ---------- */
+html[data-theme] .site-header {
+    position: sticky; top: 0; z-index: 900;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.8rem 1.75rem;
+    background: var(--header-bg);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+}
+html[data-theme] .brand a {
+    font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1.15rem;
+    text-decoration: none; white-space: nowrap;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html[data-theme] .main-nav { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+html[data-theme] .main-nav > a,
+html[data-theme] .nav-group > summary,
+html[data-theme] .nav-logout {
+    color: var(--text); font-weight: 500; font-size: 0.9rem; font-family: inherit;
+    padding: 0.45rem 0.75rem; border-radius: 9px; border: 0; background: transparent;
+    text-decoration: none; cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+}
+html[data-theme] .main-nav > a:hover,
+html[data-theme] .nav-group > summary:hover,
+html[data-theme] .nav-group[open] > summary,
+html[data-theme] .nav-logout:hover { background: var(--surface-2); color: var(--text-strong); }
+html[data-theme] .nav-menu {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 0.35rem;
+}
+html[data-theme] .nav-menu a { color: var(--text); border-radius: 8px; padding: 0.5rem 0.75rem; }
+html[data-theme] .nav-menu a:hover { background: var(--accent-soft); color: var(--accent); }
+html[data-theme] .theme-toggle {
+    width: 38px; height: 38px; margin-left: 0.35rem; display: inline-grid; place-items: center;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text); font-size: 1rem; cursor: pointer; transition: border-color 0.15s ease;
+}
+html[data-theme] .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- Superficies ---------- */
+html[data-theme] .card,
+html[data-theme] .kpi,
+html[data-theme] .idea,
+html[data-theme] .metric-card,
+html[data-theme] .chart-box,
+html[data-theme] .corr-box,
+html[data-theme] .sales-box,
+html[data-theme] .camera-card,
+html[data-theme] .empty-state {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    color: var(--text); box-shadow: none;
+}
+html[data-theme] .card { padding: 1.4rem 1.5rem; margin-bottom: 1.25rem; }
+html[data-theme] .kpi, html[data-theme] .idea, html[data-theme] .metric-card {
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+html[data-theme] .kpi:hover, html[data-theme] .idea:hover, html[data-theme] .metric-card:hover {
+    border-color: var(--border-strong); transform: translateY(-2px);
+}
+html[data-theme] .kpi-label, html[data-theme] .metric-label, html[data-theme] .summary-label {
+    color: var(--muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em;
+}
+html[data-theme] .kpi-value, html[data-theme] .metric-value {
+    font-family: "Space Grotesk", sans-serif; color: var(--text-strong); font-weight: 700;
+}
+html[data-theme] .kpi-note, html[data-theme] .metric-note { color: var(--muted); }
+html[data-theme] .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1rem 0; }
+html[data-theme] .metric-card { padding: 1.1rem 1.2rem; }
+html[data-theme] .metric-card strong { color: var(--text-strong); font-size: 1.05rem; }
+html[data-theme] .page-header {
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+}
+
+/* Tarjetas de ideas (inicio) */
+html[data-theme] .idea h3 { color: var(--text-strong); }
+html[data-theme] .idea-why { color: var(--muted); }
+html[data-theme] .idea-action { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+html[data-theme] .idea-impact { background: var(--success-soft); color: var(--success); }
+html[data-theme] .idea-section > p, html[data-theme] .idea-empty, html[data-theme] .footnote { color: var(--muted); }
+
+/* ---------- Botones ---------- */
+html[data-theme] .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+    padding: 0.6rem 1.05rem; border-radius: 10px; font: 600 0.9rem/1.2 "Inter", system-ui, sans-serif;
+    border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text);
+    text-decoration: none; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+html[data-theme] .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+html[data-theme] .btn-primary, html[data-theme] .btn-start {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; border-color: transparent;
+    box-shadow: 0 8px 22px rgba(34, 211, 238, 0.18);
+}
+html[data-theme] .btn-primary:hover, html[data-theme] .btn-start:hover { box-shadow: 0 10px 28px rgba(139, 92, 246, 0.28); }
+html[data-theme] .btn-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+html[data-theme] .btn-pdf { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+html[data-theme] .btn-small { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+/* ---------- Formularios ---------- */
+html[data-theme] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme] select,
+html[data-theme] textarea {
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.55rem 0.75rem; font: inherit; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+html[data-theme] input:focus, html[data-theme] select:focus, html[data-theme] textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+}
+html[data-theme] input[type="checkbox"], html[data-theme] input[type="radio"] { accent-color: var(--accent); }
+html[data-theme] label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+html[data-theme] .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+html[data-theme] .field-error, html[data-theme] .errorlist { color: var(--danger); font-size: 0.82rem; }
+
+/* ---------- Tablas ---------- */
+html[data-theme] table { width: 100%; border-collapse: collapse; }
+html[data-theme] th,
+html[data-theme] .dashboard-table th,
+html[data-theme] .corr-table th {
+    background: var(--surface-2); color: var(--muted); font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; text-align: left;
+    padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--border);
+}
+html[data-theme] td,
+html[data-theme] .dashboard-table td,
+html[data-theme] .corr-table td {
+    padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--border); color: var(--text);
+}
+html[data-theme] tbody tr:hover td { background: var(--surface-2); }
+html[data-theme] .table-responsive { overflow-x: auto; }
+
+/* ---------- Mensajes y avisos ---------- */
+html[data-theme] .message, html[data-theme] .alert {
+    padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+}
+html[data-theme] .message-success, html[data-theme] .alert-success { background: var(--success-soft); color: var(--success); border-color: transparent; }
+html[data-theme] .message-error, html[data-theme] .alert-error, html[data-theme] .alert-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+html[data-theme] .message-warning, html[data-theme] .alert-warning { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+html[data-theme] .message-info, html[data-theme] .alert-info { background: var(--info-soft); color: var(--info); border-color: transparent; }
+html[data-theme] .warning-box, html[data-theme] .corr-warning, html[data-theme] .now-box {
+    background: var(--warning-soft); color: var(--text); border: 1px solid transparent;
+    border-left: 3px solid var(--warning); border-radius: 12px;
+}
+html[data-theme] .now-box h2 { color: var(--warning); }
+html[data-theme] .now-box li { color: var(--text); }
+html[data-theme] .sig-yes { color: var(--success); }
+html[data-theme] .sig-no { color: var(--muted); }
+
+/* ---------- Estados ---------- */
+html[data-theme] .status, html[data-theme] .status-badge {
+    display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 600; background: var(--surface-3); color: var(--muted);
+}
+html[data-theme] .status-running, html[data-theme] .status-open { background: var(--info-soft); color: var(--info); }
+html[data-theme] .status-completed, html[data-theme] .status-paid { background: var(--success-soft); color: var(--success); }
+html[data-theme] .status-pending, html[data-theme] .status-confirmed { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .status-failed, html[data-theme] .status-cancelled { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- Asistente flotante ---------- */
+html[data-theme] .assistant-widget-toggle {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; border: 0;
+    border-radius: 999px; padding: 0.8rem 1.25rem; font-weight: 600; box-shadow: var(--shadow); cursor: pointer;
+}
+html[data-theme] .assistant-widget-panel {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: var(--shadow);
+}
+html[data-theme] .assistant-widget-header { border-bottom: 1px solid var(--border); }
+html[data-theme] .assistant-widget-close { background: transparent; border: 0; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+
+/* ---------- Varios ---------- */
+html[data-theme] .camera-preview { max-width: 100%; border-radius: 12px; border: 1px solid var(--border); }
+html[data-theme] *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+html[data-theme] ::-webkit-scrollbar { width: 10px; height: 10px; }
+html[data-theme] ::-webkit-scrollbar-track { background: var(--bg); }
+html[data-theme] ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+
+@media (max-width: 900px) {
+    html[data-theme] .site-header { flex-direction: column; align-items: flex-start; padding: 0.8rem 1rem; }
+    html[data-theme] .main-nav { justify-content: flex-start; }
+    html[data-theme] .container { padding: 1.25rem 1rem 3rem; }
+    html[data-theme] h1 { font-size: 1.55rem; }
+}
