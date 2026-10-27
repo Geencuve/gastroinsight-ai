@@ -26,3 +26,9 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+elif settings.SERVE_MEDIA:
+    # Publicación temporal (túnel): sirve las fotos de los platos sin modo DEBUG.
+    from django.urls import re_path
+    from django.views.static import serve
+
+    urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
