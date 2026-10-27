@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load gi_format %}
 
 {% block title %}
     Pedido #{{ order.id }} | GastroInsight AI
@@ -52,18 +53,18 @@
 
         <div>
             <span class="summary-label">Subtotal</span>
-            <strong>${{ order.subtotal|floatformat:0 }}</strong>
+            <strong>{{ order.subtotal|clp }}</strong>
         </div>
 
         <div>
             <span class="summary-label">Descuento</span>
-            <strong>${{ order.discount_amount|floatformat:0 }}</strong>
+            <strong>{{ order.discount_amount|clp }}</strong>
         </div>
 
         <div>
             <span class="summary-label">Total</span>
             <strong class="order-total">
-                ${{ order.total|floatformat:0 }}
+                {{ order.total|clp }}
             </strong>
         </div>
 
@@ -119,8 +120,8 @@
                         <tr>
                             <td>{{ item.dish_name }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>${{ item.unit_price|floatformat:0 }}</td>
-                            <td>${{ item.line_total|floatformat:0 }}</td>
+                            <td>{{ item.unit_price|clp }}</td>
+                            <td>{{ item.line_total|clp }}</td>
 
                             <td>
                                 {% if item.notes %}

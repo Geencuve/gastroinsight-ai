@@ -1,4 +1,5 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
+{% load gi_format %}
 
 {% block title %}Panel de correlación | GastroInsight AI{% endblock %}
 
@@ -157,7 +158,7 @@
                             <td>{{ row.positive_pct|floatformat:1 }}</td>
                             <td>{{ row.negative_pct|floatformat:1 }}</td>
                             <td>{{ row.neutral_pct|floatformat:1 }}</td>
-                            <td>${{ row.sales|floatformat:"0g" }}</td>
+                            <td>{{ row.sales|clp }}</td>
                             <td>{% if row.rating is not None %}{{ row.rating|floatformat:1 }}/5{% else %}—{% endif %}</td>
                             <td>{% if row.synthetic %}Sintético{% else %}Real{% endif %}</td>
                         </tr>

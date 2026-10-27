@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load gi_format %}
 
 {% block title %}Dashboard | GastroInsight AI{% endblock %}
 
@@ -217,7 +218,7 @@
 <section class="metrics-grid">
     <article class="metric-card">
         <p class="metric-label">Ventas totales del día</p>
-        <p class="metric-value">${{ sales_summary.revenue|default:0|floatformat:"0g" }}</p>
+        <p class="metric-value">{{ sales_summary.revenue|clp }}</p>
         <p class="metric-note">Pedidos pagados en la fecha seleccionada.</p>
     </article>
 
@@ -229,7 +230,7 @@
 
     <article class="metric-card">
         <p class="metric-label">Ticket promedio</p>
-        <p class="metric-value">${{ sales_summary.average_ticket|default:0|floatformat:"0g" }}</p>
+        <p class="metric-value">{{ sales_summary.average_ticket|clp }}</p>
         <p class="metric-note">Monto promedio por pedido pagado.</p>
     </article>
 
@@ -262,7 +263,7 @@
                         <tr>
                             <td>{{ item.dish_name }}</td>
                             <td>{{ item.units }}</td>
-                            <td>${{ item.revenue|floatformat:"0g" }}</td>
+                            <td>{{ item.revenue|clp }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

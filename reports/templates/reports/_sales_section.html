@@ -1,3 +1,4 @@
+{% load gi_format %}
 <style>
     .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
     .sales-box { padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; }
@@ -12,7 +13,7 @@
     <div class="metrics-grid">
         <article class="metric-card">
             <p class="metric-label">Ventas totales</p>
-            <p class="metric-value">${{ sales_summary.revenue|default:0|floatformat:"0g" }}</p>
+            <p class="metric-value">{{ sales_summary.revenue|clp }}</p>
         </article>
         <article class="metric-card">
             <p class="metric-label">Pedidos pagados</p>
@@ -20,11 +21,11 @@
         </article>
         <article class="metric-card">
             <p class="metric-label">Ticket promedio</p>
-            <p class="metric-value">${{ sales_summary.average_ticket|default:0|floatformat:"0g" }}</p>
+            <p class="metric-value">{{ sales_summary.average_ticket|clp }}</p>
         </article>
         <article class="metric-card">
             <p class="metric-label">Descuentos aplicados</p>
-            <p class="metric-value">${{ sales_summary.discounts|default:0|floatformat:"0g" }}</p>
+            <p class="metric-value">{{ sales_summary.discounts|clp }}</p>
         </article>
         <article class="metric-card">
             <p class="metric-label">Pedidos anulados</p>
@@ -52,7 +53,7 @@
                             <tr>
                                 <td>{{ item.dish_name }}</td>
                                 <td>{{ item.units }}</td>
-                                <td>${{ item.revenue|floatformat:"0g" }}</td>
+                                <td>{{ item.revenue|clp }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -72,7 +73,7 @@
                             <tr>
                                 <td>{{ item.method }}</td>
                                 <td>{{ item.orders_count }}</td>
-                                <td>${{ item.revenue|floatformat:"0g" }}</td>
+                                <td>{{ item.revenue|clp }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
