@@ -85,6 +85,9 @@
         <article class="metric-card"><span class="metric-label">Ocupación promedio</span><strong>{% if stats.average_occupancy is not None %}{{ stats.average_occupancy|floatformat:1 }} personas{% else %}—{% endif %}</strong></article>
         <article class="metric-card"><span class="metric-label">Presencia</span><strong>{% if stats.presence_pct is not None %}{{ stats.presence_pct|floatformat:0 }}% del tiempo{% else %}—{% endif %}</strong></article>
         <article class="metric-card"><span class="metric-label">Actividad promedio</span><strong>{% if stats.average_activity is not None %}{{ stats.average_activity|floatformat:0 }}/100{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Índice de experiencia observable</span><strong>{% if stats.average_index is not None %}{{ stats.average_index|floatformat:0 }}/100{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Valencia de expresiones</span><strong>{% if stats.average_valence is not None %}{{ stats.average_valence|floatformat:2 }}{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Búsqueda de atención</span><strong>{% if stats.attention_pct is not None %}{{ stats.attention_pct|floatformat:0 }}% de los rostros{% else %}—{% endif %}</strong></article>
     </div>
     {% if timeline_labels %}
         <div style="position: relative; height: 240px;"><canvas id="behaviorChart"></canvas></div>
@@ -156,6 +159,7 @@
     {{ timeline_labels|json_script:"tl-labels" }}
     {{ timeline_occupancy|json_script:"tl-occupancy" }}
     {{ timeline_activity|json_script:"tl-activity" }}
+    {{ timeline_index|json_script:"tl-index" }}
     <script>
         new Chart(document.getElementById("behaviorChart"), {
             type: "line",
@@ -166,6 +170,8 @@
                       borderColor: "#22d3ee", backgroundColor: "rgba(34, 211, 238, 0.15)", fill: true, tension: 0.3, pointRadius: 0, yAxisID: "y" },
                     { label: "Actividad (0-100)", data: JSON.parse(document.getElementById("tl-activity").textContent),
                       borderColor: "#8b5cf6", tension: 0.3, pointRadius: 0, yAxisID: "y1" },
+                    { label: "Índice de experiencia (0-100)", data: JSON.parse(document.getElementById("tl-index").textContent),
+                      borderColor: "#34d399", borderDash: [6, 4], tension: 0.3, pointRadius: 0, yAxisID: "y1" },
                 ],
             },
             options: {
@@ -173,7 +179,7 @@
                 scales: {
                     y: { beginAtZero: true, title: { display: true, text: "Personas" } },
                     y1: { beginAtZero: true, max: 100, position: "right", grid: { drawOnChartArea: false },
-                          title: { display: true, text: "Actividad" } },
+                          title: { display: true, text: "Actividad / Índice" } },
                 },
             },
         });

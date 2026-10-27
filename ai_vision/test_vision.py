@@ -93,3 +93,20 @@ class VisionPipelineTests(TestCase):
         second = pipeline.analyze(np.full((480, 640, 3), 255, dtype=np.uint8), classify=False)
         self.assertIsNone(first["activity"])
         self.assertGreater(second["activity"], 50)
+
+    def test_ventana_calcula_valencia_y_atencion(self):
+        window = EventWindow()
+        face = lambda valence, away: {"emotion": "happy", "emotion_confidence": 0.8, "detector_score": 0.9,
+                                      "valence": valence, "looking_away": away}
+        window.add({"faces_count": 2, "processing_time_ms": 30, "faces": [face(0.6, False), face(0.2, True)]})
+        window.add({"faces_count": 1, "processing_time_ms": 30, "faces": [face(None, False)]})
+        summary = window.summary()
+        self.assertAlmostEqual(summary["valence"], 0.4)
+        self.assertAlmostEqual(summary["attention_seeking"], 1 / 3)
+
+    def test_indice_de_experiencia(self):
+        from ai_vision.services.experience import experience_index, valence_from_distribution
+        self.assertEqual(experience_index(0.0, 0.0, 0), 70.0)
+        self.assertGreater(experience_index(0.8, 0.0, 0), experience_index(-0.5, 0.4, 30))
+        self.assertIsNone(experience_index(None, None, 5))
+        self.assertAlmostEqual(valence_from_distribution({"happy": 1, "neutral": 1}), 0.5)

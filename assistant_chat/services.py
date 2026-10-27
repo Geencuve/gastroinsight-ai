@@ -38,6 +38,7 @@ UNSAFE_PHRASES = (
 
 STAFF_RULES = [
     ("help", ("que puedes hacer", "ayuda", "como funcionas", "que sabes hacer")),
+    ("live_status", ("en vivo", "tiempo real", "como estan las mesas", "mesas ahora", "monitor")),
     ("advice", ("recomienda", "recomendacion", "consejo", "que hago", "que deberia", "como mejoro",
                 "como mejorar", "vender mas", "aumentar ventas", "marketing", "promocion", "promocionar",
                 "ideas", "oportunidad", "sugerencia", "estrategia")),
@@ -525,6 +526,23 @@ def answer_dish(venues, dish, message):
     ], "dish": dish.name}
 
 
+def answer_live(venues):
+    from ai_vision.services.live import build_live_state
+
+    state = build_live_state(venues)
+    links = [_link("Abrir monitor en vivo", "ai_vision:monitor")]
+    if not state["cards"]:
+        return "No hay mesas con atención abierta ni cámaras asignadas en este momento.", {"links": links}
+    s = state["summary"]
+    ieo = f"{s['average_ieo']:.0f}" if s["average_ieo"] is not None else "sin lecturas"
+    text = f"📡 Ahora: {s['live_tables']} de {s['tables']} mesas con lectura en vivo · IEO promedio {ieo} · {s['alerts']} alerta(s)."
+    for card in state["cards"][:6]:
+        value = f"IEO {card['ieo']:.0f}" if card["ieo"] is not None else "sin lectura"
+        detail = "; ".join(card["reasons"]) or "sin alertas"
+        text += f"\n• Mesa {card['table']}: {value} · {detail}"
+    return text, {"links": links}
+
+
 def answer_daily_summary(venues):
     summary = build_home_summary(venues)
     insights = build_insights(venues)
@@ -554,7 +572,7 @@ def build_staff_response(user, message):
         return ("No puedo revelar credenciales, configuraciones internas ni ejecutar acciones destructivas. "
                 "Puedo ayudarte con indicadores y recomendaciones de tus locales.", intent, {})
 
-    if intent not in ("advice", "top_dishes", "low_dishes", "help", "pending_orders", "weekday_sales"):
+    if intent not in ("advice", "top_dishes", "low_dishes", "help", "pending_orders", "weekday_sales", "live_status"):
         dish = find_dish(venues, message)
         if dish:
             text, meta = answer_dish(venues, dish, message)
@@ -562,6 +580,7 @@ def build_staff_response(user, message):
 
     handlers = {
         "help": lambda: answer_help(),
+        "live_status": lambda: answer_live(venues),
         "advice": lambda: answer_advice(venues, message),
         "sales_summary": lambda: answer_sales(venues, message),
         "average_ticket": lambda: answer_ticket(venues, message),

@@ -219,6 +219,9 @@ def session_detail(request, session_id):
         average_occupancy=Avg("occupancy"),
         average_presence=Avg("presence_ratio"),
         average_activity=Avg("activity_level"),
+        average_valence=Avg("valence"),
+        average_attention=Avg("attention_seeking"),
+        average_index=Avg("experience_index"),
     )
     stats["under_200_percent"] = (
         100 * stats["under_200"] / stats["events_count"] if stats["events_count"] else None
@@ -242,12 +245,15 @@ def session_detail(request, session_id):
         for key, value in distribution.most_common()
     ]
 
+    stats["attention_pct"] = (
+        float(stats["average_attention"]) * 100 if stats["average_attention"] is not None else None
+    )
     stats["presence_pct"] = (
         float(stats["average_presence"]) * 100 if stats["average_presence"] is not None else None
     )
     timeline = list(
         events.exclude(occupancy__isnull=True).order_by("detected_at")
-        .values_list("detected_at", "occupancy", "activity_level")[:400]
+        .values_list("detected_at", "occupancy", "activity_level", "experience_index")[:400]
     )
 
     linked_sessions = (
@@ -269,9 +275,10 @@ def session_detail(request, session_id):
             "chart_labels": [row["label"] for row in emotion_rows],
             "chart_values": [row["count"] for row in emotion_rows],
             "linked_sessions": linked_sessions,
-            "timeline_labels": [timezone.localtime(t).strftime("%H:%M:%S") for t, _, _ in timeline],
-            "timeline_occupancy": [float(o) for _, o, _ in timeline],
-            "timeline_activity": [float(a) if a is not None else None for _, _, a in timeline],
+            "timeline_labels": [timezone.localtime(t).strftime("%H:%M:%S") for t, _, _, _ in timeline],
+            "timeline_occupancy": [float(o) for _, o, _, _ in timeline],
+            "timeline_activity": [float(a) if a is not None else None for _, _, a, _ in timeline],
+            "timeline_index": [float(i) if i is not None else None for _, _, _, i in timeline],
         },
     )
 

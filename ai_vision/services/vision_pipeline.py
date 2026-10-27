@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pipeline de visión no biométrica de GastroInsight AI.
 
 - Detección de rostros: YuNet (CNN, OpenCV Zoo) sobre una imagen reducida.
@@ -32,6 +32,11 @@ TO_EMOTION = {
     "neutral": "neutral", "happiness": "happy", "surprise": "surprised", "sadness": "sad",
     "anger": "angry", "disgust": "disgust", "fear": "fear", "contempt": "contempt",
 }
+
+
+# Peso de cada expresión FER+ en la valencia (-1 negativa, +1 positiva)
+VALENCE_VECTOR = np.array([0.0, 1.0, 0.3, -0.8, -1.0, -0.9, -0.7, -0.8])
+LOOKING_AWAY_YAW = 0.35  # desplazamiento de la nariz respecto del centro de los ojos
 
 
 class ModelsNotAvailable(RuntimeError):
@@ -93,19 +98,27 @@ class VisionPipeline:
             x1, y1 = min(width, x + w), min(height, y + h)
             if x1 - x0 < 20 or y1 - y0 < 20:
                 continue
-            emotion, emotion_confidence = None, None
+            # Dirección de la cabeza con los puntos faciales de YuNet (ojos y nariz)
+            right_eye_x, left_eye_x, nose_x = face[4] / scale, face[6] / scale, face[8] / scale
+            eye_distance = abs(left_eye_x - right_eye_x) or 1.0
+            yaw = (nose_x - (right_eye_x + left_eye_x) / 2) / eye_distance
+            emotion, emotion_confidence, valence = None, None, None
             if classify:
                 crop = cv2.resize(gray[y0:y1, x0:x1], (64, 64))
                 self.fer.setInput(crop.reshape(1, 1, 64, 64).astype(np.float32))
                 probs = _softmax(self.fer.forward()[0])
                 index = int(np.argmax(probs))
                 emotion, emotion_confidence = TO_EMOTION[FERPLUS_LABELS[index]], float(probs[index])
+                valence = float(np.clip(np.dot(probs, VALENCE_VECTOR), -1.0, 1.0))
                 del crop
             results.append({
                 "box": {"x": x0, "y": y0, "width": x1 - x0, "height": y1 - y0},
                 "detector_score": float(face[14]),
                 "emotion": emotion,
                 "emotion_confidence": emotion_confidence,
+                "valence": valence,
+                "yaw": float(yaw),
+                "looking_away": bool(abs(yaw) > LOOKING_AWAY_YAW),
             })
         del gray, small_gray, small
 
@@ -130,6 +143,9 @@ class EventWindow:
         self.faces_per_frame = []
         self.frames_with_faces = 0
         self.activity = []
+        self.valences = []
+        self.faces_seen = 0
+        self.faces_away = 0
         self.emotions = Counter()
         self.emotion_confidences = defaultdict(list)
         self.detector_scores = []
@@ -147,6 +163,11 @@ class EventWindow:
         self.times.append(result["processing_time_ms"])
         for face in result["faces"]:
             self.detector_scores.append(face["detector_score"])
+            self.faces_seen += 1
+            if face.get("looking_away"):
+                self.faces_away += 1
+            if face.get("valence") is not None:
+                self.valences.append(face["valence"])
             if face.get("emotion"):
                 self.emotions[face["emotion"]] += 1
                 self.emotion_confidences[face["emotion"]].append(face["emotion_confidence"])
@@ -168,4 +189,6 @@ class EventWindow:
             "occupancy": float(median(self.faces_per_frame)) if self.faces_per_frame else None,
             "presence_ratio": self.frames_with_faces / self.frames if self.frames else None,
             "activity_level": float(np.mean(self.activity)) if self.activity else None,
+            "valence": float(np.mean(self.valences)) if self.valences else None,
+            "attention_seeking": self.faces_away / self.faces_seen if self.faces_seen else None,
         }

@@ -1,4 +1,4 @@
-﻿"""Lanza el análisis visual como proceso en segundo plano desde la interfaz."""
+"""Lanza el análisis visual como proceso en segundo plano desde la interfaz."""
 import os
 import subprocess
 import sys
@@ -25,6 +25,21 @@ def launch_analysis(session_id, preview=True, duration=0):
     if sys.platform == "win32" and not preview:
         kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
 
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        process = subprocess.Popen(args, stdout=log_file, **kwargs)
+    return process.pid, log_path
+
+
+def launch_simulation(minutes=10):
+    """Inicia simulate_live en segundo plano (datos sintéticos de las cámaras demo)."""
+    LOG_DIR.mkdir(exist_ok=True)
+    log_path = LOG_DIR / "simulacion_en_vivo.log"
+    args = [sys.executable, str(Path(settings.BASE_DIR) / "manage.py"), "simulate_live", "--minutes", str(minutes)]
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    kwargs = {"cwd": str(settings.BASE_DIR), "env": env, "stderr": subprocess.STDOUT}
+    if sys.platform == "win32":
+        kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
     with open(log_path, "a", encoding="utf-8") as log_file:
         process = subprocess.Popen(args, stdout=log_file, **kwargs)
     return process.pid, log_path

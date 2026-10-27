@@ -1,0 +1,123 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Monitor en vivo | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .live-summary { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.5rem 0 1.25rem; }
+    .live-chip { padding: 0.55rem 0.95rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; }
+    .live-chip strong { font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; margin-left: 0.3rem; }
+    .live-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--success); margin-right: 0.35rem; animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.25; } 100% { opacity: 1; } }
+    .live-alerts { margin-bottom: 1.25rem; }
+    .live-alerts li { margin: 0.25rem 0; }
+    .live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
+    .live-card { display: flex; flex-direction: column; gap: 0.7rem; padding: 1.1rem; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--success); }
+    .live-card.level-atencion { border-top-color: var(--warning); }
+    .live-card.level-alerta { border-top-color: var(--danger); box-shadow: 0 0 0 1px var(--danger-soft); }
+    .live-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .live-head h3 { margin: 0; font-size: 1.15rem; }
+    .live-meta { color: var(--muted); font-size: 0.78rem; }
+    .live-body { display: flex; gap: 1rem; align-items: center; }
+    .gauge { --v: 0; --c: var(--muted); width: 92px; height: 92px; border-radius: 50%; flex: none;
+             background: conic-gradient(var(--c) calc(var(--v) * 1%), var(--surface-3) 0); display: grid; place-items: center; }
+    .gauge-inner { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; text-align: center; }
+    .gauge-value { font-family: "Space Grotesk", sans-serif; font-size: 1.45rem; font-weight: 700; color: var(--text-strong); line-height: 1; }
+    .gauge-label { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; }
+    .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 0.9rem; font-size: 0.84rem; color: var(--muted); }
+    .live-stats b { color: var(--text); font-weight: 600; }
+    .live-reasons { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .reason { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: var(--warning-soft); color: var(--warning); }
+    .level-alerta .reason { background: var(--danger-soft); color: var(--danger); }
+    .trend-up { color: var(--success); } .trend-down { color: var(--danger); }
+    .spark { width: 100%; height: 34px; }
+    .tag-synthetic { font-size: 0.68rem; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--surface-3); color: var(--muted); margin-left: 0.35rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>📡 Monitor en vivo</h1>
+        <p class="muted">Índice de Experiencia Observable (IEO) y señales agregadas por mesa. Se actualiza cada 4 segundos. No identifica personas.</p>
+    </div>
+    {% if can_operate %}
+        <form method="post" action="{% url 'ai_vision:monitor_simulate' %}">
+            {% csrf_token %}
+            <button class="btn btn-secondary" type="submit" {% if simulating %}disabled{% endif %}>
+                {% if simulating %}Simulación en curso…{% else %}▶ Simular mesas demo (10 min){% endif %}
+            </button>
+        </form>
+    {% endif %}
+</section>
+
+<div class="live-summary" id="live-summary"></div>
+<section class="now-box live-alerts" id="live-alerts" hidden><h2>⚠️ Alertas en vivo</h2><ul id="live-alert-list"></ul></section>
+<div class="live-grid" id="live-grid"><p class="muted">Cargando mesas…</p></div>
+
+<p class="footnote" style="margin-top: 1.25rem;">
+    El IEO es un indicador exploratorio (60% valencia de expresiones, 25% búsqueda de atención, 15% tiempo sin atención).
+    No mide la satisfacción directamente: su relación con la valoración voluntaria se evalúa en el panel de correlación.
+</p>
+
+<script>
+    (function () {
+        const url = "{% url 'ai_vision:monitor_data' %}";
+        const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+        const fmt = (v, d = 0, suffix = "") => (v === null || v === undefined) ? "—" : Number(v).toFixed(d).replace(".", ",") + suffix;
+        const color = (v) => v === null ? "var(--muted)" : v >= 65 ? "var(--success)" : v >= 45 ? "var(--warning)" : "var(--danger)";
+
+        function spark(values) {
+            if (!values || values.length < 2) return "";
+            const w = 240, h = 34;
+            const points = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - (v / 100) * h}`).join(" ");
+            return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${points}" fill="none" stroke="${color(values[values.length - 1])}" stroke-width="2"/></svg>`;
+        }
+
+        function card(c) {
+            const trend = c.ieo_trend === null ? "" :
+                `<span class="${c.ieo_trend >= 0 ? "trend-up" : "trend-down"}">${c.ieo_trend >= 0 ? "▲" : "▼"} ${fmt(Math.abs(c.ieo_trend), 1)}</span>`;
+            const status = c.live ? `<span class="live-dot"></span>en vivo` :
+                (c.has_camera ? (c.seconds_since === null ? "sin lecturas" : `última lectura hace ${Math.round(c.seconds_since / 60)} min`) : "sin cámara");
+            return `<article class="live-card level-${c.level}">
+                <div class="live-head"><h3>Mesa ${esc(c.table)}${c.synthetic ? '<span class="tag-synthetic">sintético</span>' : ""}</h3>
+                    <span class="live-meta">${status}</span></div>
+                <div class="live-body">
+                    <div class="gauge" style="--v:${c.ieo ?? 0};--c:${color(c.ieo)}"><div class="gauge-inner">
+                        <div><div class="gauge-value">${fmt(c.ieo)}</div><div class="gauge-label">IEO</div></div></div></div>
+                    <div class="live-stats">
+                        <span>Personas <b>${fmt(c.occupancy, 1)}</b></span><span>Valencia <b>${fmt(c.valence, 2)}</b></span>
+                        <span>Atención <b>${fmt(c.attention_pct, 0, "%")}</b></span><span>Actividad <b>${fmt(c.activity)}</b></span>
+                        <span>Sentados <b>${fmt(c.seated_min, 0, " min")}</b></span><span>Sin atención <b>${fmt(c.wait_min, 0, " min")}</b></span>
+                        <span>Por cobrar <b>${esc(c.pending_count)} · ${esc(c.pending_total)}</b></span><span>Tendencia <b>${trend || "—"}</b></span>
+                    </div>
+                </div>
+                ${spark(c.spark)}
+                ${c.reasons.length ? `<div class="live-reasons">${c.reasons.map((r) => `<span class="reason">${esc(r)}</span>`).join("")}</div>` : ""}
+            </article>`;
+        }
+
+        async function refresh() {
+            try {
+                const response = await fetch(url, { credentials: "same-origin" });
+                if (!response.ok) return;
+                const data = await response.json();
+                const s = data.summary;
+                document.getElementById("live-summary").innerHTML =
+                    `<span class="live-chip">Mesas en vivo<strong>${s.live_tables}/${s.tables}</strong></span>
+                     <span class="live-chip">IEO promedio<strong>${fmt(s.average_ieo, 0)}</strong></span>
+                     <span class="live-chip">Alertas<strong>${s.alerts}</strong></span>
+                     <span class="live-chip">Actualizado<strong>${esc(data.generated_at)}</strong></span>`;
+                const alertsBox = document.getElementById("live-alerts");
+                alertsBox.hidden = data.alerts.length === 0;
+                document.getElementById("live-alert-list").innerHTML =
+                    data.alerts.map((a) => `<li><strong>Mesa ${esc(a.table)}:</strong> ${esc(a.text)}</li>`).join("");
+                document.getElementById("live-grid").innerHTML =
+                    data.cards.length ? data.cards.map(card).join("") : '<p class="muted">No hay mesas con atención abierta ni cámaras asignadas.</p>';
+            } catch (error) { /* se reintenta en el siguiente ciclo */ }
+        }
+        refresh();
+        setInterval(refresh, 4000);
+    })();
+</script>
+{% endblock %}

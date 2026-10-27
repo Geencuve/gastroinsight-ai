@@ -148,6 +148,18 @@ class DetectionEvent(models.Model):
         max_digits=5, decimal_places=2, null=True, blank=True,
         verbose_name="Nivel de actividad (0-100)",
     )
+    valence = models.DecimalField(
+        max_digits=5, decimal_places=4, null=True, blank=True,
+        verbose_name="Valencia de las expresiones (-1 a 1)",
+    )
+    attention_seeking = models.DecimalField(
+        max_digits=5, decimal_places=4, null=True, blank=True,
+        verbose_name="Proporción de rostros buscando atención",
+    )
+    experience_index = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="Índice de Experiencia Observable (0-100)",
+    )
     emotion_distribution = models.JSONField(
         default=dict,
         blank=True,

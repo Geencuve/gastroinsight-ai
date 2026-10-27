@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from ai_vision.models import AnalysisSession, DetectionEvent
+from ai_vision.services.experience import experience_index, valence_from_distribution
 from cameras.models import Camera
 from operations.models import RestaurantTable, ServiceSession
 from venues.models import Venue
@@ -99,6 +100,10 @@ class Command(BaseCommand):
                         else:
                             distribution["neutral"] += 1
                     has_faces = bool(distribution)
+                    valence = valence_from_distribution(distribution)
+                    attention = min(0.9, max(0.0, 0.08 + 0.10 * effect * excess + rng.gauss(0, 0.04)))
+                    elapsed = (moment - start).total_seconds() / 60
+                    index = experience_index(valence, attention if has_faces else None, max(0.0, elapsed - 20))
                     events.append(DetectionEvent(
                         session=analysis, detected_at=moment, faces_count=faces,
                         estimated_emotion=distribution.most_common(1)[0][0] if has_faces else "unknown",
@@ -107,6 +112,9 @@ class Command(BaseCommand):
                         emotion_distribution=dict(distribution),
                         processing_time_ms=rng.randint(32, 70),
                         occupancy=Decimal(str(round(max(0.0, rng.gauss(service.guests_count * 0.85, 0.5)), 2))),
+                        valence=Decimal(str(round(valence, 4))) if valence is not None else None,
+                        attention_seeking=Decimal(str(round(attention, 4))) if has_faces else None,
+                        experience_index=Decimal(str(index)) if index is not None else None,
                         presence_ratio=Decimal(str(round(rng.uniform(0.72, 0.98), 4))),
                         activity_level=Decimal(str(round(min(100.0, max(3.0, rng.gauss(18 + 10 * effect * max(0.0, -excess), 6))), 2))),
                         table=camera.table, service_session=service,

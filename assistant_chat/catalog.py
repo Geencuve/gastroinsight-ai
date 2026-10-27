@@ -1,4 +1,4 @@
-﻿CUSTOMER_SUGGESTIONS = [
+CUSTOMER_SUGGESTIONS = [
     {"label": "Ver carta", "prompt": "¿Qué platos tienen?", "intent": "customer_menu"},
     {"label": "¿Qué me recomiendan?", "prompt": "¿Qué me recomiendan?", "intent": "customer_recommended_dishes"},
     {"label": "Postres y bebidas", "prompt": "¿Qué postres y bebidas tienen?", "intent": "customer_desserts_drinks"},
@@ -8,6 +8,7 @@
 ]
 
 STAFF_SUGGESTIONS = [
+    {"label": "📡 Mesas en vivo", "prompt": "¿Cómo están las mesas ahora?", "intent": "live_status"},
     {"label": "📊 Resumen de hoy", "prompt": "Dame el resumen de hoy", "intent": "daily_summary"},
     {"label": "💰 Ventas de la semana", "prompt": "¿Cuánto vendimos esta semana?", "intent": "sales_summary"},
     {"label": "📣 ¿Qué promociono?", "prompt": "¿Qué debería promocionar? Dame ideas de marketing", "intent": "advice"},

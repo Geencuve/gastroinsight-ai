@@ -29,7 +29,7 @@ logging.disable(logging.WARNING)
 
 SKIP = ("logout", "delete", "eliminar", "stream", "feed", "video", "live", "start", "stop", "preview", "pay",
         "confirm", "cancel", "close", "resolve", "review", "continue", "message", "add", "discount", "image",
-        "create_session")
+        "create_session", "simulate")
 ISSUES = [
     (r">\s*None\s*<", "Se muestra 'None'"),
     (r"\$None|None\s*%", "Monto o porcentaje 'None'"),

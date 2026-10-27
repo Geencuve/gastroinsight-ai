@@ -1,4 +1,4 @@
-﻿import csv
+import csv
 from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
@@ -112,13 +112,13 @@ def correlation_csv(request):
         ])
     writer.writerow([])
     writer.writerow(["Sesión", "Mesa", "Inicio", "Ts (min)", "Comensales", "Detecciones",
-                     "% positivas", "% negativas", "% neutral", "Ventas (CLP)", "Valoración", "Origen"])
+                     "% positivas", "% negativas", "% neutral", "Ventas (CLP)", "Valoración", "IEO", "Origen"])
     for row in context["rows"]:
         writer.writerow([
             row["session_id"], row["table"], timezone.localtime(row["started_at"]).strftime("%d-%m-%Y %H:%M"),
             _fmt(row["ts_minutes"], 1), row["guests"], row["detections"],
             _fmt(row["positive_pct"], 2), _fmt(row["negative_pct"], 2), _fmt(row["neutral_pct"], 2),
-            int(row["sales"]), _fmt(row["rating"], 2), "Sintético" if row["synthetic"] else "Real",
+            int(row["sales"]), _fmt(row["rating"], 2), _fmt(row["ieo"], 1), "Sintético" if row["synthetic"] else "Real",
         ])
 
     venue = context["selected_venue"] or context["venues"].first()

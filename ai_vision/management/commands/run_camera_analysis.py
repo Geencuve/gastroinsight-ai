@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from ai_vision.models import AnalysisSession, DetectionEvent
 from ai_vision.services.association import find_service_session
+from ai_vision.services.experience import experience_index, wait_minutes
 from ai_vision.services.vision_pipeline import EventWindow, ModelsNotAvailable, VisionPipeline
 from cameras.models import Camera
 from monitoring.models import AuditLog
@@ -90,6 +91,8 @@ class Command(BaseCommand):
     def save_event(self, session, camera, window):
         summary = window.summary()
         now = timezone.now()
+        service_session = find_service_session(camera.table, now)
+        index = experience_index(summary["valence"], summary["attention_seeking"], wait_minutes(service_session, now))
         DetectionEvent.objects.create(
             session_id=session.id,
             detected_at=now,
@@ -103,7 +106,10 @@ class Command(BaseCommand):
             presence_ratio=to_decimal(summary["presence_ratio"]),
             activity_level=to_decimal(summary["activity_level"]),
             table=camera.table,
-            service_session=find_service_session(camera.table, now),
+            service_session=service_session,
+            valence=to_decimal(summary["valence"]),
+            attention_seeking=to_decimal(summary["attention_seeking"]),
+            experience_index=Decimal(str(index)) if index is not None else None,
         )
         return summary
 
@@ -222,7 +228,8 @@ class Command(BaseCommand):
                         x, y = box["x"], box["y"]
                         cv2.rectangle(frame, (x, y), (x + box["width"], y + box["height"]), (0, 200, 0), 2)
                         label = PREVIEW_LABELS.get(face["emotion"], face["emotion"])
-                        cv2.putText(frame, (f"{label} {face['emotion_confidence']:.2f}" if face["emotion"] else "rostro"), (x, max(18, y - 8)),
+                        cv2.putText(frame, (f"{label} {face['emotion_confidence']:.2f}" if face["emotion"] else "rostro")
+                                    + (" | mira alrededor" if face.get("looking_away") else ""), (x, max(18, y - 8)),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 0), 2)
                     cv2.putText(frame, f"Rostros: {result['faces_count']} | {result['processing_time_ms']} ms | "
                                        f"eventos: {events_saved}", (15, 30),

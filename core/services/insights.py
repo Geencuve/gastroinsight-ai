@@ -97,6 +97,13 @@ def build_insights(venues, today=None, per_section=3):
             "🧾", f"{stale} pedido{'s' if stale != 1 else ''} esperando pago hace más de 45 minutos",
             "", "Registra el pago o anula lo que ya no corresponda.", "sales:order_list", 95,
         ))
+    from ai_vision.services.live import build_live_state
+
+    for alert in build_live_state(venues)["alerts"][:3]:
+        sections["now"].append(_item(
+            "👀" if "atención" in alert["text"] else "📉", f"Mesa {alert['table']}: {alert['text']}", "",
+            "Acércate a la mesa y revisa su atención.", "ai_vision:monitor", 98,
+        ))
     incidents = Incident.objects.filter(venue__in=venues, status=Incident.Status.OPEN).count()
     if incidents:
         sections["now"].append(_item(

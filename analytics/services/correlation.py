@@ -1,4 +1,4 @@
-﻿"""
+"""
 Correlación entre métricas operacionales y expresiones faciales agregadas.
 
 Unidad de análisis: la sesión de atención (una mesa atendida), con su tiempo de
@@ -26,6 +26,8 @@ ANALYSES = [
     ("ts_minutes", "sales", "Ts (min) vs ventas de la mesa"),
     ("positive_pct", "rating", "% expresiones positivas vs valoración voluntaria (CSAT)"),
     ("ts_minutes", "rating", "Ts (min) vs valoración voluntaria (CSAT)"),
+    ("ts_minutes", "ieo", "Ts (min) vs Índice de Experiencia Observable"),
+    ("ieo", "rating", "Índice de Experiencia Observable vs valoración voluntaria (CSAT)"),
 ]
 
 
@@ -68,10 +70,13 @@ def build_dataset(venues, start_date, end_date, table=None, min_detections=20, i
 
     distributions = defaultdict(Counter)
     synthetic = set()
-    for session_id, distribution, source_type in events.values_list(
-        "service_session_id", "emotion_distribution", "session__camera__source_type",
+    ieo_values = defaultdict(list)
+    for session_id, distribution, source_type, index in events.values_list(
+        "service_session_id", "emotion_distribution", "session__camera__source_type", "experience_index",
     ):
         distributions[session_id].update(distribution or {})
+        if index is not None:
+            ieo_values[session_id].append(float(index))
         if source_type == Camera.SourceType.DEMO:
             synthetic.add(session_id)
 
@@ -104,6 +109,7 @@ def build_dataset(venues, start_date, end_date, table=None, min_detections=20, i
             "neutral_pct": round(100 * counts["neutral"] / total, 2),
             "sales": float(sales.get(session.id) or 0),
             "rating": float(ratings[session.id]) if session.id in ratings else None,
+            "ieo": round(sum(ieo_values[session.id]) / len(ieo_values[session.id]), 2) if ieo_values[session.id] else None,
             "synthetic": session.id in synthetic,
         })
     rows.sort(key=lambda row: row["started_at"])
