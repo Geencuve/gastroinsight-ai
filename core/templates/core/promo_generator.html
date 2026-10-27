@@ -1,0 +1,114 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Promociones | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .promo-layout { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 1.5rem; align-items: start; }
+    .promo-preview img { width: 100%; max-width: 560px; border-radius: 18px; border: 1px solid var(--border); display: block; }
+    .promo-preview.is-story img { max-width: 340px; }
+    .promo-form { display: grid; gap: 0.9rem; }
+    .promo-form .form-group { margin: 0; }
+    .promo-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+    .promo-caption { white-space: pre-line; padding: 0.9rem 1rem; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+    @media (max-width: 900px) { .promo-layout { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🎨 Generador de promociones</h1>
+        <p class="muted">Crea piezas listas para redes sociales a partir de tu carta y de las sugerencias de la IA.</p>
+    </div>
+</section>
+
+<div class="promo-layout">
+    <section class="card">
+        <form method="get" class="promo-form" id="promo-form">
+            <div class="form-group">
+                <label for="f-tipo">Tipo de promoción</label>
+                <select id="f-tipo" name="tipo">
+                    {% for value, label in types %}<option value="{{ value }}" {% if promo.kind == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="f-plato">Plato</label>
+                <select id="f-plato" name="plato">
+                    {% for dish in dishes %}<option value="{{ dish.id }}" {% if promo.dish.id == dish.id %}selected{% endif %}>{{ dish.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group" data-show="combo">
+                <label for="f-plato2">Segundo plato del combo</label>
+                <select id="f-plato2" name="plato2">
+                    {% for dish in dishes %}<option value="{{ dish.id }}" {% if promo.second.id == dish.id %}selected{% endif %}>{{ dish.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group" data-show="dia">
+                <label for="f-dia">Día de la semana</label>
+                <select id="f-dia" name="dia">
+                    {% for index, name in weekdays %}<option value="{{ index }}" {% if promo.day == index %}selected{% endif %}>{{ name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="f-titular">Titular</label>
+                <input id="f-titular" name="titular" maxlength="40" value="{{ promo.headline }}">
+            </div>
+            <div class="form-group">
+                <label for="f-titulo">Título</label>
+                <input id="f-titulo" name="titulo" maxlength="60" value="{{ promo.title }}">
+            </div>
+            <div class="form-group">
+                <label for="f-oferta">Texto de la oferta</label>
+                <input id="f-oferta" name="oferta" maxlength="90" value="{{ promo.offer }}">
+            </div>
+            <div class="form-group">
+                <label for="f-precio">Precio a mostrar (CLP, opcional)</label>
+                <input id="f-precio" name="precio" inputmode="numeric" value="{{ promo.query.precio|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="f-formato">Formato</label>
+                <select id="f-formato" name="formato">
+                    <option value="cuadrado" {% if not promo.story %}selected{% endif %}>Publicación (1080×1080)</option>
+                    <option value="historia" {% if promo.story %}selected{% endif %}>Historia (1080×1920)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Actualizar vista previa</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="promo-preview {% if promo.story %}is-story{% endif %}">
+            <img src="{{ image_url }}" alt="Vista previa de la promoción">
+        </div>
+        <div class="promo-actions">
+            <a class="btn btn-primary" href="{{ download_url }}">⬇️ Descargar imagen</a>
+            <button class="btn btn-secondary" type="button" id="copy-caption">📋 Copiar texto para redes</button>
+        </div>
+        <h3>Texto sugerido para la publicación</h3>
+        <div class="promo-caption" id="caption">{{ caption }}</div>
+        <p class="muted" style="margin-top: 1rem;">
+            💡 Publica la promoción el día anterior, entre las 19:00 y las 21:00, y repítela en historias el mismo día.
+        </p>
+    </section>
+</div>
+
+<script>
+    (function () {
+        const type = document.getElementById("f-tipo");
+        function toggleFields() {
+            document.querySelectorAll("[data-show]").forEach((el) => { el.hidden = el.dataset.show !== type.value; });
+        }
+        type.addEventListener("change", () => {
+            ["f-titular", "f-titulo", "f-oferta", "f-precio"].forEach((id) => { document.getElementById(id).value = ""; });
+            toggleFields();
+            document.getElementById("promo-form").requestSubmit();
+        });
+        toggleFields();
+        document.getElementById("copy-caption").addEventListener("click", async (event) => {
+            await navigator.clipboard.writeText(document.getElementById("caption").textContent);
+            event.target.textContent = "✅ Texto copiado";
+        });
+    })();
+</script>
+{% endblock %}

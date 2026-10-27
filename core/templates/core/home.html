@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load gi_format %}
 
 {% block title %}Inicio | GastroInsight AI{% endblock %}
@@ -97,7 +97,7 @@
                             <p class="idea-why">{{ item.why }}</p>
                             <p class="idea-action">💡 <strong>Qué hacer:</strong> {{ item.action }}</p>
                             {% if item.impact %}<p class="idea-impact">Potencial estimado: {{ item.impact }}</p>{% endif %}
-                            {% if item.url %}<a href="{{ item.url }}">Ver detalle →</a>{% endif %}
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: auto;">{% if item.promo_url %}<a class="btn btn-small btn-primary" href="{{ item.promo_url }}">🎨 Crear promo</a>{% endif %}{% if item.url %}<a href="{{ item.url }}">Ver detalle →</a>{% endif %}</div>
                         </article>
                     {% endfor %}
                 </div>

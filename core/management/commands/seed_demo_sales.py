@@ -1,4 +1,4 @@
-﻿import random
+import random
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 
@@ -40,6 +40,13 @@ COMMENTS = {
     3: ["Correcto, nada especial.", "La comida bien, el servicio lento."],
     2: ["Demoraron mucho en traer los platos.", "El plato llegó frío."],
     1: ["Mala experiencia, mucha espera."],
+}
+DRINK_COMMENTS = {
+    5: ["Excelente coctelería.", "Muy refrescante, la recomiendo."],
+    4: ["Buena bebida, bien preparada.", "Rica, aunque tardó un poco."],
+    3: ["Correcta, nada especial."],
+    2: ["Llegó tibia y con poco hielo.", "Muy dulce para mi gusto."],
+    1: ["La bebida no estaba bien preparada."],
 }
 PAYMENT_METHODS = ["DEBIT", "CREDIT", "CASH", "TRANSFER"]
 PAYMENT_WEIGHTS = [45, 25, 20, 10]
@@ -124,6 +131,7 @@ class Command(BaseCommand):
             self.open_session(table, now - timedelta(minutes=15 + 20 * index), confirm=(index == 0))
 
         self.create_conversations(venue, today)
+        self.polish_seed_evaluations()
 
         s = self.stats
         self.stdout.write(self.style.SUCCESS("Datos demo de ventas creados correctamente."))
@@ -188,7 +196,7 @@ class Command(BaseCommand):
                 rating = rng.choice(RATINGS)
                 evaluation = SatisfactionEvaluation.objects.create(
                     service_session=session, dish=dish, rating=rating,
-                    comment=rng.choice(COMMENTS[rating]), registered_by=self.operator,
+                    comment=self.comment_for(rating, dish), registered_by=self.operator,
                 )
                 SatisfactionEvaluation.objects.filter(pk=evaluation.pk).update(
                     created_at=end - timedelta(minutes=5)
@@ -262,6 +270,22 @@ class Command(BaseCommand):
                 ChatMessage.objects.filter(pk=message.pk).update(created_at=moment + timedelta(seconds=30 * i))
             ChatConversation.objects.filter(pk=conversation.pk).update(
                 created_at=moment, updated_at=moment + timedelta(seconds=30 * len(messages)),
+            )
+
+    def comment_for(self, rating, dish):
+        pool = DRINK_COMMENTS if dish is not None and dish.category == "Bebida" else COMMENTS
+        return self.rng.choice(pool[rating])
+
+    def polish_seed_evaluations(self):
+        """Comentarios realistas y fechas coherentes para las evaluaciones del seed base."""
+        for evaluation in SatisfactionEvaluation.objects.filter(
+            comment="Evaluación de demostración."
+        ).select_related("service_session", "dish"):
+            session = evaluation.service_session
+            moment = session.ended_at or session.started_at
+            SatisfactionEvaluation.objects.filter(pk=evaluation.pk).update(
+                comment=self.comment_for(evaluation.rating, evaluation.dish),
+                created_at=moment - timedelta(minutes=5),
             )
 
     def reset(self):

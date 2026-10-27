@@ -1,4 +1,4 @@
-﻿"""
+"""
 Sugerencias de negocio generadas a partir de los datos: oportunidades de venta,
 ideas de marketing y mejoras en la experiencia. Los impactos son estimaciones
 simples para orientar decisiones, no proyecciones financieras.
@@ -7,6 +7,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, time, timedelta
 from itertools import combinations
 from statistics import median
+
+from urllib.parse import urlencode
 
 from django.db.models import Avg, Count, Q, Sum
 from django.urls import reverse
@@ -30,10 +32,11 @@ def _start(day):
     return timezone.make_aware(datetime.combine(day, time.min))
 
 
-def _item(icon, title, why, action, url_name=None, impact=None, score=0):
+def _item(icon, title, why, action, url_name=None, impact=None, score=0, promo=None):
     return {
         "icon": icon, "title": title, "why": why, "action": action,
         "impact": impact, "url": reverse(url_name) if url_name else None, "score": score,
+        "promo_url": (reverse("core:promo_generator") + "?" + urlencode(promo)) if promo else None,
     }
 
 
@@ -205,7 +208,7 @@ def build_insights(venues, today=None, per_section=3):
                 "🤝", f"Combo sugerido: {dish_names[anchor]} + {dish_names[partner]}",
                 f"El {100 * confidence:.0f}% de quienes piden {dish_names[anchor]} también pide {dish_names[partner]}.",
                 "Ofrécelos juntos con un pequeño descuento y muéstralo en la carta y en redes sociales.",
-                "menus:list", score=65,
+                "menus:list", score=65, promo={"tipo": "combo", "plato": anchor, "plato2": partner},
             ))
 
         # Día más flojo de la semana
@@ -226,7 +229,7 @@ def build_insights(venues, today=None, per_section=3):
                     f"Vendes en promedio {clp(averages[weakest])} esos días, frente a {clp(typical)} de un día típico.",
                     f"Crea una promoción exclusiva para los {day} (menú del día, 2x1 en bebidas) y anúnciala en redes el día anterior.",
                     "reports:list",
-                    impact=f"+{clp(gain)} por semana si ese día llega al 80% de un día típico", score=75,
+                    impact=f"+{clp(gain)} por semana si ese día llega al 80% de un día típico", score=75, promo={"tipo": "dia", "dia": weakest},
                 ))
 
         # Tardes vacías entre almuerzo y cena
@@ -242,7 +245,7 @@ def build_insights(venues, today=None, per_section=3):
                 "🍹", "Las tardes, de 16:00 a 19:00, están casi vacías",
                 f"Solo el {100 * afternoon / total_sales:.0f}% de tus ventas ocurre en ese horario.",
                 "Prueba un happy hour o una once con precio especial para atraer público entre el almuerzo y la cena.",
-                "analytics:dashboard", score=55,
+                "analytics:dashboard", score=55, promo={"tipo": "happy"},
             ))
 
         # Plato estrella y joya escondida
@@ -255,7 +258,7 @@ def build_insights(venues, today=None, per_section=3):
             sections["marketing"].append(_item(
                 "⭐", f"Tu plato estrella: {dish_names[star]}", why + ".",
                 "Úsalo como imagen principal en redes sociales y destácalo en la portada de la carta.",
-                "menus:list", score=50,
+                "menus:list", score=50, promo={"tipo": "estrella", "plato": star},
             ))
             median_units = median(units.values())
             gems = [
@@ -269,7 +272,7 @@ def build_insights(venues, today=None, per_section=3):
                     "💎", f"Joya escondida: {name}",
                     f"Tiene muy buena valoración ({row['avg']:.1f}/5) pero se vende poco ({units.get(dish_id, 0)} unidades).".replace(".", ",", 1),
                     "Recomiéndalo como 'sugerencia del chef' y pide al personal que lo mencione al tomar el pedido.",
-                    "menus:list", score=60,
+                    "menus:list", score=60, promo={"tipo": "joya", "plato": dish_id},
                 ))
 
     # ================= ⭐ Mejoras en la experiencia =================

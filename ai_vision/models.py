@@ -136,6 +136,18 @@ class DetectionEvent(models.Model):
         blank=True,
         verbose_name="Confianza del detector",
     )
+    occupancy = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="Ocupación (personas visibles, mediana)",
+    )
+    presence_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, null=True, blank=True,
+        verbose_name="Proporción del tiempo con presencia",
+    )
+    activity_level = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="Nivel de actividad (0-100)",
+    )
     emotion_distribution = models.JSONField(
         default=dict,
         blank=True,

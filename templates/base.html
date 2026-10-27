@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=6">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -71,6 +71,7 @@
                     <div class="nav-menu">
                         <a href="{% url 'analytics:dashboard' %}">Dashboard</a>
                         <a href="{% url 'reports:list' %}">Reportes</a>
+                        <a href="{% url 'core:promo_generator' %}">Promociones</a>
                     </div>
                 </details>
                 <details class="nav-group">
@@ -227,7 +228,7 @@
             window.addEventListener("load", applyChartTheme);
         })();
     </script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/main.js' %}?v=6"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

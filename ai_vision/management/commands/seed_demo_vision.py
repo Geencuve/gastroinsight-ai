@@ -1,4 +1,4 @@
-﻿import random
+import random
 from collections import Counter
 from datetime import timedelta
 from decimal import Decimal
@@ -106,6 +106,9 @@ class Command(BaseCommand):
                         detector_confidence=Decimal(str(round(rng.uniform(0.78, 0.95), 4))) if has_faces else None,
                         emotion_distribution=dict(distribution),
                         processing_time_ms=rng.randint(32, 70),
+                        occupancy=Decimal(str(round(max(0.0, rng.gauss(service.guests_count * 0.85, 0.5)), 2))),
+                        presence_ratio=Decimal(str(round(rng.uniform(0.72, 0.98), 4))),
+                        activity_level=Decimal(str(round(min(100.0, max(3.0, rng.gauss(18 + 10 * effect * max(0.0, -excess), 6))), 2))),
                         table=camera.table, service_session=service,
                     ))
                     frames += 15

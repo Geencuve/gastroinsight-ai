@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Sesión #{{ session.id }} | GastroInsight AI{% endblock %}
 
@@ -78,6 +78,19 @@
 </section>
 
 <section class="card">
+    <h2>Comportamiento agregado de la mesa</h2>
+    <p class="muted">Métricas anónimas por ventana de fotogramas: cuántas personas se ven, cuánto tiempo hay presencia y cuánto movimiento hay. No se sigue a ninguna persona.</p>
+    <div class="metrics-grid">
+        <article class="metric-card"><span class="metric-label">Ocupación promedio</span><strong>{% if stats.average_occupancy is not None %}{{ stats.average_occupancy|floatformat:1 }} personas{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Presencia</span><strong>{% if stats.presence_pct is not None %}{{ stats.presence_pct|floatformat:0 }}% del tiempo{% else %}—{% endif %}</strong></article>
+        <article class="metric-card"><span class="metric-label">Actividad promedio</span><strong>{% if stats.average_activity is not None %}{{ stats.average_activity|floatformat:0 }}/100{% else %}—{% endif %}</strong></article>
+    </div>
+    {% if timeline_labels %}
+        <div style="position: relative; height: 240px;"><canvas id="behaviorChart"></canvas></div>
+    {% endif %}
+</section>
+
+<section class="card">
     <h2>Distribución agregada de expresiones</h2>
     {% if emotion_rows %}
         <div style="position: relative; height: 260px;"><canvas id="emotionChart"></canvas></div>
@@ -137,10 +150,37 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% if timeline_labels %}
+    {{ timeline_labels|json_script:"tl-labels" }}
+    {{ timeline_occupancy|json_script:"tl-occupancy" }}
+    {{ timeline_activity|json_script:"tl-activity" }}
+    <script>
+        new Chart(document.getElementById("behaviorChart"), {
+            type: "line",
+            data: {
+                labels: JSON.parse(document.getElementById("tl-labels").textContent),
+                datasets: [
+                    { label: "Personas visibles", data: JSON.parse(document.getElementById("tl-occupancy").textContent),
+                      borderColor: "#22d3ee", backgroundColor: "rgba(34, 211, 238, 0.15)", fill: true, tension: 0.3, pointRadius: 0, yAxisID: "y" },
+                    { label: "Actividad (0-100)", data: JSON.parse(document.getElementById("tl-activity").textContent),
+                      borderColor: "#8b5cf6", tension: 0.3, pointRadius: 0, yAxisID: "y1" },
+                ],
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: "Personas" } },
+                    y1: { beginAtZero: true, max: 100, position: "right", grid: { drawOnChartArea: false },
+                          title: { display: true, text: "Actividad" } },
+                },
+            },
+        });
+    </script>
+{% endif %}
 {% if emotion_rows %}
     {{ chart_labels|json_script:"emotion-labels" }}
     {{ chart_values|json_script:"emotion-values" }}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         new Chart(document.getElementById("emotionChart"), {
             type: "bar",

@@ -8,6 +8,7 @@ from django.db import close_old_connections, transaction
 from django.db.models import Avg, Count, Q
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from authentication.models import Profile
@@ -215,6 +216,9 @@ def session_detail(request, session_id):
         average_detector_confidence=Avg("detector_confidence"),
         average_emotion_confidence=Avg("confidence"),
         under_200=Count("id", filter=Q(processing_time_ms__lt=200)),
+        average_occupancy=Avg("occupancy"),
+        average_presence=Avg("presence_ratio"),
+        average_activity=Avg("activity_level"),
     )
     stats["under_200_percent"] = (
         100 * stats["under_200"] / stats["events_count"] if stats["events_count"] else None
@@ -238,6 +242,14 @@ def session_detail(request, session_id):
         for key, value in distribution.most_common()
     ]
 
+    stats["presence_pct"] = (
+        float(stats["average_presence"]) * 100 if stats["average_presence"] is not None else None
+    )
+    timeline = list(
+        events.exclude(occupancy__isnull=True).order_by("detected_at")
+        .values_list("detected_at", "occupancy", "activity_level")[:400]
+    )
+
     linked_sessions = (
         events.filter(service_session__isnull=False)
         .values("service_session_id", "service_session__table__code")
@@ -257,6 +269,9 @@ def session_detail(request, session_id):
             "chart_labels": [row["label"] for row in emotion_rows],
             "chart_values": [row["count"] for row in emotion_rows],
             "linked_sessions": linked_sessions,
+            "timeline_labels": [timezone.localtime(t).strftime("%H:%M:%S") for t, _, _ in timeline],
+            "timeline_occupancy": [float(o) for _, o, _ in timeline],
+            "timeline_activity": [float(a) if a is not None else None for _, _, a in timeline],
         },
     )
 

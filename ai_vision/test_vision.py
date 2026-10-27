@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 import numpy as np
 from django.contrib.auth.models import User
@@ -74,3 +74,22 @@ class VisionPipelineTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Distribución agregada de expresiones")
         self.assertContains(response, "Positiva / feliz")
+
+    def test_ventana_calcula_comportamiento_agregado(self):
+        window = EventWindow()
+        window.add({"faces_count": 2, "processing_time_ms": 30, "activity": 20.0, "faces": []})
+        window.add({"faces_count": 0, "processing_time_ms": 30, "activity": 40.0, "faces": []})
+        window.add({"faces_count": 3, "processing_time_ms": 30, "activity": None, "faces": []})
+        summary = window.summary()
+        self.assertEqual(summary["occupancy"], 2.0)
+        self.assertAlmostEqual(summary["presence_ratio"], 2 / 3)
+        self.assertEqual(summary["activity_level"], 30.0)
+
+    def test_pipeline_mide_actividad_sin_clasificar(self):
+        if not MODELS_READY:
+            self.skipTest("Modelos no descargados")
+        pipeline = VisionPipeline()
+        first = pipeline.analyze(np.zeros((480, 640, 3), dtype=np.uint8), classify=False)
+        second = pipeline.analyze(np.full((480, 640, 3), 255, dtype=np.uint8), classify=False)
+        self.assertIsNone(first["activity"])
+        self.assertGreater(second["activity"], 50)

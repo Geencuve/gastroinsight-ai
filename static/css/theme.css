@@ -434,3 +434,13 @@ html[data-theme] .chat-input { display: flex; gap: 0.6rem; align-items: flex-end
 html[data-theme] .chat-input textarea { flex: 1; resize: vertical; min-height: 52px; }
 html[data-theme] .assistant-widget-messages { display: flex; flex-direction: column; gap: 0.6rem; }
 html[data-theme] .widget-bubble { max-width: 92%; font-size: 0.86rem; }
+
+/* ---------- Correcciones generales ---------- */
+html[data-theme] [hidden] { display: none !important; }
+html[data-theme] .assistant-widget-header { background: var(--surface-2); padding: 0.8rem 1rem; }
+html[data-theme] .assistant-widget-header h2 { color: var(--text-strong); margin: 0; font-size: 1rem; }
+html[data-theme] .assistant-widget-body textarea { width: 100%; box-sizing: border-box; }
+html[data-theme] .assistant-widget-send {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; border: 0;
+    border-radius: 10px; padding: 0.55rem 1.1rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem;
+}

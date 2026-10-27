@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -68,3 +68,9 @@ class AssistantTests(TestCase):
         response = self.client.post("/assistant/staff/widget/message/", {"message": "ventas de hoy"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("links", response.json())
+
+    def test_reconoce_periodos(self):
+        from assistant_chat.services import get_period_from_message
+        self.assertEqual(get_period_from_message("ticket promedio del mes")[2], "este mes")
+        self.assertEqual(get_period_from_message("ventas de la semana")[2], "esta semana")
+        self.assertEqual(get_period_from_message("ventas del mes pasado")[2], "el mes pasado")

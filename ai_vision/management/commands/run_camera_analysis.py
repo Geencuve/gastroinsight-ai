@@ -40,6 +40,10 @@ class Command(BaseCommand):
                             help="Duración máxima en segundos; 0 = sin límite.")
         parser.add_argument("--threshold", type=float, default=0.70,
                             help="Confianza mínima del detector de rostros. Por defecto: 0.70.")
+        parser.add_argument("--fer-every", type=int, default=2,
+                            help="Clasificar expresiones cada N fotogramas (la detección es en todos). Por defecto: 2.")
+        parser.add_argument("--max-width", type=int, default=640,
+                            help="Ancho máximo para la detección; 0 = tamaño original. Por defecto: 640.")
         parser.add_argument("--check-every-seconds", type=float, default=1.0,
                             help="Cada cuántos segundos verificar estado, cámara y privacidad. Por defecto: 1.")
         parser.add_argument("--no-preview", action="store_true",
@@ -95,6 +99,9 @@ class Command(BaseCommand):
             detector_confidence=to_decimal(summary["detector_confidence"]),
             emotion_distribution=summary["emotion_distribution"],
             processing_time_ms=summary["processing_time_ms"],
+            occupancy=to_decimal(summary["occupancy"]),
+            presence_ratio=to_decimal(summary["presence_ratio"]),
+            activity_level=to_decimal(summary["activity_level"]),
             table=camera.table,
             service_session=find_service_session(camera.table, now),
         )
@@ -106,6 +113,7 @@ class Command(BaseCommand):
         max_frames = max(0, options["max_frames"])
         duration = max(0, options["duration"])
         check_every = max(0.0, options["check_every_seconds"])
+        fer_every = max(1, options["fer_every"])
         preview_enabled = not options["no_preview"]
 
         try:
@@ -127,7 +135,7 @@ class Command(BaseCommand):
             )
 
         try:
-            pipeline = VisionPipeline(score_threshold=options["threshold"])
+            pipeline = VisionPipeline(score_threshold=options["threshold"], max_width=max(0, options["max_width"]))
         except ModelsNotAvailable as exc:
             raise CommandError(str(exc)) from exc
 
@@ -203,7 +211,7 @@ class Command(BaseCommand):
 
                 frame_number += 1
                 t0 = time.perf_counter()
-                result = pipeline.analyze(frame)
+                result = pipeline.analyze(frame, classify=(frame_number % fer_every == 0))
                 timing["analisis"] += time.perf_counter() - t0
                 total_faces += result["faces_count"]
                 window.add(result)
@@ -214,7 +222,7 @@ class Command(BaseCommand):
                         x, y = box["x"], box["y"]
                         cv2.rectangle(frame, (x, y), (x + box["width"], y + box["height"]), (0, 200, 0), 2)
                         label = PREVIEW_LABELS.get(face["emotion"], face["emotion"])
-                        cv2.putText(frame, f"{label} {face['emotion_confidence']:.2f}", (x, max(18, y - 8)),
+                        cv2.putText(frame, (f"{label} {face['emotion_confidence']:.2f}" if face["emotion"] else "rostro"), (x, max(18, y - 8)),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 0), 2)
                     cv2.putText(frame, f"Rostros: {result['faces_count']} | {result['processing_time_ms']} ms | "
                                        f"eventos: {events_saved}", (15, 30),

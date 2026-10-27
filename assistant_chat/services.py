@@ -122,12 +122,12 @@ def get_period_from_message(message):
     if has(text, "semana pasada", "semana anterior"):
         end = today - timedelta(days=today.weekday() + 1)
         return end - timedelta(days=6), end, "la semana pasada"
-    if has(text, "esta semana", "semanal", "la semana"):
+    if "semanal" in text or re.search(r"\bsemana\b", text):
         return today - timedelta(days=today.weekday()), today, "esta semana"
     if has(text, "mes pasado", "mes anterior"):
         end = today.replace(day=1) - timedelta(days=1)
         return end.replace(day=1), end, "el mes pasado"
-    if re.search(r"\b(este mes|mes actual|mensual|el mes)\b", text):
+    if re.search(r"\bmes\b", text) or "mensual" in text:
         return today.replace(day=1), today, "este mes"
     return today, today, "hoy"
 
@@ -268,12 +268,15 @@ def answer_sales(venues, message):
     if not agg["count"]:
         return f"No hay ventas pagadas registradas para {label}.", {"links": links, "orders": 0}
     span = end_dt - start_dt
-    previous = _paid(venues, start_dt - span, start_dt).aggregate(total=Sum("total"))["total"]
+    shift = timedelta(days=7) if span <= timedelta(days=7) else span
+    compare_end = min(end_dt, timezone.now())
+    previous = _paid(venues, start_dt - shift, compare_end - shift).aggregate(total=Sum("total"))["total"]
+    compare_label = "al mismo período de la semana anterior" if shift == timedelta(days=7) else "al período anterior"
     text = (f"💰 Ventas de {label}: {clp(agg['revenue'])} en {agg['count']} pedidos pagados "
             f"(ticket promedio {clp(agg['avg'])}).")
     if previous:
         change = 100 * (float(agg["revenue"]) - float(previous)) / float(previous)
-        text += f"\nFrente al período anterior equivalente ({clp(previous)}): {change:+.0f}%."
+        text += f"\nFrente {compare_label} ({clp(previous)}): {change:+.0f}%."
     top = (OrderItem.objects.filter(order__in=paid).values("dish_name")
            .annotate(units=Sum("quantity")).order_by("-units").first())
     if top:
@@ -287,7 +290,7 @@ def answer_ticket(venues, message):
     agg = paid.aggregate(revenue=Sum("total"), count=Count("id"), avg=Avg("total"))
     links = [_link("Ver reportes", "reports:list")]
     if not agg["count"]:
-        return f"No hay pedidos pagados en {label}.", {"links": links}
+        return f"No hay pedidos pagados para {label}.", {"links": links}
     guests = ServiceSession.objects.filter(id__in=paid.values("service_session_id")).aggregate(
         total=Sum("guests_count"))["total"] or 0
     text = f"🧾 Ticket promedio de {label}: {clp(agg['avg'])} por pedido ({agg['count']} pedidos)."
@@ -313,7 +316,7 @@ def answer_top_dishes(venues, message, lowest=False):
         text += "\n💡 Recomiéndalos como sugerencia del chef, prueba una promoción de lanzamiento o reemplázalos por una novedad."
         return text, {"links": links}
     if not rows:
-        return f"No hay ventas de platos en {label}.", {"links": links}
+        return f"No hay ventas de platos para {label}.", {"links": links}
     text = f"🔥 Lo más vendido ({label}):\n" + "\n".join(
         f"{i}. {row['dish_name']}: {row['units']} unidades · {clp(row['total'])}" for i, row in enumerate(rows[:5], 1))
     text += "\n💡 Destaca el primero en redes sociales y asegura su stock en hora punta."
@@ -325,7 +328,7 @@ def answer_dish_performance(venues, message):
     metrics = get_dish_performance(venues, start, end)
     links = [_link("Ver evaluaciones", "operations:evaluation_list")]
     if not metrics["total_dishes"]:
-        return f"No hay evaluaciones de platos en {label}.", {"links": links}
+        return f"No hay evaluaciones de platos para {label}.", {"links": links}
     best, worst = metrics["best"], metrics["worst"]
     text = (f"⭐ Valoración de platos ({label}):\n"
             f"Mejor evaluado: {best.name} con {_fmt(best.average_rating)}/5 ({best.evaluations_count} evaluaciones).\n"
@@ -344,7 +347,7 @@ def answer_comments(venues, message):
     links = [_link("Ver evaluaciones", "operations:evaluation_list"), _link("Códigos QR de opinión", "feedback:qr")]
     total = evaluations.count()
     if not total:
-        return (f"No hay comentarios de clientes en {label}. "
+        return (f"No hay comentarios de clientes para {label}. "
                 "💡 Deja el código QR de opinión en cada mesa para recibir más.", {"links": links})
     low = evaluations.filter(rating__lte=2).count()
     lines = [
@@ -393,7 +396,7 @@ def answer_service_time(venues, message):
     links = [_link("Atención de mesas", "operations:session_list")]
     values = [m for items in durations.values() for m in items]
     if not values:
-        return f"No hay atenciones cerradas en {label}.", {"links": links}
+        return f"No hay atenciones cerradas para {label}.", {"links": links}
     average = sum(values) / len(values)
     text = f"⏱️ Tiempo promedio de atención ({label}): {average:.0f} minutos en {len(values)} atenciones."
     by_table = {code: sum(v) / len(v) for code, v in durations.items() if len(v) >= 2}
@@ -434,7 +437,7 @@ def answer_payments(venues, message):
     labels = dict(Order.PaymentMethod.choices)
     links = [_link("Ver reportes", "reports:list")]
     if not rows:
-        return f"No hay pagos registrados en {label}.", {"links": links}
+        return f"No hay pagos registrados para {label}.", {"links": links}
     grand = sum(float(row["total"]) for row in rows)
     lines = [f"• {labels.get(row['payment_method'], row['payment_method'])}: {clp(row['total'])} "
              f"({row['count']} pedidos · {100 * float(row['total']) / grand:.0f}%)" for row in rows]
@@ -482,6 +485,9 @@ def answer_advice(venues, message):
         if item["url"] and item["url"] not in seen and len(links) < 4:
             seen.add(item["url"])
             links.append({"label": item["title"][:38] + ("…" if len(item["title"]) > 38 else ""), "url": item["url"]})
+    promo = next((item for item in items if item.get("promo_url")), None)
+    if promo:
+        links.insert(1, {"label": "🎨 Crear promo", "url": promo["promo_url"]})
     return text, {"links": links}
 
 
@@ -509,10 +515,14 @@ def answer_dish(venues, dish, message):
     if rating["count"] and rating["avg"] < 3.5:
         text += "\n💡 Su valoración es baja: revisa receta, temperatura y tiempo de salida."
     elif rank and rank <= 3:
-        text += "\n💡 Es de tus más vendidos: úsalo en redes o arma un combo con una bebida."
+        partner = "un plato de fondo" if dish.category == "Bebida" else "una bebida"
+        text += f"\n💡 Es de tus más vendidos: úsalo en redes o arma un combo con {partner}."
     elif units <= 2:
         text += "\n💡 Se vende poco: pruébalo como sugerencia del chef o evalúa reemplazarlo."
-    return text, {"links": [_link("Ver en la carta", "menus:detail", dish.menu_id)], "dish": dish.name}
+    return text, {"links": [
+        _link("Ver en la carta", "menus:detail", dish.menu_id),
+        {"label": "🎨 Crear promo", "url": reverse("core:promo_generator") + f"?tipo=estrella&plato={dish.id}"},
+    ], "dish": dish.name}
 
 
 def answer_daily_summary(venues):
