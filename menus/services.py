@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 from django.db.models import Avg, Count, Sum
 from django.utils import timezone
@@ -9,6 +9,14 @@ from sales.models import Order, OrderItem
 CATEGORY_ORDER = ["Entrada", "Fondo", "Postre", "Bebida"]
 
 
+def sort_dishes(dishes):
+    def key(dish):
+        category = dish.category or "Otros"
+        position = CATEGORY_ORDER.index(category) if category in CATEGORY_ORDER else len(CATEGORY_ORDER)
+        return (position, category, dish.name)
+    return sorted(dishes, key=key)
+
+
 def categories_of(dishes):
     found = {dish.category or "Otros" for dish in dishes}
     ordered = [c for c in CATEGORY_ORDER if c in found]
@@ -17,6 +25,7 @@ def categories_of(dishes):
 
 def build_dish_cards(dishes):
     """Tarjetas de platos con valoración promedio y ventas de las últimas 4 semanas."""
+    dishes = sort_dishes(dishes)
     ids = [dish.id for dish in dishes]
     ratings = {
         row["dish_id"]: row

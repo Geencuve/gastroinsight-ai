@@ -1,0 +1,5 @@
+﻿<div class="chat-chips">
+    {% for suggestion in suggestions %}
+        <button type="button" class="chip" data-prompt="{{ suggestion.prompt }}">{{ suggestion.label }}</button>
+    {% endfor %}
+</div>

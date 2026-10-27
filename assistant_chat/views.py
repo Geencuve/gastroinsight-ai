@@ -292,6 +292,7 @@ def staff_widget_message(request):
             "conversation_id": conversation.id,
             "user_message": content,
             "assistant_message": response_text,
+            "links": metadata.get("links", []),
         }
     )
 

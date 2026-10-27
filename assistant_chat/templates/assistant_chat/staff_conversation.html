@@ -1,98 +1,23 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+
+{% block title %}Asistente IA | GastroInsight AI{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="chat-wrap">
+    <section class="page-header">
         <div>
-            <h1>Asistente operacional</h1>
-            <p class="text-muted mb-0">
-                Conversación #{{ conversation.id }}
-            </p>
+            <h1>✨ Asistente IA</h1>
+            <p class="muted">Respuestas con los datos de tus locales.</p>
         </div>
-
-        <a
-            class="btn btn-outline-secondary"
-            href="{% url 'assistant_chat:staff_chat' %}"
-        >
-            Nueva consulta
-        </a>
-    </div>
-
-    <div class="alert alert-info">
-        Las respuestas se basan en indicadores agregados y registros
-        disponibles. Verifica las decisiones operativas con el equipo.
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            {% for message in conversation.messages.all %}
-                <div class="mb-3">
-                    <strong>
-                        {% if message.sender == "USER" %}
-                            Tú
-                        {% else %}
-                            Asistente
-                        {% endif %}
-                    </strong>
-
-                    <div class="mt-1">
-                        {{ message.content|linebreaksbr }}
-                    </div>
-                </div>
-
-                {% if not forloop.last %}
-                    <hr>
-                {% endif %}
-            {% endfor %}
+        <a class="btn btn-secondary" href="{% url 'assistant_chat:staff_chat' %}">Nueva conversación</a>
+    </section>
+    <section class="card">
+        <div class="chat-log" id="chat-log">
+            {% include "assistant_chat/_bubbles.html" with messages_list=conversation.messages.all %}
         </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                {% for suggestion in suggestions %}
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary btn-sm"
-                        data-prompt="{{ suggestion.prompt }}"
-                    >
-                        {{ suggestion.label }}
-                    </button>
-                {% endfor %}
-            </div>
-
-            <form
-                method="post"
-                action="{% url 'assistant_chat:staff_continue_conversation' conversation.id %}"
-            >
-                {% csrf_token %}
-
-                <textarea
-                    name="message"
-                    id="chat-message"
-                    rows="2"
-                    maxlength="600"
-                    class="form-control"
-                    placeholder="Escribe una nueva consulta..."
-                    required
-                ></textarea>
-
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        Enviar consulta
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+        {% include "assistant_chat/_chips.html" %}
+        {% url 'assistant_chat:staff_continue_conversation' conversation.id as action_url %}
+        {% include "assistant_chat/_chat_form.html" with action=action_url %}
+    </section>
 </div>
-
-<script>
-    document.querySelectorAll("[data-prompt]").forEach((button) => {
-        button.addEventListener("click", () => {
-            document.getElementById("chat-message").value =
-                button.dataset.prompt;
-        });
-    });
-</script>
 {% endblock %}

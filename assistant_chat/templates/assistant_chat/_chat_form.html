@@ -1,0 +1,25 @@
+﻿<form method="post" class="chat-input" action="{{ action }}" id="chat-form">
+    {% csrf_token %}
+    {% if venue_id %}<input type="hidden" name="venue_id" value="{{ venue_id }}">{% endif %}
+    <textarea name="message" id="chat-message" rows="2" maxlength="600" required
+              placeholder="{{ placeholder|default:'Escribe tu pregunta… (Enter para enviar)' }}"></textarea>
+    <button class="btn btn-primary" type="submit">Enviar</button>
+</form>
+<script>
+    (function () {
+        const log = document.getElementById("chat-log");
+        if (log) log.scrollTop = log.scrollHeight;
+        const form = document.getElementById("chat-form");
+        const box = document.getElementById("chat-message");
+        document.querySelectorAll(".chat-chips [data-prompt]").forEach((button) => {
+            button.addEventListener("click", () => { box.value = button.dataset.prompt; form.requestSubmit(); });
+        });
+        box.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                if (box.value.trim()) form.requestSubmit();
+            }
+        });
+        box.focus();
+    })();
+</script>

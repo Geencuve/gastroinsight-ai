@@ -1,0 +1,2 @@
+﻿{% for message in messages_list %}<div class="bubble {% if message.sender == 'USER' %}bubble-user{% else %}bubble-assistant{% endif %}">{{ message.content }}{% if message.metadata.links %}<div class="chat-links">{% for link in message.metadata.links %}<a class="btn btn-small" href="{{ link.url }}">{{ link.label }} →</a>{% endfor %}</div>{% endif %}</div>
+{% endfor %}

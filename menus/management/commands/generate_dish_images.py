@@ -1,4 +1,4 @@
-﻿import io
+import io
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
@@ -30,7 +30,7 @@ def load_font(candidates, size):
     return None
 
 
-def render_dish(dish):
+def render_dish(dish, with_text=False):
     width, height = 800, 600
     top, bottom = PALETTES.get(dish.category, DEFAULT_PALETTE)
     image = Image.new("RGBA", (width, height))
@@ -40,7 +40,8 @@ def render_dish(dish):
         draw.line([(0, y), (width, y)], fill=tuple(int(top[i] * (1 - t) + bottom[i] * t) for i in range(3)))
 
     glow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    ImageDraw.Draw(glow).ellipse((190, 40, 610, 420), fill=(255, 255, 255, 26))
+    center_y = 230 if with_text else 300
+    ImageDraw.Draw(glow).ellipse((190, center_y - 190, 610, center_y + 190), fill=(255, 255, 255, 26))
     image = Image.alpha_composite(image, glow)
     draw = ImageDraw.Draw(image)
 
@@ -51,13 +52,18 @@ def render_dish(dish):
     drawn = False
     if emoji_font:
         try:
-            draw.text((width / 2, 230), emoji, font=emoji_font, anchor="mm", embedded_color=True)
+            draw.text((width / 2, center_y), emoji, font=emoji_font, anchor="mm", embedded_color=True)
             drawn = True
         except Exception:
             drawn = False
     if not drawn and bold:
         big = load_font(["segoeuib.ttf", "C:/Windows/Fonts/segoeuib.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf"], 180)
-        draw.text((width / 2, 230), dish.name[:1].upper(), font=big, anchor="mm", fill=(255, 255, 255))
+        draw.text((width / 2, center_y), dish.name[:1].upper(), font=big, anchor="mm", fill=(255, 255, 255))
+
+    if not with_text:
+        buffer = io.BytesIO()
+        image.convert("RGB").save(buffer, "JPEG", quality=88)
+        return buffer.getvalue()
 
     band = Image.new("RGBA", (width, 150), (0, 0, 0, 120))
     image.alpha_composite(band, (0, height - 150))
