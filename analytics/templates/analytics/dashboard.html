@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load gi_format %}
 
 {% block title %}Dashboard | GastroInsight AI{% endblock %}
@@ -557,7 +558,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
 
 {{ chart_labels|json_script:"chart-labels" }}
 {{ chart_faces|json_script:"chart-faces" }}

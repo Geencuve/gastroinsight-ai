@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Sesión #{{ session.id }} | GastroInsight AI{% endblock %}
 
@@ -150,7 +151,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
 {% if timeline_labels %}
     {{ timeline_labels|json_script:"tl-labels" }}
     {{ timeline_occupancy|json_script:"tl-occupancy" }}

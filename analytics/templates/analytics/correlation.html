@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load gi_format %}
 
 {% block title %}Panel de correlación | GastroInsight AI{% endblock %}
@@ -186,7 +187,7 @@
 {% block extra_js %}
 {{ chart_positive|json_script:"chart-positive" }}
 {{ chart_negative|json_script:"chart-negative" }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
 <script>
     function drawScatter(canvasId, dataId, color, yLabel) {
         const canvas = document.getElementById(canvasId);

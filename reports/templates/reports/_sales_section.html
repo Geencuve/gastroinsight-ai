@@ -1,3 +1,4 @@
+{% load static %}
 {% load gi_format %}
 <style>
     .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
@@ -95,7 +96,7 @@
     {{ sales_chart_values|json_script:"sales-values" }}
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const canvas = document.getElementById("salesChart");
