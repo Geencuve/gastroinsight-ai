@@ -1,0 +1,27 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Códigos QR de opinión | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header no-print">
+    <div>
+        <h1>Códigos QR de opinión</h1>
+        <p class="muted">Imprime y deja un código en cada mesa: el cliente califica su atención desde el celular, sin cuenta.</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
+</section>
+
+<div class="qr-grid">
+    {% for card in cards %}
+        <article class="qr-card">
+            <h3>{{ card.table.venue.name }}</h3>
+            <p><strong>Mesa {{ card.table.code }}</strong></p>
+            {{ card.svg }}
+            <p>Escanea y cuéntanos cómo estuvo todo ⭐</p>
+            <p class="no-print"><a href="{{ card.url }}" target="_blank">Probar enlace</a></p>
+        </article>
+    {% empty %}
+        <p class="muted">No hay mesas activas.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -6,7 +6,7 @@ from .models import Dish, Menu
 class DishInline(admin.TabularInline):
     model = Dish
     extra = 1
-    fields = ("name", "category", "price", "is_available")
+    fields = ("name", "category", "price", "is_available", "image")
 
 
 @admin.register(Menu)

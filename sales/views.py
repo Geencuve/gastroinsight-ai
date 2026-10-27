@@ -11,6 +11,7 @@ from authentication.permissions import (
 )
 from monitoring.models import AuditLog
 from monitoring.services.audit import log_action
+from menus.services import build_dish_cards
 from operations.models import ServiceSession
 
 from .forms import (
@@ -172,6 +173,10 @@ def order_detail(request, order_id):
             "item_form": item_form,
             "discount_form": discount_form,
             "payment_form": payment_form,
+            "dish_cards": (
+                build_dish_cards(list(item_form.fields["dish"].queryset))
+                if order.can_be_edited else []
+            ),
         },
     )
 

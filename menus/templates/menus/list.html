@@ -1,28 +1,36 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Menús | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Menús disponibles</h1>
-
-    {% if menus %}
-        <ul>
-            {% for menu in menus %}
-                <li>
-                    <a href="{% url 'menus:detail' menu.id %}">
-                        <strong>{{ menu.name }}</strong>
-                    </a>
-                    <span>— {{ menu.venue.name }}</span>
-
-                    {% if menu.description %}
-                        <p>{{ menu.description }}</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hay menús activos registrados.</p>
-    {% endif %}
+<section class="page-header">
+    <div>
+        <h1>Cartas</h1>
+        <p class="muted">Gestiona los platos, sus fotos y la carta pública de cada local.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'feedback:qr' %}">Códigos QR de opinión</a>
 </section>
+
+{% if items %}
+    <div class="menu-grid">
+        {% for item in items %}
+            <a class="dish-card menu-card" href="{% url 'menus:detail' item.menu.id %}">
+                <div class="dish-media">
+                    {% if item.cover %}
+                        <img src="{{ item.cover.image.url }}" alt="{{ item.menu.name }}">
+                    {% else %}
+                        <div class="dish-placeholder">📖</div>
+                    {% endif %}
+                </div>
+                <div class="dish-body">
+                    <h3>{{ item.menu.name }}</h3>
+                    <p class="dish-meta">{{ item.menu.venue.name }} · {{ item.menu.dish_count }} plato{{ item.menu.dish_count|pluralize }}</p>
+                    {% if item.menu.description %}<p class="dish-desc">{{ item.menu.description }}</p>{% endif %}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="muted">No hay menús activos registrados.</p>
+{% endif %}
 {% endblock %}

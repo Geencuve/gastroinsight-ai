@@ -230,6 +230,17 @@ class SatisfactionEvaluation(models.Model):
         max_length=500,
         verbose_name="Comentario voluntario",
     )
+
+    class Source(models.TextChoices):
+        STAFF = "staff", "Registrada por el personal"
+        CUSTOMER_QR = "customer_qr", "Cliente vía QR"
+
+    source = models.CharField(
+        max_length=20,
+        choices=Source.choices,
+        default=Source.STAFF,
+        verbose_name="Origen",
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Fecha y hora de registro",

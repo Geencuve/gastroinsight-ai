@@ -1,0 +1,43 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Tu opinión | {{ venue.name }}{% endblock %}
+
+{% block content %}
+<div class="feedback-wrap">
+    <section class="card" style="text-align: center;">
+        <p class="muted">{{ venue.name }} · Mesa {{ table.code }}</p>
+        {% if no_session %}
+            <h1>¡Gracias por visitarnos!</h1>
+            <p>En este momento no hay una atención activa en esta mesa. Puedes revisar nuestra carta mientras tanto.</p>
+            <a class="btn btn-primary" href="{{ menu_url }}">Ver la carta</a>
+        {% else %}
+            <h1>¿Cómo estuvo todo?</h1>
+            <p class="muted">Tu opinión es anónima y nos ayuda a mejorar.</p>
+            <form method="post" style="display: grid; gap: 1.1rem; text-align: left; margin-top: 1rem;">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                <div style="text-align: center;">
+                    <div class="star-rating" role="radiogroup" aria-label="{{ form.rating.label }}">
+                        {% for radio in form.rating %}
+                            <input type="radio" id="{{ radio.id_for_label }}" name="{{ radio.data.name }}"
+                                   value="{{ radio.data.value }}" {% if radio.data.selected %}checked{% endif %} required>
+                            <label for="{{ radio.id_for_label }}" title="{{ radio.choice_label }} de 5">★</label>
+                        {% endfor %}
+                    </div>
+                    {% for error in form.rating.errors %}<p class="field-error">Elige una calificación.</p>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.dish.id_for_label }}">{{ form.dish.label }}</label>
+                    {{ form.dish }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
+                    {{ form.comment }}
+                    <small>No incluyas datos personales.</small>
+                </div>
+                <button class="btn btn-primary" type="submit">Enviar opinión</button>
+            </form>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

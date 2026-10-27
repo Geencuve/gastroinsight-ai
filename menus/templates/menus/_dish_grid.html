@@ -1,0 +1,59 @@
+﻿{% load gi_format %}
+{% if categories|length > 1 %}
+    <div class="chip-row">
+        <button type="button" class="chip is-active" data-filter="all">Todo</button>
+        {% for category in categories %}
+            <button type="button" class="chip" data-filter="{{ category|slugify }}">{{ category }}</button>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="dish-grid">
+    {% for card in cards %}
+        <article class="dish-card" data-category="{{ card.dish.category|default:'Otros'|slugify }}">
+            <div class="dish-media">
+                {% if card.dish.image %}
+                    <img src="{{ card.dish.image.url }}" alt="{{ card.dish.name }}" loading="lazy">
+                {% else %}
+                    <div class="dish-placeholder">🍽️</div>
+                {% endif %}
+                {% if card.is_top %}<span class="dish-badge">🔥 Más pedido</span>{% endif %}
+            </div>
+            <div class="dish-body">
+                <div class="dish-head">
+                    <h3>{{ card.dish.name }}</h3>
+                    <span class="dish-price">{{ card.dish.price|clp }}</span>
+                </div>
+                <p class="dish-meta">
+                    {{ card.dish.category|default:"Plato" }}
+                    {% if card.rating %} · ⭐ {{ card.rating|floatformat:1 }} ({{ card.rating_count }}){% endif %}
+                </p>
+                {% if card.dish.description %}<p class="dish-desc">{{ card.dish.description }}</p>{% endif %}
+                {% if show_upload %}
+                    <form method="post" enctype="multipart/form-data" class="dish-upload"
+                          action="{% url 'menus:dish_image' card.dish.menu_id card.dish.id %}">
+                        {% csrf_token %}
+                        <label class="btn btn-small">
+                            📷 {% if card.dish.image %}Cambiar foto{% else %}Subir foto{% endif %}
+                            <input type="file" name="image" accept="image/*" hidden onchange="this.form.submit()">
+                        </label>
+                    </form>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <p class="muted">No hay platos disponibles.</p>
+    {% endfor %}
+</div>
+
+<script>
+    document.querySelectorAll(".chip[data-filter]").forEach((chip) => {
+        chip.addEventListener("click", () => {
+            document.querySelectorAll(".chip[data-filter]").forEach((c) => c.classList.toggle("is-active", c === chip));
+            const filter = chip.dataset.filter;
+            document.querySelectorAll(".dish-card").forEach((card) => {
+                card.hidden = filter !== "all" && card.dataset.category !== filter;
+            });
+        });
+    });
+</script>

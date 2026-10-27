@@ -273,3 +273,74 @@ html[data-theme] ::-webkit-scrollbar-thumb { background: var(--border-strong); b
     html[data-theme] .container { padding: 1.25rem 1rem 3rem; }
     html[data-theme] h1 { font-size: 1.55rem; }
 }
+
+/* ---------- Carta visual ---------- */
+html[data-theme] .chip-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.25rem 0 1.25rem; }
+html[data-theme] .chip {
+    padding: 0.45rem 0.95rem; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font: 600 0.85rem/1 "Inter", sans-serif; cursor: pointer;
+}
+html[data-theme] .chip.is-active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; border-color: transparent; }
+html[data-theme] .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.1rem; }
+html[data-theme] .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.1rem; }
+html[data-theme] .dish-card {
+    display: flex; flex-direction: column; overflow: hidden; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 18px; color: var(--text); text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+html[data-theme] .dish-card:hover { transform: translateY(-3px); border-color: var(--border-strong); }
+html[data-theme] .dish-media { position: relative; aspect-ratio: 4 / 3; background: var(--surface-2); }
+html[data-theme] .dish-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+html[data-theme] .dish-placeholder { display: grid; place-items: center; height: 100%; font-size: 3rem; }
+html[data-theme] .dish-badge {
+    position: absolute; top: 0.7rem; left: 0.7rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+    background: rgba(5, 7, 11, 0.75); color: #ffffff; font-size: 0.75rem; font-weight: 700; backdrop-filter: blur(6px);
+}
+html[data-theme] .dish-body { display: flex; flex-direction: column; gap: 0.35rem; padding: 1rem 1.1rem 1.1rem; }
+html[data-theme] .dish-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
+html[data-theme] .dish-head h3, html[data-theme] .dish-body h3 { margin: 0; font-size: 1rem; }
+html[data-theme] .dish-price { font-family: "Space Grotesk", sans-serif; font-weight: 700; color: var(--accent); white-space: nowrap; }
+html[data-theme] .dish-meta, html[data-theme] .dish-desc { margin: 0; color: var(--muted); font-size: 0.85rem; }
+html[data-theme] .dish-upload { margin-top: 0.4rem; }
+html[data-theme] .dish-upload label { cursor: pointer; color: var(--text); font-size: 0.8rem; text-transform: none; letter-spacing: 0; }
+
+/* ---------- Selector visual de platos (pedidos) ---------- */
+html[data-theme] .dish-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; }
+html[data-theme] .dish-pick {
+    display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    font: inherit; text-align: left; cursor: pointer; transition: border-color 0.15s ease, transform 0.15s ease;
+}
+html[data-theme] .dish-pick:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+html[data-theme] .dish-pick.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+html[data-theme] .dish-pick img, html[data-theme] .dish-pick-ph {
+    width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px;
+    display: grid; place-items: center; background: var(--surface-3); font-size: 2rem;
+}
+html[data-theme] .dish-pick-name { font-weight: 600; font-size: 0.88rem; }
+html[data-theme] .dish-pick-price { color: var(--muted); font-size: 0.8rem; }
+
+/* ---------- Opinión del cliente ---------- */
+html[data-theme] .feedback-wrap { max-width: 520px; margin: 0 auto; }
+html[data-theme] .star-rating { display: inline-flex; flex-direction: row-reverse; gap: 0.3rem; }
+html[data-theme] .star-rating input { position: absolute; opacity: 0; pointer-events: none; }
+html[data-theme] .star-rating label {
+    font-size: 2.7rem; line-height: 1; color: var(--border-strong); cursor: pointer;
+    text-transform: none; letter-spacing: 0; transition: color 0.15s ease, transform 0.15s ease;
+}
+html[data-theme] .star-rating label:hover,
+html[data-theme] .star-rating label:hover ~ label,
+html[data-theme] .star-rating input:checked ~ label { color: var(--warning); }
+html[data-theme] .star-rating label:active { transform: scale(0.9); }
+
+/* ---------- Códigos QR (siempre blancos para escanear bien) ---------- */
+html[data-theme] .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+html[data-theme] .qr-card { text-align: center; padding: 1.1rem; border-radius: 16px; background: #ffffff; border: 1px solid var(--border); }
+html[data-theme] .qr-card h3 { color: #05070b; }
+html[data-theme] .qr-card p { color: #334155; font-size: 0.82rem; margin: 0.3rem 0; }
+html[data-theme] .qr-card svg { width: 180px; height: 180px; }
+@media print {
+    html[data-theme] body { background: #ffffff; }
+    .site-header, .no-print, .assistant-widget { display: none !important; }
+    .qr-card { break-inside: avoid; }
+}

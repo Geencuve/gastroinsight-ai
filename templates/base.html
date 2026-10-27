@@ -54,6 +54,7 @@
                         <a href="{% url 'operations:session_list' %}">Atención de mesas</a>
                         <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
                         <a href="{% url 'operations:evaluation_list' %}">Evaluaciones</a>
+                        <a href="{% url 'feedback:qr' %}">Códigos QR de opinión</a>
                         <a href="{% url 'operations:table_list' %}">Mesas</a>
                     </div>
                 </details>
@@ -76,7 +77,7 @@
                     <summary>Gestión</summary>
                     <div class="nav-menu">
                         <a href="{% url 'venues:list' %}">Locales</a>
-                        <a href="{% url 'menus:list' %}">Menús</a>
+                        <a href="{% url 'menus:list' %}">Cartas y fotos</a>
                         <a href="{% url 'monitoring:incident_list' %}">Incidencias</a>
                         <a href="{% url 'privacy:policy_list' %}">Privacidad</a>
                         {% if user.is_superuser %}<a href="{% url 'monitoring:audit_log_list' %}">Auditoría</a>{% endif %}

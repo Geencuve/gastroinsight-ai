@@ -1,0 +1,18 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Carta | {{ venue.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>{{ venue.name }}</h1>
+        <p class="muted">Nuestra carta{% if venue.address %} · {{ venue.address }}{% endif %}</p>
+    </div>
+</section>
+
+{% include "menus/_dish_grid.html" with show_upload=False %}
+
+<p class="muted" style="margin-top: 1.5rem;">
+    Para alergias o ingredientes específicos, consulta siempre al personal del local.
+</p>
+{% endblock %}

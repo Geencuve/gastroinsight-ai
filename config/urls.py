@@ -19,6 +19,7 @@ urlpatterns = [
     path("api/", include("api.urls", namespace="api")),
     path("assistant/", include("assistant_chat.urls", namespace="assistant_chat")),
     path("sales/", include("sales.urls", namespace="sales")),
+    path("opinion/", include("operations.feedback_urls", namespace="feedback")),
 ]
 if settings.DEBUG:
     urlpatterns += static(

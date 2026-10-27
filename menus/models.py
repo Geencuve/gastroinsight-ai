@@ -70,6 +70,11 @@ class Dish(models.Model):
         default=True,
         verbose_name="Disponible",
     )
+    image = models.ImageField(
+        upload_to="dishes/",
+        blank=True,
+        verbose_name="Foto del plato",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

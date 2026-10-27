@@ -1,0 +1,17 @@
+﻿{% extends "base.html" %}
+
+{% block title %}¡Gracias! | {{ venue.name }}{% endblock %}
+
+{% block content %}
+<div class="feedback-wrap">
+    <section class="card" style="text-align: center;">
+        <div style="font-size: 3rem;">🙌</div>
+        <h1>¡Gracias por tu opinión!</h1>
+        <p class="muted">La usaremos para mejorar la experiencia en {{ venue.name }}.</p>
+        <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+            <a class="btn btn-primary" href="{{ menu_url }}">Ver la carta</a>
+            <a class="btn btn-secondary" href="{{ chat_url }}">Hablar con el asistente</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

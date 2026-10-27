@@ -1,4 +1,4 @@
-﻿from django.core.management import call_command
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -27,6 +27,7 @@ class Command(BaseCommand):
 
         call_command("seed_demo_sales", reset=True)
         call_command("seed_demo_vision", reset=True)
+        call_command("generate_dish_images")
 
         webcam = Camera.objects.filter(name="Webcam de desarrollo").select_related("venue").first()
         if webcam and webcam.table is None:

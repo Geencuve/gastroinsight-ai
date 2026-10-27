@@ -165,6 +165,35 @@
 </section>
 
 {% if can_operate and order.can_be_edited %}
+    {% if dish_cards %}
+        <section class="card">
+            <h2>Elige un plato</h2>
+            <p class="muted">Toca un plato para seleccionarlo y luego indica la cantidad.</p>
+            <div class="dish-picker">
+                {% for card in dish_cards %}
+                    <button type="button" class="dish-pick" data-dish-id="{{ card.dish.id }}">
+                        {% if card.dish.image %}<img src="{{ card.dish.image.url }}" alt="">{% else %}<span class="dish-pick-ph">🍽️</span>{% endif %}
+                        <span class="dish-pick-name">{{ card.dish.name }}</span>
+                        <span class="dish-pick-price">{{ card.dish.price|clp }}{% if card.is_top %} · 🔥{% endif %}</span>
+                    </button>
+                {% endfor %}
+            </div>
+        </section>
+        <script>
+            document.querySelectorAll(".dish-pick").forEach((button) => {
+                button.addEventListener("click", () => {
+                    const select = document.getElementById("{{ item_form.dish.id_for_label }}");
+                    if (!select) return;
+                    select.value = button.dataset.dishId;
+                    document.querySelectorAll(".dish-pick").forEach((b) => b.classList.toggle("is-selected", b === button));
+                    const quantity = document.getElementById("{{ item_form.quantity.id_for_label }}");
+                    select.scrollIntoView({ behavior: "smooth", block: "center" });
+                    if (quantity) { quantity.focus(); quantity.select(); }
+                });
+            });
+        </script>
+    {% endif %}
+
     <section class="two-column-grid">
         <article class="card">
             <h2>Agregar producto</h2>
