@@ -1,0 +1,262 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Datos para entrenamiento | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .train-layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 1.25rem; align-items: start; }
+    .train-side { position: sticky; top: 5.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .train-side .card { margin: 0; }
+    .privacy-note { margin-bottom: 1.25rem; }
+    .privacy-note ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    .acc-compare { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; margin: 0.5rem 0 1rem; }
+    .acc-compare div span { display: block; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .acc-compare strong { font-family: "Space Grotesk", sans-serif; font-size: 1.7rem; color: var(--text-strong); }
+    .acc-arrow { font-size: 1.4rem; color: var(--muted); }
+    .cm-table { border-collapse: separate !important; border-spacing: 4px; width: auto !important; }
+    .cm-table th, .cm-table td { border: 0 !important; text-align: center; padding: 0.45rem 0.6rem !important; border-radius: 8px; font-size: 0.8rem; }
+    .cm-table td { min-width: 54px; font-weight: 700; color: var(--text-strong) !important; background: var(--surface-2); }
+    .cm-table td.diag { box-shadow: inset 0 0 0 2px var(--accent); }
+    .cm-table th.row-head { text-align: right; background: transparent !important; text-transform: none !important; }
+    .calib-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+    .calib-row:last-child { border-bottom: 0; }
+    .calib-row small { display: block; color: var(--muted); }
+    .calib-row form { margin: 0; display: flex; gap: 0.4rem; align-items: center; }
+    .sample-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.6rem; }
+    .sample { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface-2); font-size: 0.72rem; }
+    .sample img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .sample-meta { padding: 0.35rem 0.45rem; display: flex; justify-content: space-between; align-items: center; gap: 0.25rem; }
+    .sample-meta .ok { color: var(--success); font-weight: 700; }
+    .sample-meta .ko { color: var(--danger); font-weight: 700; }
+    .sample form { margin: 0; }
+    .sample form button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 0.85rem; }
+    .upload-form { display: grid; gap: 0.9rem; }
+    .upload-form .form-group { margin: 0; }
+    .upload-form select, .upload-form input[type="file"] { width: 100%; box-sizing: border-box; }
+    .consent { display: flex; gap: 0.55rem; align-items: flex-start; font-size: 0.82rem; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 500; }
+    .consent input { margin-top: 0.2rem; }
+    @media (max-width: 1100px) { .train-layout { grid-template-columns: 1fr; } .train-side { position: static; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🧪 Datos para entrenamiento</h1>
+        <p class="muted">Sube imágenes etiquetadas para medir la precisión del modelo y calibrarlo a tu local.</p>
+    </div>
+</section>
+
+<section class="now-box privacy-note">
+    <h2>🔒 Cómo protegemos estos datos</h2>
+    <ul>
+        <li>Cada carga exige <strong>consentimiento informado</strong> de las personas que aparecen.</li>
+        <li>De cada imagen se guarda <strong>solo el recorte del rostro en escala de grises (128×128)</strong>; la original se descarta.</li>
+        <li>Este conjunto está separado del análisis en vivo, que <strong>no guarda imágenes</strong>.</li>
+        <li>Puedes eliminar cualquier muestra o el conjunto completo. Todo queda en la auditoría.</li>
+    </ul>
+</section>
+
+<div class="train-layout">
+    <div>
+        <section class="card">
+            <h2>Rendimiento del modelo de expresiones</h2>
+            {% if eval_base %}
+                <div class="acc-compare">
+                    <div><span>FER+ base</span><strong>{{ eval_base.accuracy|floatformat:1 }}%</strong></div>
+                    {% if eval_calibrated %}
+                        <span class="acc-arrow">→</span>
+                        <div><span>Con calibración activa</span><strong>{{ eval_calibrated.accuracy|floatformat:1 }}%</strong></div>
+                    {% endif %}
+                    <div><span>Imágenes evaluadas</span><strong>{{ eval_base.total }}</strong></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="cm-table">
+                        <thead>
+                            <tr>
+                                <th>Real ↓ · Predicho →</th>
+                                {% for label in eval_shown.labels %}<th>{{ label }}</th>{% endfor %}
+                                <th>Acierto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in eval_shown.rows %}
+                                <tr>
+                                    <th class="row-head">{{ row.label }}</th>
+                                    {% for cell in row.cells %}
+                                        <td class="{% if cell.diag %}diag{% endif %}" style="background: rgba(34, 211, 238, {{ cell.alpha|stringformat:'s' }})">{{ cell.value }}</td>
+                                    {% endfor %}
+                                    <td>{% if row.recall is not None %}{{ row.recall|floatformat:0 }}%{% else %}—{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="muted">Matriz de confusión{% if eval_calibrated %} con la calibración activa{% endif %}: las filas son la etiqueta real y las columnas la predicción. La diagonal resaltada son los aciertos.</p>
+            {% else %}
+                <p class="muted">Aún no hay imágenes de expresiones. Sube al menos {{ min_per_label }} por expresión para evaluar el modelo.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Calibración del modelo (entrenamiento)</h2>
+            <p class="muted">Entrena una capa de regresión logística sobre las salidas de FER+ con tus imágenes etiquetadas. La mejora se mide con validación cruzada, para no sobreestimarla.</p>
+            <form method="post" action="{% url 'ai_vision:training_train' %}">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit" {% if not can_train %}disabled{% endif %}>🧠 Entrenar calibración</button>
+            </form>
+            {% if not can_train %}
+                <p class="muted">Requisito: al menos {{ min_total }} imágenes de 2 o más expresiones, con {{ min_per_label }} o más por expresión.</p>
+            {% endif %}
+            {% for cal in calibrations %}
+                <div class="calib-row">
+                    <div>
+                        <strong>{{ cal.created_at|date:"d-m-Y H:i" }} · {{ cal.samples_count }} imágenes</strong>
+                        <small>Precisión {{ cal.accuracy_before|floatformat:1 }}% → {{ cal.accuracy_after|floatformat:1 }}% · {{ cal.notes }}</small>
+                    </div>
+                    <form method="post" action="{% url 'ai_vision:training_toggle' cal.pk %}">
+                        {% csrf_token %}
+                        {% if cal.active %}
+                            <span class="status status-completed">Activa</span>
+                            <button class="btn btn-small" type="submit">Desactivar</button>
+                        {% else %}
+                            <button class="btn btn-small btn-primary" type="submit">Activar</button>
+                        {% endif %}
+                    </form>
+                </div>
+            {% empty %}
+                <p class="muted">Aún no hay calibraciones entrenadas.</p>
+            {% endfor %}
+        </section>
+
+        <section class="card">
+            <h2>Búsqueda de atención</h2>
+            {% if attention %}
+                <div class="acc-compare">
+                    <div><span>Umbral actual</span><strong>{{ attention.threshold|floatformat:2 }}</strong></div>
+                    <div><span>Precisión actual</span><strong>{{ attention.accuracy|floatformat:0 }}%</strong></div>
+                    {% if attention.can_suggest %}
+                        <span class="acc-arrow">→</span>
+                        <div><span>Umbral sugerido</span><strong>{{ attention.suggested|floatformat:2 }}</strong></div>
+                        <div><span>Precisión sugerida</span><strong>{{ attention.suggested_accuracy|floatformat:0 }}%</strong></div>
+                    {% endif %}
+                </div>
+                {% if attention.can_suggest and attention.suggested != attention.threshold %}
+                    <form method="post" action="{% url 'ai_vision:training_attention' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">Aplicar umbral sugerido</button>
+                    </form>
+                {% elif not attention.can_suggest %}
+                    <p class="muted">Sube al menos 6 imágenes con ambas etiquetas para sugerir un umbral.</p>
+                {% endif %}
+            {% else %}
+                <p class="muted">Sube imágenes de personas mirando la mesa y girando la cabeza como buscando al personal.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <h2>Imágenes del conjunto ({{ total_samples }})</h2>
+                {% if total_samples %}
+                    <form method="post" action="{% url 'ai_vision:training_delete_all' %}" onsubmit="return confirm('¿Eliminar todas las imágenes de entrenamiento? Esta acción no se puede deshacer.');">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-small" type="submit">Eliminar todo</button>
+                    </form>
+                {% endif %}
+            </div>
+            {% if samples %}
+                <div class="sample-grid">
+                    {% for sample in samples %}
+                        <article class="sample">
+                            {% if sample.image %}<img src="{{ sample.image.url }}" alt="Recorte de rostro etiquetado" loading="lazy">{% endif %}
+                            <div class="sample-meta">
+                                <span>{{ sample.get_label_display }}
+                                    {% if sample.predicted_label == sample.label %}<span class="ok">✓</span>{% else %}<span class="ko">✗</span>{% endif %}
+                                </span>
+                                <form method="post" action="{% url 'ai_vision:training_delete' sample.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" title="Eliminar muestra" aria-label="Eliminar muestra">✕</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+                <p class="muted" style="margin-top: 0.75rem;">✓ / ✗ indica si el modelo base acertó la etiqueta.</p>
+            {% else %}
+                <p class="muted">El conjunto está vacío.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <aside class="train-side">
+        <section class="card">
+            <h2>Ingresar datos para entrenamiento</h2>
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                <div class="form-group">
+                    <label for="{{ form.kind.id_for_label }}">{{ form.kind.label }}</label>
+                    {{ form.kind }}
+                </div>
+                <div class="form-group">
+                    <label for="id_label">{{ form.label.label }}</label>
+                    <select name="label" id="id_label">
+                        {% for group in label_groups %}
+                            <optgroup label="{{ group.title }}" data-kind="{{ group.kind }}">
+                                {% for value, name in group.options %}<option value="{{ value }}">{{ name }}</option>{% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.label.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.images.id_for_label }}">{{ form.images.label }}</label>
+                    {{ form.images }}
+                    <small>Hasta 50 imágenes por carga, 5 MB cada una. Todas con la misma etiqueta.</small>
+                    {% for error in form.images.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+                <label class="consent">{{ form.consent }} <span>{{ form.consent.label }}</span></label>
+                {% for error in form.consent.errors %}<p class="field-error">Debes confirmar el consentimiento.</p>{% endfor %}
+                <button class="btn btn-primary" type="submit">⬆️ Subir y procesar</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Composición del conjunto</h2>
+            <p class="muted">Expresiones</p>
+            <div class="chat-bars">
+                {% for bar in expression_bars %}
+                    <div class="chat-bar"><span class="chat-bar-label">{{ bar.label }}</span><span class="chat-bar-track"><span class="chat-bar-fill" style="width: {{ bar.pct }}%"></span></span><span class="chat-bar-value">{{ bar.value }}</span></div>
+                {% endfor %}
+            </div>
+            <p class="muted" style="margin-top: 1rem;">Atención</p>
+            <div class="chat-bars">
+                {% for bar in attention_bars %}
+                    <div class="chat-bar"><span class="chat-bar-label">{{ bar.label }}</span><span class="chat-bar-track"><span class="chat-bar-fill" style="width: {{ bar.pct }}%"></span></span><span class="chat-bar-value">{{ bar.value }}</span></div>
+                {% endfor %}
+            </div>
+        </section>
+    </aside>
+</div>
+
+<script>
+    (function () {
+        const kind = document.getElementById("{{ form.kind.id_for_label }}");
+        const label = document.getElementById("id_label");
+        function sync() {
+            label.querySelectorAll("optgroup").forEach((group) => {
+                const match = group.dataset.kind === kind.value;
+                group.disabled = !match;
+                group.hidden = !match;
+            });
+            const current = label.selectedOptions[0];
+            if (!current || current.parentElement.disabled) {
+                const first = label.querySelector(`optgroup[data-kind="${kind.value}"] option`);
+                if (first) label.value = first.value;
+            }
+        }
+        kind.addEventListener("change", sync);
+        sync();
+    })();
+</script>
+{% endblock %}

@@ -62,6 +62,7 @@
                     <summary>Visión IA</summary>
                     <div class="nav-menu">
                         <a href="{% url 'ai_vision:monitor' %}">📡 Monitor en vivo</a>
+                        {% if user.is_staff %}<a href="{% url 'ai_vision:training' %}">🧪 Datos para entrenamiento</a>{% endif %}
                         <a href="{% url 'ai_vision:session_list' %}">Sesiones de análisis</a>
                         <a href="{% url 'cameras:list' %}">Cámaras</a>
                         <a href="{% url 'analytics:correlation' %}">Panel de correlación</a>
@@ -214,7 +215,7 @@
         })();
     </script>
     <script src="{% static 'js/main.js' %}?v=9"></script>
-    <script src="{% static 'js/guide.js' %}?v=1"></script>
+    <script src="{% static 'js/guide.js' %}?v=2"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

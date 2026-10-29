@@ -1,4 +1,4 @@
-﻿/* GastroInsight AI · Leyendas de ayuda (2 s sobre una función) y tour guiado. */
+/* GastroInsight AI · Leyendas de ayuda (2 s sobre una función) y tour guiado. */
 (function () {
     "use strict";
 
@@ -15,6 +15,7 @@
         "/operations/evaluations/create/": "Registra la valoración de un cliente.",
         "/opinion/qr/": "Imprime un código QR por mesa para que los clientes califiquen sin crear una cuenta.",
         "/operations/tables/": "Mesas del local: código, capacidad y zona.",
+        "/ai/entrenamiento/": "Sube imágenes etiquetadas con consentimiento para medir la precisión del modelo (matriz de confusión) y calibrarlo.",
         "/ai/monitor/": "Estado en tiempo real de cada mesa: Índice de Experiencia Observable y alertas.",
         "/ai/sessions/": "Crea e inicia análisis con la cámara. Los fotogramas se procesan en memoria y no se guardan.",
         "/cameras/": "Cámaras registradas y la mesa que monitorea cada una.",

@@ -98,3 +98,6 @@ vistas_*.txt
 vistas_*.txt
 ai_vision/ml_models/*.onnx
 logs/
+build/
+dist/
+desktop/icon.ico

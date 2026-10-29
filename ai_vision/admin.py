@@ -68,3 +68,17 @@ class DetectionEventAdmin(admin.ModelAdmin):
         "detected_at",
         "processing_time_ms",
     )
+
+from .models import CalibrationModel, TrainingSample  # noqa: E402
+
+
+@admin.register(TrainingSample)
+class TrainingSampleAdmin(admin.ModelAdmin):
+    list_display = ("id", "kind", "label", "predicted_label", "consent_confirmed", "uploaded_by", "created_at")
+    list_filter = ("kind", "label", "consent_confirmed")
+
+
+@admin.register(CalibrationModel)
+class CalibrationModelAdmin(admin.ModelAdmin):
+    list_display = ("id", "kind", "active", "samples_count", "accuracy_before", "accuracy_after", "created_at")
+    list_filter = ("kind", "active")

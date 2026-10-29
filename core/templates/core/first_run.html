@@ -1,0 +1,51 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Bienvenido | GastroInsight AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-wrap { max-width: 760px; margin: 1rem auto 3rem; }
+    .setup-hero { text-align: center; margin-bottom: 1.5rem; }
+    .setup-hero h1 { margin: 1rem 0 0.3rem; }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.25rem; }
+    .setup-grid .full { grid-column: 1 / -1; }
+    .setup-grid input { width: 100%; box-sizing: border-box; }
+    .setup-step { margin: 0.5rem 0 0.75rem; color: var(--accent); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+    .setup-demo { display: flex; gap: 0.6rem; align-items: flex-start; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text); }
+    @media (max-width: 700px) { .setup-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-wrap">
+    <section class="setup-hero">
+        <span class="aw-avatar lg" aria-hidden="true"></span>
+        <h1>Bienvenido a GastroInsight AI</h1>
+        <p class="muted">Configuremos tu local en menos de un minuto. Después te mostraremos un tour por la aplicación.</p>
+    </section>
+    <section class="card">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+            <p class="setup-step">1 · Tu local</p>
+            <div class="setup-grid">
+                {% for field in form %}
+                    {% if field.name == "first_name" %}</div><p class="setup-step">2 · Tu cuenta de administrador</p><div class="setup-grid">{% endif %}
+                    {% if field.name == "load_demo" %}
+                        </div><p class="setup-step">3 · Opcional</p>
+                        <label class="setup-demo">{{ field }} <span>{{ field.label }}</span></label>
+                        <div>
+                    {% else %}
+                        <div class="form-group {% if field.name == 'venue_name' or field.name == 'address' %}full{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem;">Comenzar →</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -32,3 +32,10 @@ elif settings.SERVE_MEDIA:
     from django.views.static import serve
 
     urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
+
+if not settings.DEBUG and getattr(settings, "SERVE_STATIC", False):
+    # Versión de escritorio: sirve los archivos estáticos recopilados.
+    from django.urls import re_path
+    from django.views.static import serve as static_serve
+
+    urlpatterns += [re_path(r"^static/(?P<path>.*)$", static_serve, {"document_root": settings.STATIC_ROOT})]

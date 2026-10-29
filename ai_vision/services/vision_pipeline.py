@@ -48,6 +48,26 @@ def _softmax(values):
     return exp / exp.sum()
 
 
+EMOTION_ORDER = [TO_EMOTION[label] for label in FERPLUS_LABELS]
+EMOTION_VALENCE = {TO_EMOTION[label]: float(v) for label, v in zip(FERPLUS_LABELS, VALENCE_VECTOR)}
+
+
+def calibrated_emotion(probs, weights):
+    """Aplica la calibración entrenada (regresión logística sobre log-probabilidades de FER+)."""
+    features = np.log(np.clip(np.asarray(probs, dtype=float), 1e-6, 1.0))
+    coef = np.asarray(weights["coef"], dtype=float)
+    intercept = np.asarray(weights["intercept"], dtype=float)
+    classes = weights["classes"]
+    if len(classes) == 2:
+        positive = 1.0 / (1.0 + np.exp(-(float(features @ coef[0]) + float(intercept[0]))))
+        scores = np.array([1.0 - positive, positive])
+    else:
+        scores = _softmax(coef @ features + intercept)
+    index = int(np.argmax(scores))
+    valence = sum(float(scores[i]) * EMOTION_VALENCE.get(label, 0.0) for i, label in enumerate(classes))
+    return classes[index], float(scores[index]), max(-1.0, min(1.0, valence))
+
+
 class VisionPipeline:
     def __init__(self, score_threshold=0.70, models_dir=None, max_width=640):
         directory = Path(models_dir) if models_dir else MODELS_DIR
@@ -64,6 +84,11 @@ class VisionPipeline:
         self.detector = cv2.FaceDetectorYN.create(str(yunet), "", (320, 320), score_threshold, 0.3, 50)
         self.fer = cv2.dnn.readNetFromONNX(str(ferplus))
         self._previous_thumb = None
+        from ai_vision.services.training import load_active_calibrations
+
+        calibrations = load_active_calibrations()
+        self.calibration = calibrations["expression"]
+        self.looking_away_yaw = calibrations["attention_threshold"] or LOOKING_AWAY_YAW
 
     def _activity(self, gray_small):
         thumb = cv2.GaussianBlur(cv2.resize(gray_small, (64, 48), interpolation=cv2.INTER_AREA), (3, 3), 0)
@@ -110,6 +135,8 @@ class VisionPipeline:
                 index = int(np.argmax(probs))
                 emotion, emotion_confidence = TO_EMOTION[FERPLUS_LABELS[index]], float(probs[index])
                 valence = float(np.clip(np.dot(probs, VALENCE_VECTOR), -1.0, 1.0))
+                if self.calibration:
+                    emotion, emotion_confidence, valence = calibrated_emotion(probs, self.calibration)
                 del crop
             results.append({
                 "box": {"x": x0, "y": y0, "width": x1 - x0, "height": y1 - y0},
@@ -118,7 +145,7 @@ class VisionPipeline:
                 "emotion_confidence": emotion_confidence,
                 "valence": valence,
                 "yaw": float(yaw),
-                "looking_away": bool(abs(yaw) > LOOKING_AWAY_YAW),
+                "looking_away": bool(abs(yaw) > self.looking_away_yaw),
             })
         del gray, small_gray, small
 

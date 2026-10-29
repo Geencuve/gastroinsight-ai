@@ -1,4 +1,4 @@
-﻿from django import template
+from django import template
 from django.apps import apps
 from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
@@ -29,7 +29,8 @@ SECTIONS = [
     {"icon": "book", "title": "Locales y carta", "subtitle": "Locales, menús y platos", "wide": False,
      "models": [("venues", "venue"), ("menus", "menu"), ("menus", "dish")]},
     {"icon": "eye", "title": "Visión IA", "subtitle": "Cámaras, sesiones y eventos agregados", "wide": False,
-     "models": [("cameras", "camera"), ("ai_vision", "analysissession"), ("ai_vision", "detectionevent")]},
+     "models": [("cameras", "camera"), ("ai_vision", "analysissession"), ("ai_vision", "detectionevent"),
+                ("ai_vision", "trainingsample"), ("ai_vision", "calibrationmodel")]},
     {"icon": "lock", "title": "Usuarios, privacidad y control", "subtitle": "Accesos, roles, privacidad, incidencias y auditoría", "wide": True,
      "models": [("auth", "user"), ("auth", "group"), ("authentication", "profile"), ("privacy", "privacypolicy"),
                 ("privacy", "processingauthorization"), ("monitoring", "incident"), ("monitoring", "auditlog")]},

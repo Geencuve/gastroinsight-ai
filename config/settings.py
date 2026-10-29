@@ -46,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.FirstRunMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -71,6 +72,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DB_ENGINE = config('DB_ENGINE', default='sqlite')
+SQLITE_PATH = config('SQLITE_PATH', default=str(BASE_DIR / 'db.sqlite3'))
 
 if DB_ENGINE == 'postgres':
     DATABASES = {
@@ -87,7 +89,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': SQLITE_PATH,
         }
     }
 
@@ -112,7 +114,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(config("MEDIA_ROOT", default=str(BASE_DIR / "media")))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -138,3 +140,6 @@ REST_FRAMEWORK = {
 }
 
 ASSISTANT_NAME = config("ASSISTANT_NAME", default="Sazón")
+
+DESKTOP_MODE = config('DESKTOP_MODE', default=False, cast=bool)
+SERVE_STATIC = config('SERVE_STATIC', default=False, cast=bool)

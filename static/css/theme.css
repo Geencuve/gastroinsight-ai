@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    GastroInsight AI · Sistema visual (oscuro / claro)
    Se aplica con html[data-theme] para tener prioridad sobre
    estilos anteriores y estilos propios de cada página.
@@ -676,3 +676,5 @@ html[data-theme] .user-menu-tour {
     padding: 0.5rem 0.75rem; border-radius: 8px; font: inherit; cursor: pointer;
 }
 html[data-theme] .user-menu-tour:hover { background: var(--accent-soft); color: var(--accent); }
+
+html[data-theme] .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
