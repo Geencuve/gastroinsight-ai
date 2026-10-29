@@ -1,0 +1,39 @@
+﻿{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Administración · GastroInsight AI{% endblock %}
+
+{% block dark-mode-vars %}
+    <script>
+        try {
+            var giTheme = localStorage.getItem("gi-theme");
+            if (giTheme) localStorage.setItem("theme", giTheme);
+        } catch (e) {}
+    </script>
+    {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+    <link rel="stylesheet" href="{% static 'css/admin_theme.css' %}?v=1">
+{% endblock %}
+
+{% block branding %}
+    <div id="site-name">
+        <a href="{% url 'admin:index' %}" class="gi-admin-brand">
+            <span class="gi-orb" aria-hidden="true"></span>
+            <span>GastroInsight AI</span>
+            <small>Administración</small>
+        </a>
+    </div>
+    {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+
+{% block userlinks %}
+    <a href="{% url 'core:home' %}">← Volver a GastroInsight</a> /
+    {{ block.super }}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

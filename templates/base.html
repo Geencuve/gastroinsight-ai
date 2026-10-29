@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=7">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=8">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -87,11 +87,26 @@
                     </div>
                 </details>
                 <a href="{% url 'assistant_chat:staff_chat' %}">✨ {{ assistant_name }}</a>
-                <a href="{% url 'authentication:profile' %}">Mi perfil</a>
-                <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
-                    {% csrf_token %}
-                    <button class="nav-logout" type="submit">Cerrar sesión</button>
-                </form>
+                <details class="nav-group user-menu">
+                    <summary aria-label="Menú de usuario">
+                        <span class="user-avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+                        <span class="user-name">{{ user.first_name|default:user.username }}</span>
+                    </summary>
+                    <div class="nav-menu nav-menu-right">
+                        <div class="user-menu-head">
+                            <strong>{{ user.get_full_name|default:user.username }}</strong>
+                            <small>{{ user.email|default:"Sin correo registrado" }}</small>
+                        </div>
+                        <a href="{% url 'authentication:profile' %}">👤 Mi perfil</a>
+                        <a href="{% url 'authentication:profile' %}#configuracion">⚙️ Configuración de cuenta</a>
+                        <a href="{% url 'authentication:password_change' %}">🔑 Cambiar contraseña</a>
+                        {% if user.is_staff %}<a href="/admin/">🛠️ Administración</a>{% endif %}
+                        <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button class="nav-logout user-logout" type="submit">↩ Cerrar sesión</button>
+                        </form>
+                    </div>
+                </details>
             {% else %}
                 <a href="{% url 'authentication:login' %}">Ingresar</a>
                 <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
@@ -182,7 +197,7 @@
             }
             function setTheme(theme) {
                 root.setAttribute("data-theme", theme);
-                try { localStorage.setItem("gi-theme", theme); } catch (e) {}
+                try { localStorage.setItem("gi-theme", theme); localStorage.setItem("theme", theme); } catch (e) {}
                 if (toggle) toggle.textContent = theme === "dark" ? "☀" : "☾";
                 const meta = document.querySelector('meta[name="theme-color"]');
                 if (meta) meta.setAttribute("content", theme === "dark" ? "#05070b" : "#f6f7fb");
@@ -197,7 +212,7 @@
             window.addEventListener("load", applyChartTheme);
         })();
     </script>
-    <script src="{% static 'js/main.js' %}?v=7"></script>
+    <script src="{% static 'js/main.js' %}?v=8"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
