@@ -83,3 +83,34 @@ class RegisterForm(UserCreationForm):
             )
 
         return email
+
+
+class AccountForm(forms.ModelForm):
+    """Datos editables de la cuenta desde Mi perfil."""
+
+    phone = forms.CharField(label="Teléfono", max_length=30, required=False,
+                            widget=forms.TextInput(attrs={"placeholder": "+56 9 1234 5678"}))
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email")
+        labels = {"first_name": "Nombre", "last_name": "Apellido", "email": "Correo electrónico"}
+
+    def __init__(self, *args, profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+        if profile is not None and not self.is_bound:
+            self.fields["phone"].initial = profile.phone
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if email and User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ese correo ya está registrado en otra cuenta.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        if commit and self.profile is not None:
+            self.profile.phone = self.cleaned_data.get("phone", "").strip()
+            self.profile.save(update_fields=["phone", "updated_at"])
+        return user

@@ -1,48 +1,146 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Mi perfil | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Mi perfil</h1>
+<div class="profile-layout">
+    <aside class="profile-card">
+        <div class="profile-avatar">{{ initial }}</div>
+        <h1>{{ user.get_full_name|default:user.username }}</h1>
+        <p class="muted">@{{ user.username }}</p>
+        <span class="role-badge role-{{ role_key }}">{{ profile.get_role_display }}</span>
 
-    <p>
-        <strong>Usuario:</strong>
-        {{ request.user.username }}
-    </p>
+        <dl class="profile-facts">
+            <div><dt>Correo</dt><dd>{{ user.email|default:"Sin registrar" }}</dd></div>
+            <div><dt>Teléfono</dt><dd>{{ profile.phone|default:"Sin registrar" }}</dd></div>
+            <div><dt>Miembro desde</dt><dd>{{ user.date_joined|date:"d \d\e F \d\e Y" }}</dd></div>
+            <div><dt>Último acceso</dt><dd>{{ user.last_login|date:"d-m-Y H:i"|default:"—" }}</dd></div>
+        </dl>
 
-    <p>
-        <strong>Nombre:</strong>
-        {{ request.user.get_full_name|default:"No informado" }}
-    </p>
+        <nav class="profile-nav">
+            <a href="#locales">🏪 Locales y permisos</a>
+            <a href="#configuracion">⚙️ Configuración de cuenta</a>
+            <a href="#seguridad">🔒 Seguridad</a>
+            <a href="#preferencias">🎨 Preferencias</a>
+            <a href="#actividad">🕑 Mi actividad</a>
+        </nav>
 
-    <p>
-        <strong>Correo:</strong>
-        {{ request.user.email|default:"No informado" }}
-    </p>
+        <form method="post" action="{% url 'authentication:logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger profile-logout" type="submit">↩ Cerrar sesión</button>
+        </form>
+    </aside>
 
-    <p>
-        <strong>Rol:</strong>
-        {{ profile.get_role_display }}
-    </p>
+    <div class="profile-main">
+        <section class="card" id="locales">
+            <h2>Mis locales y permisos</h2>
+            <div class="venue-chips">
+                {% if all_venues %}<span class="venue-chip">🌐 Todos los locales de la plataforma</span>{% endif %}
+                {% for venue in venues %}
+                    <span class="venue-chip">🏪 {{ venue.name }}</span>
+                {% empty %}
+                    <p class="muted">Aún no tienes locales asignados. Un administrador debe asignártelos.</p>
+                {% endfor %}
+            </div>
+            <ul class="capability-list">
+                {% for item in capabilities %}
+                    <li class="{% if item.allowed %}is-allowed{% else %}is-denied{% endif %}">
+                        <span>{% if item.allowed %}✓{% else %}✕{% endif %}</span>{{ item.label }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
 
-    <p>
-        <strong>Locales asignados:</strong>
-    </p>
-    <p>
-        <a
-            class="btn btn-primary"
-            href="{% url 'authentication:password_change' %}"
-        >
-            Cambiar contraseña
-        </a>
-    </p>
-    <ul>
-        {% for venue in profile.venues.all %}
-            <li>{{ venue.name }}</li>
-        {% empty %}
-            <li>No tienes locales asignados todavía.</li>
-        {% endfor %}
-    </ul>
-</section>
+        <section class="card" id="configuracion">
+            <h2>Configuración de cuenta</h2>
+            <p class="muted">Estos datos se muestran en tu perfil y en el registro de auditoría.</p>
+            <form method="post" class="profile-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                <div class="profile-grid">
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" value="{{ user.username }}" disabled>
+                        <small>El nombre de usuario no se puede cambiar.</small>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Guardar cambios</button>
+            </form>
+        </section>
+
+        <section class="card" id="seguridad">
+            <h2>Seguridad</h2>
+            <div class="setting-row">
+                <div><strong>Contraseña</strong><small>Usa al menos 8 caracteres y cámbiala si la compartiste.</small></div>
+                <a class="btn btn-secondary" href="{% url 'authentication:password_change' %}">🔑 Cambiar contraseña</a>
+            </div>
+            <div class="setting-row">
+                <div><strong>Sesión actual</strong><small>Último acceso: {{ user.last_login|date:"d-m-Y H:i"|default:"—" }}</small></div>
+                <form method="post" action="{% url 'authentication:logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit">Cerrar sesión</button>
+                </form>
+            </div>
+            {% if user.is_staff %}
+                <div class="setting-row">
+                    <div><strong>Administración</strong><small>Usuarios, roles, locales y datos maestros.</small></div>
+                    <a class="btn btn-secondary" href="/admin/">🛠️ Abrir administración</a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="card" id="preferencias">
+            <h2>Preferencias</h2>
+            <div class="setting-row">
+                <div><strong>Tema de la interfaz</strong><small>Se guarda en este navegador y también aplica al panel de administración.</small></div>
+                <div class="segmented">
+                    <button type="button" data-theme-choice="dark">🌙 Oscuro</button>
+                    <button type="button" data-theme-choice="light">☀️ Claro</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div><strong>Asistente de gestión</strong><small>Tu copiloto para consultas, métricas e ideas.</small></div>
+                <a class="btn btn-secondary" href="{% url 'assistant_chat:staff_chat' %}">✨ Abrir {{ assistant_name }}</a>
+            </div>
+        </section>
+
+        <section class="card" id="actividad">
+            <h2>Mi actividad reciente</h2>
+            {% if activity %}
+                <ul class="activity-list">
+                    {% for item in activity %}
+                        <li>
+                            <span class="activity-tag">{{ item.action }}</span>
+                            <span class="activity-text">{{ item.description }}</span>
+                            <small>{{ item.when|date:"d-m-Y H:i" }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="muted">Aún no hay acciones registradas para tu cuenta.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const buttons = document.querySelectorAll("[data-theme-choice]");
+        const mark = () => buttons.forEach((b) => b.classList.toggle("is-active", b.dataset.themeChoice === document.documentElement.getAttribute("data-theme")));
+        buttons.forEach((button) => button.addEventListener("click", () => {
+            if (document.documentElement.getAttribute("data-theme") !== button.dataset.themeChoice) {
+                document.getElementById("theme-toggle").click();
+            }
+            mark();
+        }));
+        mark();
+    })();
+</script>
 {% endblock %}

@@ -1,4 +1,4 @@
-﻿from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from authentication.models import Profile
@@ -24,3 +24,10 @@ class AdminAndUserMenuTests(TestCase):
         self.assertContains(response, "user-menu")
         self.assertContains(response, "Configuración de cuenta")
         self.assertContains(response, "Cerrar sesión")
+
+    def test_portada_del_admin_rediseñada(self):
+        response = self.client.get("/admin/")
+        self.assertContains(response, "gi-stats")
+        self.assertContains(response, "Nuevo usuario")
+        self.assertContains(response, "Visión IA")
+        self.assertContains(response, "Usuarios activos")

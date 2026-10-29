@@ -1,0 +1,88 @@
+﻿{% extends "admin/base_site.html" %}
+{% load i18n log gi_admin %}
+
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} gi-dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+{% gi_admin_stats as stats %}
+{% gi_admin_sections app_list as sections %}
+<div class="gi-admin">
+    <section class="gi-hero">
+        <div>
+            <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+            <p>Administra usuarios, locales, carta, cámaras y datos de GastroInsight AI.</p>
+        </div>
+        <div class="gi-hero-actions">
+            <a class="gi-btn gi-btn-primary" href="{% url 'admin:auth_user_add' %}">{% gi_icon "plus" 16 %} Nuevo usuario</a>
+            <a class="gi-btn" href="{% url 'admin:menus_dish_add' %}">{% gi_icon "plus" 16 %} Nuevo plato</a>
+            <a class="gi-btn" href="{% url 'admin:operations_restauranttable_add' %}">{% gi_icon "plus" 16 %} Nueva mesa</a>
+            <a class="gi-btn" href="{% url 'core:home' %}">{% gi_icon "back" 16 %} Volver a la app</a>
+        </div>
+    </section>
+
+    <section class="gi-stats">
+        {% for stat in stats %}
+            <a class="gi-stat" href="{{ stat.url }}">
+                <span class="gi-stat-icon">{% gi_icon stat.icon 20 %}</span>
+                <span class="gi-stat-text"><strong>{{ stat.value }}</strong><small>{{ stat.label }}</small></span>
+            </a>
+        {% endfor %}
+    </section>
+
+    <div class="gi-admin-layout">
+        <div class="gi-sections">
+            {% for section in sections %}
+                <section class="gi-section{% if section.wide %} gi-section-wide{% endif %}">
+                    <header>
+                        <span class="gi-section-icon">{% gi_icon section.icon 20 %}</span>
+                        <div><h2>{{ section.title }}</h2><p>{{ section.subtitle }}</p></div>
+                    </header>
+                    <div class="gi-tiles">
+                        {% for tile in section.tiles %}
+                            <article class="gi-tile">
+                                <span class="gi-tile-name">{{ tile.name }}</span>
+                                <strong class="gi-tile-count">{% if tile.count is not None %}{{ tile.count }}{% else %}—{% endif %}</strong>
+                                <div class="gi-tile-actions">
+                                    {% if tile.admin_url %}<a href="{{ tile.admin_url }}">Ver lista {% gi_icon "arrow" 14 %}</a>{% else %}<span></span>{% endif %}
+                                    {% if tile.add_url %}<a class="gi-tile-add" href="{{ tile.add_url }}" title="Añadir" aria-label="Añadir {{ tile.name|lower }}">{% gi_icon "plus" 16 %}</a>{% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endfor %}
+        </div>
+
+        <aside class="gi-recent">
+            <h2>Acciones recientes</h2>
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if admin_log %}
+                <ul>
+                    {% for entry in admin_log %}
+                        <li class="{% if entry.is_addition %}is-add{% elif entry.is_change %}is-change{% else %}is-delete{% endif %}">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                <strong>{{ entry.object_repr }}</strong>
+                            {% else %}
+                                <a href="{{ entry.get_admin_url }}"><strong>{{ entry.object_repr }}</strong></a>
+                            {% endif %}
+                            <small>
+                                {% if entry.is_addition %}Creado{% elif entry.is_change %}Modificado{% else %}Eliminado{% endif %}
+                                {% if entry.content_type %} · {{ entry.content_type.name|capfirst }}{% endif %}
+                                · {{ entry.action_time|date:"d-m H:i" }}
+                            </small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="gi-empty">Aún no hay acciones en el panel. Cuando crees o modifiques registros, aparecerán aquí.</p>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

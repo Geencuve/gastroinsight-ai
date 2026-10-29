@@ -578,3 +578,65 @@ html[data-theme] .user-menu .logout-form { margin: 0.3rem 0 0; padding-top: 0.3r
 html[data-theme] .user-logout { width: 100%; text-align: left; color: var(--danger) !important; padding: 0.5rem 0.75rem !important; }
 html[data-theme] .user-logout:hover { background: var(--danger-soft) !important; }
 @media (max-width: 900px) { html[data-theme] .user-name { display: none; } }
+
+/* ---------- Mi perfil ---------- */
+html[data-theme] .profile-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+html[data-theme] .profile-card {
+    position: sticky; top: 5.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 1.6rem 1.25rem; border-radius: 20px; background: var(--surface); border: 1px solid var(--border);
+}
+html[data-theme] .profile-avatar {
+    width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 0.8rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff;
+    font: 700 2rem "Space Grotesk", sans-serif; box-shadow: 0 0 34px rgba(139, 92, 246, 0.3);
+}
+html[data-theme] .profile-card h1 { font-size: 1.3rem; margin: 0; }
+html[data-theme] .profile-card > p { margin: 0.15rem 0 0.7rem; }
+html[data-theme] .role-badge { padding: 0.28rem 0.8rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; background: var(--info-soft); color: var(--info); }
+html[data-theme] .role-platform_admin { background: var(--accent-soft); color: var(--accent); }
+html[data-theme] .role-venue_admin { background: var(--success-soft); color: var(--success); }
+html[data-theme] .role-operator { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .profile-facts { width: 100%; margin: 1.2rem 0; display: grid; gap: 0.55rem; text-align: left; }
+html[data-theme] .profile-facts div { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 0.85rem; }
+html[data-theme] .profile-facts dt { color: var(--muted); }
+html[data-theme] .profile-facts dd { margin: 0; color: var(--text); text-align: right; overflow-wrap: anywhere; }
+html[data-theme] .profile-nav { width: 100%; display: grid; gap: 0.2rem; padding: 0.8rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 1rem; text-align: left; }
+html[data-theme] .profile-nav a { padding: 0.5rem 0.6rem; border-radius: 9px; color: var(--text); text-decoration: none; font-size: 0.88rem; }
+html[data-theme] .profile-nav a:hover { background: var(--surface-2); color: var(--accent); }
+html[data-theme] .profile-card form { width: 100%; }
+html[data-theme] .profile-logout { width: 100%; }
+html[data-theme] .profile-main .card { scroll-margin-top: 6rem; }
+html[data-theme] .venue-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+html[data-theme] .venue-chip { padding: 0.4rem 0.8rem; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 0.85rem; }
+html[data-theme] .capability-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+html[data-theme] .capability-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
+html[data-theme] .capability-list li span { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; }
+html[data-theme] .capability-list .is-allowed span { background: var(--success-soft); color: var(--success); }
+html[data-theme] .capability-list .is-denied { color: var(--muted); }
+html[data-theme] .capability-list .is-denied span { background: var(--surface-3); color: var(--muted); }
+html[data-theme] .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 1rem; margin: 1rem 0 0.5rem; }
+html[data-theme] .profile-grid input { width: 100%; box-sizing: border-box; }
+html[data-theme] .setting-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+html[data-theme] .setting-row:last-child { border-bottom: 0; }
+html[data-theme] .setting-row strong { display: block; color: var(--text-strong); }
+html[data-theme] .setting-row small { color: var(--muted); }
+html[data-theme] .setting-row form { margin: 0; }
+html[data-theme] .segmented { display: inline-flex; padding: 0.25rem; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .segmented button { padding: 0.45rem 0.9rem; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: 600 0.85rem "Inter", sans-serif; cursor: pointer; }
+html[data-theme] .segmented button.is-active { background: var(--surface); color: var(--text-strong); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+html[data-theme] .activity-list { list-style: none; margin: 0; padding: 0; }
+html[data-theme] .activity-list li { display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.86rem; }
+html[data-theme] .activity-list li:last-child { border-bottom: 0; }
+html[data-theme] .activity-tag { padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--surface-3); color: var(--muted); font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+html[data-theme] .activity-list small { color: var(--muted); white-space: nowrap; }
+@media (max-width: 900px) {
+    html[data-theme] .profile-layout { grid-template-columns: 1fr; }
+    html[data-theme] .profile-card { position: static; }
+}
+
+/* ---------- Ingresar y cambiar contraseña ---------- */
+html[data-theme] .auth-card { max-width: 440px; margin: 3rem auto; padding: 2rem; }
+html[data-theme] .auth-card .form-input, html[data-theme] .auth-card input { width: 100%; box-sizing: border-box; }
+html[data-theme] .auth-card .btn-primary { width: 100%; margin: 0.5rem 0 1rem; }
+html[data-theme] .form-error { color: var(--danger); font-size: 0.82rem; margin: 0.3rem 0 0; }
+html[data-theme] .auth-card ul { padding-left: 1.1rem; color: var(--muted); font-size: 0.8rem; }
