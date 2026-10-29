@@ -640,3 +640,39 @@ html[data-theme] .auth-card .form-input, html[data-theme] .auth-card input { wid
 html[data-theme] .auth-card .btn-primary { width: 100%; margin: 0.5rem 0 1rem; }
 html[data-theme] .form-error { color: var(--danger); font-size: 0.82rem; margin: 0.3rem 0 0; }
 html[data-theme] .auth-card ul { padding-left: 1.1rem; color: var(--muted); font-size: 0.8rem; }
+
+/* ---------- Leyendas de ayuda ---------- */
+.gi-tooltip {
+    position: fixed; z-index: 3000; max-width: 290px; padding: 0.6rem 0.8rem; border-radius: 10px;
+    background: var(--text-strong); color: var(--bg); font: 500 0.8rem/1.45 "Inter", sans-serif;
+    box-shadow: var(--shadow); pointer-events: none; opacity: 0; transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.gi-tooltip.is-visible { opacity: 1; transform: none; }
+
+/* ---------- Tour guiado ---------- */
+.gi-tour-backdrop { position: fixed; inset: 0; z-index: 2990; background: rgba(5, 7, 11, 0.62); }
+.gi-tour-spot {
+    position: fixed; z-index: 2991; border-radius: 12px; pointer-events: none;
+    box-shadow: 0 0 0 9999px rgba(5, 7, 11, 0.62), 0 0 0 3px var(--accent);
+    transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.gi-tour-card {
+    position: fixed; z-index: 2992; width: min(350px, calc(100vw - 2rem)); padding: 1.15rem 1.25rem;
+    border-radius: 16px; background: var(--surface); border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow); color: var(--text); transition: top 0.25s ease, left 0.25s ease;
+}
+.gi-tour-card h3 { margin: 0.25rem 0 0.4rem; font-size: 1.05rem; color: var(--text-strong); }
+.gi-tour-card p { margin: 0 0 1rem; font-size: 0.9rem; color: var(--text); }
+.gi-tour-counter { color: var(--accent); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.gi-tour-actions { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.gi-tour-actions > div { display: flex; gap: 0.4rem; }
+.gi-tour-skip { border: 0; background: transparent; color: var(--muted); font: 500 0.82rem "Inter", sans-serif; cursor: pointer; padding: 0; }
+.gi-tour-skip:hover { color: var(--text-strong); }
+
+/* ---------- Botón del tour en el menú de usuario ---------- */
+html[data-theme] .user-menu-tour {
+    width: 100%; text-align: left; border: 0; background: transparent; color: var(--text);
+    padding: 0.5rem 0.75rem; border-radius: 8px; font: inherit; cursor: pointer;
+}
+html[data-theme] .user-menu-tour:hover { background: var(--accent-soft); color: var(--accent); }

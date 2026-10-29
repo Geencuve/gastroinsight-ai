@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Mi perfil | GastroInsight AI{% endblock %}
 
@@ -104,6 +104,17 @@
                     <button type="button" data-theme-choice="dark">🌙 Oscuro</button>
                     <button type="button" data-theme-choice="light">☀️ Claro</button>
                 </div>
+            </div>
+            <div class="setting-row">
+                <div><strong>Leyendas de ayuda</strong><small>Al dejar el mouse 2 segundos sobre una función, aparece una breve explicación.</small></div>
+                <div class="segmented">
+                    <button type="button" data-tips-choice="on">Activadas</button>
+                    <button type="button" data-tips-choice="off">Desactivadas</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div><strong>Tour guiado</strong><small>Recorre las funciones principales de GastroInsight en un minuto.</small></div>
+                <button type="button" class="btn btn-secondary" data-start-tour>🧭 Ver tour</button>
             </div>
             <div class="setting-row">
                 <div><strong>Asistente de gestión</strong><small>Tu copiloto para consultas, métricas e ideas.</small></div>

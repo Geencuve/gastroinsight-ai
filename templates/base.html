@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=8">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=9">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -100,6 +100,7 @@
                         <a href="{% url 'authentication:profile' %}">👤 Mi perfil</a>
                         <a href="{% url 'authentication:profile' %}#configuracion">⚙️ Configuración de cuenta</a>
                         <a href="{% url 'authentication:password_change' %}">🔑 Cambiar contraseña</a>
+                        <button type="button" class="user-menu-tour" data-start-tour>🧭 Ver tour guiado</button>
                         {% if user.is_staff %}<a href="/admin/">🛠️ Administración</a>{% endif %}
                         <form method="post" action="{% url 'authentication:logout' %}" class="logout-form">
                             {% csrf_token %}
@@ -212,7 +213,8 @@
             window.addEventListener("load", applyChartTheme);
         })();
     </script>
-    <script src="{% static 'js/main.js' %}?v=8"></script>
+    <script src="{% static 'js/main.js' %}?v=9"></script>
+    <script src="{% static 'js/guide.js' %}?v=1"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
