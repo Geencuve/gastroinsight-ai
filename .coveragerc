@@ -1,0 +1,21 @@
+[run]
+source = .
+omit =
+    venv/*
+    */migrations/*
+    build/*
+    dist/*
+    desktop/*
+    scripts/*
+    evidencias/*
+    manage.py
+    smoke_test.py
+    config-*.py
+    */test_*.py
+    */tests.py
+    config/asgi.py
+    config/wsgi.py
+
+[report]
+skip_empty = True
+ignore_errors = True
