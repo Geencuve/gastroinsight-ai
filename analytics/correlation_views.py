@@ -40,7 +40,8 @@ def _build_context(request):
     selected_table = tables.filter(id=table_id).first() if table_id else None
 
     min_detections = min(max(get_int_filter(request, "min") or 20, 1), 1000)
-    include_synthetic = request.GET.get("synthetic", "1") != "0"
+    # v1.0.2: por defecto se excluyen las cámaras demo (datos sintéticos); se incluyen con ?synthetic=1
+    include_synthetic = request.GET.get("synthetic", "0") == "1"
 
     rows = build_dataset(scope, start_date, end_date, selected_table, min_detections, include_synthetic)
     results = [

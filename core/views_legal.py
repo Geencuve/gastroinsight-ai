@@ -1,4 +1,4 @@
-﻿from django import forms
+from django import forms
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -29,7 +29,7 @@ def legal_page(request, slug):
 
 class AcceptanceForm(forms.Form):
     educational = forms.BooleanField(
-        label="Entiendo que GastroInsight AI es un prototipo académico y lo usaré solo con fines educativos.")
+        label="Entiendo que GastroInsight AI es un Testbed experimental académico y lo usaré solo con fines educativos.")
     terms = forms.BooleanField(
         label="He leído y acepto los Términos y condiciones y la Política de privacidad.")
     responsible = forms.BooleanField(

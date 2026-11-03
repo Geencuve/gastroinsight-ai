@@ -64,10 +64,21 @@ class CorrelationTests(TestCase):
         for minutes, happy in ((40, 20), (60, 15), (80, 10), (100, 5)):
             self._session_with_events(minutes, {"happy": happy, "neutral": 30 - happy})
         self.client.force_login(self.user)
-        response = self.client.get("/analytics/correlation/")
+        response = self.client.get("/analytics/correlation/?synthetic=1")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pearson r")
         self.assertContains(response, "no constituyen evidencia empírica")
-        csv_response = self.client.get("/analytics/correlation/csv/")
+        csv_response = self.client.get("/analytics/correlation/csv/?synthetic=1")
         self.assertEqual(csv_response.status_code, 200)
         self.assertIn("Pearson r", csv_response.content.decode("utf-8"))
+
+    def test_panel_excluye_camaras_demo_por_defecto(self):
+        for minutes, happy in ((40, 20), (60, 15), (80, 10), (100, 5)):
+            self._session_with_events(minutes, {"happy": happy, "neutral": 30 - happy})
+        self.client.force_login(self.user)
+        response = self.client.get("/analytics/correlation/")
+        self.assertFalse(response.context["include_synthetic"])
+        self.assertEqual(response.context["rows"], [])
+        response = self.client.get("/analytics/correlation/?synthetic=1")
+        self.assertTrue(response.context["include_synthetic"])
+        self.assertEqual(len(response.context["rows"]), 4)
