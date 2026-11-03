@@ -1,5 +1,5 @@
 ﻿#define AppName "GastroInsight AI"
-#define AppVersion "1.0.1"
+#define AppVersion "1.0.2"
 
 [Setup]
 AppId={{8F3B2C1A-5D4E-4F6A-9B7C-1E2D3F4A5B6C}
