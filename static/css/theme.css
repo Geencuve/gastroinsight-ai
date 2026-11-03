@@ -678,3 +678,27 @@ html[data-theme] .user-menu-tour {
 html[data-theme] .user-menu-tour:hover { background: var(--accent-soft); color: var(--accent); }
 
 html[data-theme] .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ---------- Pie de página y sección legal ---------- */
+html[data-theme] .site-footer {
+    max-width: 1200px; margin: 2rem auto 0; padding: 1.25rem 1.5rem 2rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; color: var(--muted); font-size: 0.82rem;
+}
+html[data-theme] .site-footer nav { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+html[data-theme] .site-footer a { color: var(--muted); text-decoration: none; }
+html[data-theme] .site-footer a:hover { color: var(--accent); }
+html[data-theme] .edu-badge { margin-left: 0.4rem; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--warning-soft); color: var(--warning); font-weight: 600; font-size: 0.75rem; }
+html[data-theme] .legal-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+html[data-theme] .legal-nav { position: sticky; top: 5.5rem; display: flex; flex-direction: column; gap: 0.2rem; padding: 0.8rem; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
+html[data-theme] .legal-nav a { padding: 0.55rem 0.7rem; border-radius: 9px; color: var(--text); text-decoration: none; font-size: 0.88rem; }
+html[data-theme] .legal-nav a:hover, html[data-theme] .legal-nav a.is-active { background: var(--accent-soft); color: var(--accent); }
+html[data-theme] .legal-article { padding: 2rem 2.4rem; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); line-height: 1.7; }
+html[data-theme] .legal-article h2 { margin: 1.8rem 0 0.5rem; font-size: 1.1rem; }
+html[data-theme] .legal-article p, html[data-theme] .legal-article li { max-width: 80ch; }
+html[data-theme] .legal-article table { margin: 0.8rem 0 1rem; }
+html[data-theme] .legal-meta { color: var(--muted); font-size: 0.82rem; }
+html[data-theme] .legal-disclaimer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+@media (max-width: 900px) {
+    html[data-theme] .legal-layout { grid-template-columns: 1fr; }
+    html[data-theme] .legal-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+}

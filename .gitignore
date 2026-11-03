@@ -101,3 +101,6 @@ logs/
 build/
 dist/
 desktop/icon.ico
+evidencias/
+.coverage
+htmlcov/

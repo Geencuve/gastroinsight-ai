@@ -1,0 +1,43 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Toma de conocimiento | GastroInsight AI{% endblock %}
+
+{% block content %}
+<div class="setup-wrap" style="max-width: 720px; margin: 1rem auto 3rem;">
+    <section class="card">
+        <span class="role-badge role-operator">Uso educativo · v{{ legal.version }}</span>
+        <h1 style="margin-top: 0.8rem;">Antes de comenzar</h1>
+        <p>GastroInsight AI es un <strong>prototipo académico</strong>. Lee este resumen y confirma que lo conoces.</p>
+        <ul>
+            <li>Su uso actual es <strong>solo con fines educativos</strong>; parte de los datos son sintéticos.</li>
+            <li>El análisis visual <strong>no identifica personas</strong>: procesa los fotogramas en memoria y guarda solo métricas agregadas.</li>
+            <li>Los indicadores y sugerencias son <strong>orientativos</strong>; no miden la satisfacción directamente.</li>
+            <li>Tu aceptación queda registrada con fecha y versión.</li>
+        </ul>
+        <p>
+            Lee los <a href="{% url 'core:legal_terms' %}" target="_blank">Términos y condiciones</a>,
+            la <a href="{% url 'core:legal_privacy' %}" target="_blank">Política de privacidad</a> y el
+            <a href="{% url 'core:legal_education' %}" target="_blank">Aviso de uso educativo</a>.
+        </p>
+        <form method="post" style="display: grid; gap: 0.8rem; margin-top: 1rem;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {% for field in form %}
+                {% if field.name == "full_name" %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                    </div>
+                {% else %}
+                    <label class="setup-demo" style="display: flex; gap: 0.6rem; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text);">
+                        {{ field }} <span>{{ field.label }}</span>
+                    </label>
+                    {% if field.errors %}<p class="field-error">Debes confirmar esta declaración.</p>{% endif %}
+                {% endif %}
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Acepto y continúo</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

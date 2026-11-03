@@ -1,0 +1,11 @@
+﻿<p>Para consultas sobre el proyecto, los términos o el tratamiento de datos personales, contacta al equipo de GastroInsight AI.</p>
+<table>
+    <tbody>
+        <tr><th>Equipo</th><td>{{ legal.team|join:" · " }}</td></tr>
+        <tr><th>Académica guía</th><td>{{ legal.advisor }}</td></tr>
+        <tr><th>Contexto</th><td>{{ legal.course }}</td></tr>
+        <tr><th>Correo</th><td>{% if legal.contact_email %}<a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>{% else %}Por definir (configurar CONTACT_EMAIL){% endif %}</td></tr>
+    </tbody>
+</table>
+<h2>Solicitudes sobre tus datos</h2>
+<p>Indica tu nombre, tu usuario en GastroInsight AI y el derecho que quieres ejercer (acceso, rectificación, supresión, oposición, portabilidad o bloqueo). Te responderemos al correo desde el que escribas.</p>

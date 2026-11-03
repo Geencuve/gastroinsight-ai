@@ -1,4 +1,4 @@
-﻿from django.conf import settings
+from django.conf import settings
 from django.shortcuts import redirect
 
 ALLOWED_PREFIXES = ("/primer-uso/", "/static/", "/media/")
@@ -19,4 +19,35 @@ class FirstRunMiddleware:
                 self.ready = True
             elif not request.path.startswith(ALLOWED_PREFIXES):
                 return redirect("core:first_run")
+        return self.get_response(request)
+
+
+LEGAL_EXEMPT = ("/legal/", "/static/", "/media/", "/auth/logout/", "/primer-uso/", "/opinion/",
+                "/menus/carta/", "/assistant/customer/")
+
+
+class LegalAcceptanceMiddleware:
+    """Exige la toma de conocimiento de uso educativo antes de usar el sistema."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if (getattr(settings, "LEGAL_ACCEPTANCE_REQUIRED", False) and request.user.is_authenticated
+                and not request.path.startswith(LEGAL_EXEMPT)):
+            from core.legal import LEGAL_VERSION
+
+            key = f"legal_ok_{LEGAL_VERSION}"
+            if not request.session.get(key):
+                from core.models import LegalAcceptance
+
+                if LegalAcceptance.objects.filter(user=request.user, version=LEGAL_VERSION).exists():
+                    request.session[key] = True
+                else:
+                    from urllib.parse import urlencode
+
+                    from django.urls import reverse
+
+                    query = urlencode({"next": request.get_full_path()})
+                    return redirect(f"{reverse('core:legal_acceptance')}?{query}")
         return self.get_response(request)

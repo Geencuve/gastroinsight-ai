@@ -1,4 +1,6 @@
 from pathlib import Path
+import sys
+
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.FirstRunMiddleware',
+    'core.middleware.LegalAcceptanceMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -143,3 +146,8 @@ ASSISTANT_NAME = config("ASSISTANT_NAME", default="Sazón")
 
 DESKTOP_MODE = config('DESKTOP_MODE', default=False, cast=bool)
 SERVE_STATIC = config('SERVE_STATIC', default=False, cast=bool)
+
+LEGAL_ACCEPTANCE_REQUIRED = config('LEGAL_ACCEPTANCE_REQUIRED', default=True, cast=bool)
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    LEGAL_ACCEPTANCE_REQUIRED = False  # las pruebas que lo necesitan lo activan explícitamente
+CONTACT_EMAIL = config('CONTACT_EMAIL', default='')

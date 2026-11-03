@@ -1,5 +1,6 @@
-﻿import os, re, sys, traceback, logging
+import os, re, sys, traceback, logging
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+os.environ.setdefault("LEGAL_ACCEPTANCE_REQUIRED", "False")
 import django
 django.setup()
 from django.test import Client

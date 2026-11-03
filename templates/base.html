@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=9">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=10">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -129,6 +129,17 @@
 
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="site-footer">
+        <div><strong>GastroInsight AI</strong> · v1.0.1 <span class="edu-badge">Prototipo académico · uso educativo</span></div>
+        <nav aria-label="Información legal">
+            <a href="{% url 'core:legal_about' %}">Acerca de nosotros</a>
+            <a href="{% url 'core:legal_terms' %}">Términos y condiciones</a>
+            <a href="{% url 'core:legal_privacy' %}">Privacidad</a>
+            <a href="{% url 'core:legal_education' %}">Uso educativo</a>
+            <a href="{% url 'core:legal_contact' %}">Contacto</a>
+        </nav>
+    </footer>
 
         {% if show_staff_assistant_widget %}
         <div class="assistant-widget">
