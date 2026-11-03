@@ -104,3 +104,4 @@ desktop/icon.ico
 evidencias/
 .coverage
 htmlcov/
+parche_*.diff
