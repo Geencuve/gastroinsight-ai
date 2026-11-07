@@ -1174,3 +1174,22 @@ main:has(.discover-grid) .discover-grid > .card { max-height: calc(100vh - var(-
     .receipt { position: absolute; left: 0; top: 0; width: 74mm; border: 0; box-shadow: none; padding: 0; }
     .no-print { display: none !important; }
 }
+
+/* ---------- I3 · Interfaz de consultas de Sazón ---------- */
+.sazon-followups { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.55rem; }
+html[data-theme] .followup-chip {
+    padding: 0.28rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); font: 600 0.78rem "Inter", sans-serif; cursor: pointer; transition: all 0.15s ease;
+}
+html[data-theme] .followup-chip:hover { border-color: var(--accent); color: var(--accent); }
+html[data-theme] .followup-chip.is-guess { border-style: dashed; }
+.sazon-didyoumean { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--muted); }
+.sazon-meta { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.45rem; font-size: 0.72rem; color: var(--muted); }
+html[data-theme] .sazon-copy { border: 0; background: transparent; color: var(--muted); font: 600 0.72rem "Inter", sans-serif; cursor: pointer; padding: 0; }
+html[data-theme] .sazon-copy:hover { color: var(--accent); }
+html[data-theme] .sazon-suggest {
+    position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 30; margin: 0; padding: 0.3rem; list-style: none;
+    border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); max-height: 240px; overflow-y: auto;
+}
+html[data-theme] .sazon-suggest li { padding: 0.45rem 0.6rem; border-radius: 9px; font-size: 0.84rem; cursor: pointer; color: var(--text); }
+html[data-theme] .sazon-suggest li:hover, html[data-theme] .sazon-suggest li.is-active { background: var(--accent-soft); color: var(--accent); }

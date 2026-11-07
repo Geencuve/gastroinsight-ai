@@ -818,3 +818,7 @@ def build_customer_response(venue, message):
             {"links": [_link("Ver carta con fotos", "menus:public", venue.id)]})
 
 from . import answers_v2  # noqa: E402,F401  (respuestas por rol)
+
+from . import robust as _robust  # noqa: E402
+
+_robust.install(__import__(__name__, fromlist=['x']))

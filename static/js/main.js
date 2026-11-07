@@ -54,6 +54,22 @@ document.addEventListener("DOMContentLoaded", () => {
             wrap.innerHTML = extra.thumbs.map(window.GIThumb.mini).join("");
             bubble.appendChild(wrap);
         }
+        if (!isUser && extra.did_you_mean && extra.did_you_mean.length) {
+            const note = el("p", "sazon-didyoumean");
+            note.textContent = "¿Quisiste decir…?";
+            bubble.appendChild(note);
+        }
+        if (!isUser && ((extra.did_you_mean && extra.did_you_mean.length) || (extra.followups && extra.followups.length))) {
+            const wrap = el("div", "sazon-followups");
+            (extra.did_you_mean || []).forEach((f) => { const b = el("button", "followup-chip is-guess"); b.type = "button"; b.dataset.prompt = f.prompt; b.textContent = f.label; wrap.appendChild(b); });
+            (extra.followups || []).forEach((f) => { const b = el("button", "followup-chip"); b.type = "button"; b.dataset.prompt = f.prompt; b.textContent = f.label; wrap.appendChild(b); });
+            bubble.appendChild(wrap);
+        }
+        if (!isUser && extra.elapsed_ms !== undefined && extra.elapsed_ms !== null) {
+            const meta = el("div", "sazon-meta");
+            meta.innerHTML = `<span>⚡ ${extra.elapsed_ms} ms</span><button type="button" class="sazon-copy">📋 Copiar</button>`;
+            bubble.appendChild(meta);
+        }
         if (!isUser && extra.links && extra.links.length) {
             const wrap = el("div", "chat-links");
             extra.links.forEach((link) => {

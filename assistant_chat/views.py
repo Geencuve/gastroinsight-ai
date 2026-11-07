@@ -1,3 +1,4 @@
+from . import services  # noqa: E402  (versión robusta de Sazón)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -129,7 +130,7 @@ def staff_chat(request):
             content=content,
         )
 
-        response_text, intent, metadata = build_staff_response(
+        response_text, intent, metadata = services.build_staff_response(
             request.user,
             content,
         )
@@ -216,7 +217,7 @@ def staff_continue_conversation(request, conversation_id):
         content=content,
     )
 
-    response_text, intent, metadata = build_staff_response(
+    response_text, intent, metadata = services.build_staff_response(
         request.user,
         content,
     )
@@ -278,7 +279,7 @@ def staff_widget_message(request):
             content=content,
         )
 
-        response_text, intent, metadata = build_staff_response(
+        response_text, intent, metadata = services.build_staff_response(
             request.user,
             content,
         )
@@ -300,6 +301,9 @@ def staff_widget_message(request):
             "metrics": metadata.get("metrics", []),
             "bars": metadata.get("bars", []),
             "thumbs": metadata.get("thumbs", []),
+            "followups": metadata.get("followups", []),
+            "did_you_mean": metadata.get("did_you_mean", []),
+            "elapsed_ms": metadata.get("elapsed_ms"),
         }
     )
 

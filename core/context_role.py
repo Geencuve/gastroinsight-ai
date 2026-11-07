@@ -15,4 +15,5 @@ def role_scope(request):
 
     return {"gi_role_scope": allowed_prefixes(profile), "gi_role_home": home_for(profile),
             "gi_role_label": profile.get_role_display(), "gi_sazon_chips": chips_for(profile),
-            "gi_alerts_url": reverse("alerts:feed") if kinds_for(profile) else ""}
+            "gi_alerts_url": reverse("alerts:feed") if kinds_for(profile) else "",
+            "gi_sazon_prompts": __import__("assistant_chat.robust", fromlist=["x"]).prompts_for(request.user)}
