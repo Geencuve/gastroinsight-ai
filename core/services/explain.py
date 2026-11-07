@@ -1,4 +1,4 @@
-﻿"""
+"""
 Transparencia de las recomendaciones: cada idea declara su tipo de cálculo, la fórmula y los datos usados.
 Ninguna recomendación del inicio usa modelos predictivos: son reglas de negocio y estadística descriptiva.
 """
@@ -11,6 +11,16 @@ CORRELATION = "Correlación estadística"
 OPERATIONAL = "Regla operativa con umbral"
 
 RULES = [
+    (r"alegra a las mesas|reaccion negativa al servirlo|no convence", DESCRIPTIVE, "Variación del IBE al servir el plato",
+     "Promedio del balance de expresiones (IBE) de la mesa después de recibir el plato menos el de antes. Requiere al menos 3 unidades.",
+     "Métricas visuales agregadas por mesa y hora de entrega de cada plato"),
+    (r"experiencia cae en la etapa", DESCRIPTIVE, "IEO promedio por etapa del journey",
+     "Para cada atención, promedia el IEO en cada tramo (llegada y pedido, espera de platos, consumo, cuenta y pago) y compara las etapas.",
+     "Métricas visuales por mesa, horas de confirmación, entrega, cuenta y pago (14 días)"),
+    (r"se va sin sentarse", DESCRIPTIVE, "Tasa de abandono de la lista de espera",
+     "Grupos que se retiraron sin sentarse ÷ grupos registrados en la lista de espera.", "Lista de espera (14 días)"),
+    (r"se usan poco", DESCRIPTIVE, "Uso de cada mesa frente al promedio",
+     "Mesas con menos del 40% de las atenciones promedio por mesa del local.", "Atenciones por mesa (28 días)"),
     (r"abiertas hace mas de 2 horas", OPERATIONAL, "Atenciones abiertas por más de 120 minutos",
      "Lista las mesas con atención abierta hace más de 2 horas.", "Atenciones (hora de inicio)"),
     (r"esperando pago", OPERATIONAL, "Pedidos confirmados sin pagar por más de 45 minutos",

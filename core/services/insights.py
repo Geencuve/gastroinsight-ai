@@ -363,4 +363,16 @@ _build_insights_raw = build_insights
 def build_insights(*args, **kwargs):  # noqa: F811
     from .explain import annotate
 
-    return annotate(_build_insights_raw(*args, **kwargs))
+    result = _build_insights_raw(*args, **kwargs)
+    try:
+        from operations.services.vision_insights import vision_insights
+
+        venues = args[0] if args else kwargs.get("venues")
+        for key, extra in vision_insights(venues).items():
+            if isinstance(result.get(key), list):
+                result[key] = extra + result[key]
+    except Exception:  # noqa: BLE001 — las ideas de visión nunca deben romper el inicio
+        import logging
+
+        logging.getLogger("gastroinsight.insights").exception("No se pudieron calcular las ideas de visión")
+    return annotate(result)
