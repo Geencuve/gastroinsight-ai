@@ -409,6 +409,7 @@ class Notification(models.Model):
         READY = "ready", "Platos listos"
         BILL = "bill", "Cuenta solicitada"
         CHECKOUT = "checkout", "Experiencia en caja"
+        IMPATIENCE = "impatience", "Impaciencia sostenida"
 
     venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="notifications", verbose_name="Local")
     table = models.ForeignKey("operations.RestaurantTable", on_delete=models.SET_NULL, null=True, blank=True,
@@ -432,3 +433,25 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class AlertSettings(models.Model):
+    """Umbrales de alerta de cada local (configurables en el Centro de gestión)."""
+
+    venue = models.OneToOneField("venues.Venue", on_delete=models.CASCADE, related_name="alert_settings", verbose_name="Local")
+    impatience_pct = models.PositiveSmallIntegerField(default=70, verbose_name="Umbral de impaciencia (%)",
+                                                      help_text="Índice = 60% búsqueda de atención + 40% (100 − IEO).")
+    impatience_minutes = models.PositiveSmallIntegerField(default=8, verbose_name="Minutos sostenidos de impaciencia")
+    discomfort_ieo = models.PositiveSmallIntegerField(default=45, verbose_name="IEO bajo (disconformidad)")
+    discomfort_minutes = models.PositiveSmallIntegerField(default=0, verbose_name="Minutos sostenidos de IEO bajo",
+                                                          help_text="0 = aviso inmediato.")
+    waiting_minutes = models.PositiveSmallIntegerField(default=20, verbose_name="Minutos sin atención")
+    approval_ieo = models.PositiveSmallIntegerField(default=80, verbose_name="IEO de aprobación")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuración de alertas"
+        verbose_name_plural = "Configuraciones de alertas"
+
+    def __str__(self):
+        return f"Alertas de {self.venue}"

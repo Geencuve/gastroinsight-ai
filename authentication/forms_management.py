@@ -123,3 +123,11 @@ class CameraForm(forms.ModelForm):
         self.fields["venue"].queryset = venues
         self.fields["table"].queryset = RestaurantTable.objects.filter(venue__in=venues).order_by("code")
         self.fields["table"].required = False
+
+
+class AlertSettingsForm(forms.ModelForm):
+    class Meta:
+        from operations.models import AlertSettings
+
+        model = AlertSettings
+        fields = ["impatience_pct", "impatience_minutes", "discomfort_ieo", "discomfort_minutes", "waiting_minutes", "approval_ieo"]

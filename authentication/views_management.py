@@ -67,6 +67,7 @@ def home(request):
     return render(request, "authentication/management/home.html", {
         "users": users, "tables": tables, "cameras": cameras, "zones": zones,
         "service_roles": ["waiter", "cashier", "kitchen", "bar", "operator"],
+        "alert_forms": _alert_forms(venues),
         "security_warnings": __import__("core.security_checks", fromlist=["x"]).security_warnings(),
         "staff_form": StaffCreateForm(actor=actor, venues=venues), "table_form": TableForm(venues=venues),
         "camera_form": CameraForm(venues=venues),
@@ -206,3 +207,31 @@ def camera_discover(request):
         "devices": devices, "searched": request.GET.get("buscar") == "1", "tested": tested, "busy": busy,
         "venues": venues, "tables": RestaurantTable.objects.filter(venue__in=venues).order_by("code"),
     })
+
+
+def _alert_forms(venues):
+    from operations.services.sustained import alert_settings
+
+    from .forms_management import AlertSettingsForm
+
+    return [(venue, AlertSettingsForm(instance=alert_settings(venue), prefix=f"v{venue.id}")) for venue in venues]
+
+
+@login_required
+@require_POST
+def alert_settings_save(request, venue_id):
+    from operations.services.sustained import alert_settings
+
+    from .forms_management import AlertSettingsForm
+
+    _, venues = _actor(request)
+    venue = get_object_or_404(venues, pk=venue_id)
+    form = AlertSettingsForm(request.POST, instance=alert_settings(venue), prefix=f"v{venue.id}")
+    if form.is_valid():
+        form.save()
+        log_action(request, action=AuditLog.Action.UPDATE, module="operations", venue=venue, object_type="AlertSettings",
+                   object_id=str(venue.pk), description=f"Actualizó los umbrales de alerta de {venue.name}.")
+        messages.success(request, f"Umbrales de alerta de {venue.name} guardados.")
+    else:
+        messages.error(request, "Revisa los valores de los umbrales. " + _errors(form))
+    return redirect("management:home")

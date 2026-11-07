@@ -13,4 +13,5 @@ urlpatterns = [
     path("mesas/nueva/", views_management.table_create, name="table_create"),
     path("camaras/nueva/", views_management.camera_create, name="camera_create"),
     path("camaras/detectar/", views_management.camera_discover, name="camera_discover"),
+    path("alertas/<int:venue_id>/", views_management.alert_settings_save, name="alert_settings"),
 ]

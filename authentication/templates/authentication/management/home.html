@@ -30,6 +30,7 @@
         <button type="button" data-tab-button role="tab">👥 Personal</button>
         <button type="button" data-tab-button role="tab">🪑 Mesas y zonas</button>
         <button type="button" data-tab-button role="tab">📷 Cámaras</button>
+        <button type="button" data-tab-button role="tab">🔔 Alertas</button>
     </div>
 
     <div class="tab-panel mgmt-split" data-tab-panel>
@@ -125,6 +126,25 @@
                 <button class="btn btn-primary" type="submit">Registrar cámara</button>
             </form>
             <p class="muted">Una cámara solo se analiza con una política de privacidad y una autorización vigentes.</p>
+        </section>
+    </div>
+
+    <div class="tab-panel" data-tab-panel>
+        <section class="card mgmt-scroll">
+            <h2>🔔 Umbrales de alerta por local</h2>
+            <p class="muted">Una alerta sostenida se activa solo si al menos el 80% de las lecturas del período supera el umbral. Índice de impaciencia = 60% búsqueda de atención + 40% (100 − IEO), siempre por mesa.</p>
+            {% for venue, form in alert_forms %}
+                <form method="post" action="{% url 'management:alert_settings' venue.id %}" class="alert-settings">
+                    {% csrf_token %}
+                    <h3>{{ venue.name }}</h3>
+                    <div class="alert-settings-grid">
+                        {% for field in form %}
+                            <label>{{ field.label }}{{ field }}{% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}</label>
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-primary btn-small" type="submit">Guardar umbrales</button>
+                </form>
+            {% endfor %}
         </section>
     </div>
 </div>

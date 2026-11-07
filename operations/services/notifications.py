@@ -11,9 +11,9 @@ from authentication.roles import (BAR, CASHIER, KITCHEN, MANAGERS, OPERATOR, SUP
 from operations.models import Notification, RestaurantTable, WaitlistEntry
 
 ACTIVE_MINUTES = 15
-ICONS = {"attention": "🙋", "discomfort": "😟", "approval": "😊", "arrival": "🚶", "waiting": "⏱️", "ready": "🍽️", "bill": "🧾", "checkout": "💵"}
+ICONS = {"attention": "🙋", "discomfort": "😟", "approval": "😊", "arrival": "🚶", "waiting": "⏱️", "ready": "🍽️", "bill": "🧾", "checkout": "💵", "impatience": "😤"}
 PRIORITY = {"danger": 0, "warning": 1, "info": 2, "success": 3}
-SERVICE_KINDS = {"attention", "discomfort", "arrival", "waiting", "ready", "bill"}
+SERVICE_KINDS = {"attention", "discomfort", "arrival", "waiting", "ready", "bill", "impatience"}
 KIND_ROLES = {
     WAITER: SERVICE_KINDS,
     CASHIER: {"bill", "checkout"},
@@ -41,6 +41,9 @@ def _notify(venue, table, kind, level, title, message, key, window_minutes=10):
 def _from_live(venue, tables):
     from ai_vision.services.live import build_live_state
 
+    from .sustained import alert_settings, sustained_impatience, sustained_low_ieo
+
+    cfg = alert_settings(venue)
     for card in build_live_state([venue])["cards"]:
         table = tables.get(card["table"])
         code = card["table"]
@@ -49,18 +52,23 @@ def _from_live(venue, tables):
         if card["attention_pct"] is not None and card["attention_pct"] >= 30:
             _notify(venue, table, "attention", "danger", f"Mesa {code} busca atención",
                     f"El {card['attention_pct']}% de los rostros mira alrededor.", f"attention:{code}")
-        if card["ieo"] is not None and card["ieo"] < 45:
+        sustained = sustained_impatience(table, cfg)
+        if sustained:
+            _notify(venue, table, "impatience", "danger", f"Mesa {code}: impaciencia {sustained[0]}% durante {sustained[1]} min",
+                    "La mesa muestra señales de impaciencia de forma sostenida. Acércate y ofrece ayuda.",
+                    f"impatience:{code}", 15)
+        if card["ieo"] is not None and card["ieo"] < cfg.discomfort_ieo and sustained_low_ieo(table, cfg):
             _notify(venue, table, "discomfort", "danger", f"Mesa {code}: posible disconformidad",
                     f"Experiencia observable baja (IEO {card['ieo']:.0f}). Acércate a preguntar cómo va todo.",
                     f"discomfort:{code}")
         elif card["ieo_trend"] is not None and card["ieo_trend"] <= -10:
             _notify(venue, table, "discomfort", "warning", f"Mesa {code}: la experiencia va a la baja",
                     f"El IEO bajó {abs(card['ieo_trend']):.0f} puntos en los últimos minutos.", f"trend:{code}")
-        elif card["ieo"] is not None and card["ieo"] >= 80:
+        elif card["ieo"] is not None and card["ieo"] >= cfg.approval_ieo:
             _notify(venue, table, "approval", "success", f"Mesa {code}: señales de aprobación",
                     f"Experiencia observable alta (IEO {card['ieo']:.0f}). Buen momento para ofrecer postre o café.",
                     f"approval:{code}", window_minutes=20)
-        if card["wait_min"] is not None and card["wait_min"] >= 20:
+        if card["wait_min"] is not None and card["wait_min"] >= cfg.waiting_minutes:
             _notify(venue, table, "waiting", "warning", f"Mesa {code} sin atención hace {card['wait_min']} min",
                     "No hay actividad de pedidos reciente.", f"waiting:{code}")
         if not card["has_session"] and (card["occupancy"] or 0) >= 1:
