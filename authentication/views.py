@@ -28,7 +28,7 @@ def login_view(request):
 
         if is_manager(form.get_user()):
             form.add_error(None, "Esta es una cuenta de gestión (dueño, administrador o supervisor). "
-                                 "Ingresa por el Acceso de gestión.")
+                                 "Ingresa por el Acceso de gestión: usa el botón «Login admin».")
             return render(request, "authentication/login.html", {"form": form})
         login(request, form.get_user())
         log_action(request,action=AuditLog.Action.LOGIN,module="authentication",description=(f"Inicio de sesión de " f"{request.user.get_username()}."),

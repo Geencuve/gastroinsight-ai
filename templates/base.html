@@ -23,7 +23,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=33">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=34">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -111,9 +111,6 @@
                         </form>
                     </div>
                 </details>
-            {% else %}
-                <a href="{% url 'authentication:login' %}">Ingresar</a>
-                <a class="nav-register" href="{% url 'authentication:register' %}">Registrarse</a>
             {% endif %}
             <button type="button" class="theme-toggle" id="theme-toggle"
                     aria-label="Cambiar entre tema oscuro y claro" title="Cambiar tema">☀</button>
@@ -133,14 +130,15 @@
     </main>
 
     <footer class="site-footer">
-        <div><strong>GastroInsight AI</strong> · v2.0.0 <span class="edu-badge">Código abierto · AGPL-3.0</span></div>
-        <nav aria-label="Información legal">
-            <a href="{% url 'core:legal_about' %}">Acerca de nosotros</a>
-            <a href="{% url 'core:legal_terms' %}">Términos de servicio</a>
-            <a href="{% url 'core:legal_privacy' %}">Privacidad</a>
-            <a href="{% url 'core:legal_license' %}">Licencia y código fuente</a>
-            <a href="{% url 'core:legal_contact' %}">Contacto</a>
+        <div class="footer-brand"><strong>GastroInsight AI</strong> · v2.0.0 <span class="edu-badge">Código abierto · AGPL-3.0</span></div>
+        <nav class="footer-links" aria-label="Información legal">
+            <a href="{% url 'core:legal_about' %}">ℹ️ Acerca de nosotros</a>
+            <a href="{% url 'core:legal_terms' %}">📄 Términos de servicio</a>
+            <a href="{% url 'core:legal_privacy' %}">🔒 Privacidad y tus datos</a>
+            <a href="{% url 'core:legal_license' %}">⚖️ Licencia y código fuente</a>
+            <a href="{% url 'core:legal_contact' %}">✉️ Contacto</a>
         </nav>
+        <p class="footer-compliance">Tratamos los datos conforme a la Ley N° 19.628 de Chile, preparados para la Ley N° 21.719, y según principios internacionales de protección de datos (RGPD). Sin reconocimiento facial ni almacenamiento de imágenes: el análisis visual es anónimo y por mesa.</p>
     </footer>
 
         {% if show_staff_assistant_widget %}
@@ -227,7 +225,7 @@
     </script>
     <script src="{% static 'js/main.js' %}?v=11"></script>
     <script src="{% static 'js/guide.js' %}?v=7"></script>
-    <script src="{% static 'js/layout.js' %}?v=7"></script>
+    <script src="{% static 'js/layout.js' %}?v=8"></script>
     <script src="{% static 'js/thumb.js' %}?v=1"></script>
     {% if gi_sazon_prompts %}{{ gi_sazon_prompts|json_script:"gi-sazon-prompts" }}{% endif %}
     <script src="{% static 'js/sazon_plus.js' %}?v=1"></script>

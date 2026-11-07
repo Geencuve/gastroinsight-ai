@@ -190,3 +190,6 @@ if USE_HTTPS:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Registro público de cuentas: desactivado en el producto (las crea el administrador del local).
+ALLOW_SELF_REGISTRATION = config("ALLOW_SELF_REGISTRATION", default=False, cast=bool)

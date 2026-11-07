@@ -1193,3 +1193,51 @@ html[data-theme] .sazon-suggest {
 }
 html[data-theme] .sazon-suggest li { padding: 0.45rem 0.6rem; border-radius: 9px; font-size: 0.84rem; cursor: pointer; color: var(--text); }
 html[data-theme] .sazon-suggest li:hover, html[data-theme] .sazon-suggest li.is-active { background: var(--accent-soft); color: var(--accent); }
+
+/* =========================================================
+   Inicio de sesión con dos caras, encabezado centrado y pie legal
+   ========================================================= */
+html[data-theme] .header-centered { display: flex !important; justify-content: center !important; align-items: center; position: relative; }
+html[data-theme] .header-centered > .main-nav:not(.app-sidebar) { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); margin: 0 !important; }
+
+.login-stage { min-height: calc(100vh - var(--app-header) - 12rem); display: grid; place-items: center; align-content: center; gap: 1rem; padding: 1.5rem 0; }
+.login-flip { display: grid; width: min(420px, 100%); perspective: 1400px; }
+.login-face {
+    grid-area: 1 / 1; padding: 2rem 1.8rem 1.4rem; border-radius: 24px; text-align: center;
+    background: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10);
+    backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.login-back { transform: rotateY(180deg);
+              background: radial-gradient(circle at 15% 0%, rgba(34, 211, 238, 0.14), transparent 45%),
+                          radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.16), transparent 45%), var(--surface); }
+html[data-theme="dark"] .login-back { background: radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.22), transparent 45%), linear-gradient(160deg, #0b1220, #1e1b4b); border-color: rgba(139, 92, 246, 0.4); }
+.login-flip.is-flipped .login-front { transform: rotateY(-180deg); }
+.login-flip.is-flipped .login-back { transform: rotateY(0deg); }
+.login-orb { display: inline-block; margin-bottom: 0.4rem; }
+.login-kicker { margin: 0.3rem 0 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.login-face h1 { margin: 0.15rem 0; font-size: 1.6rem; }
+.login-sub { margin: 0 0 1rem; color: var(--muted); font-size: 0.9rem; }
+.login-form { display: grid; gap: 0.3rem; text-align: left; }
+.login-form label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-top: 0.35rem; }
+.login-form input { width: 100%; box-sizing: border-box; }
+.login-submit { width: 100%; margin-top: 0.8rem; }
+.login-links { margin: 0.55rem 0 0; font-size: 0.84rem; color: var(--muted); }
+html[data-theme] .login-switch {
+    display: flex; flex-direction: column; align-items: center; gap: 0.1rem; width: 100%; margin-top: 1.1rem; padding: 0.7rem;
+    border-radius: 14px; border: 1px dashed var(--border); background: transparent; color: var(--text-strong);
+    font: 700 0.9rem "Inter", sans-serif; cursor: pointer; transition: all 0.2s ease;
+}
+html[data-theme] .login-switch small { font-weight: 500; font-size: 0.74rem; color: var(--muted); }
+html[data-theme] .login-switch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.login-legal { max-width: 420px; margin: 0; text-align: center; font-size: 0.78rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .login-face { transition: none; } }
+
+html[data-theme] .site-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.7rem 1.2rem; }
+html[data-theme] .footer-links { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+html[data-theme] .footer-links a {
+    padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease;
+}
+html[data-theme] .footer-links a:hover { border-color: var(--accent); color: var(--accent); }
+html[data-theme] .footer-compliance { flex-basis: 100%; margin: 0; font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
+@media (max-width: 760px) { html[data-theme] .site-footer { justify-content: center; text-align: center; } html[data-theme] .footer-links { justify-content: center; } }

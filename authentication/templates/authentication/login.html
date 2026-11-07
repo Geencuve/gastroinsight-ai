@@ -3,50 +3,74 @@
 {% block title %}Ingresar | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card auth-card">
-    <h1>Ingresar</h1>
-    <p>Accede a GastroInsight AI con tu cuenta.</p>
+<div class="login-stage">
+    <div class="login-flip{% if side == 'gestion' %} is-flipped{% endif %}" id="login-flip">
+        <section class="login-face login-front" aria-label="Acceso del equipo del local"{% if side == 'gestion' %} inert aria-hidden="true"{% endif %}>
+            <span class="aw-avatar lg login-orb" aria-hidden="true"></span>
+            <p class="login-kicker">Equipo del local</p>
+            <h1>Ingresar</h1>
+            <p class="login-sub">Garzones, cocina, barra y caja.</p>
+            {% if side != 'gestion' %}{% for error in form.non_field_errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}{% endif %}
+            <form method="post" action="{% url 'authentication:login' %}" class="login-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                <label for="staff-user">Usuario</label>
+                <input id="staff-user" name="username" autocomplete="username" required placeholder="Ingresa tu usuario"
+                       value="{% if side != 'gestion' %}{{ form.username.value|default:'' }}{% endif %}">
+                <label for="staff-pass">Contraseña</label>
+                <input id="staff-pass" type="password" name="password" autocomplete="current-password" required placeholder="Ingresa tu contraseña">
+                <button class="btn btn-primary login-submit" type="submit">Ingresar</button>
+            </form>
+            <p class="login-links">¿No tienes cuenta? Pídela al administrador de tu local.</p>
+            <p class="login-links">¿Olvidaste tu contraseña? Pide a tu supervisor que la restablezca.</p>
+            <button type="button" class="login-switch" data-flip="gestion">🔐 Login admin <small>Dueños, administradores y supervisores</small></button>
+        </section>
 
-    <form method="post">
-        {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
-                {{ field }}
-
-                {% for error in field.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-
-        {% if form.non_field_errors %}
-            {% for error in form.non_field_errors %}
-                <p class="form-error">{{ error }}</p>
-            {% endfor %}
-        {% endif %}
-
-        <button class="btn btn-primary" type="submit">
-            Ingresar
-        </button>
-    </form>
-
-    <p>
-        ¿No tienes cuenta?
-        <a href="{% url 'authentication:register' %}">
-            Regístrate aquí
-        </a>.
+        <section class="login-face login-back" aria-label="Acceso de gestión"{% if side != 'gestion' %} inert aria-hidden="true"{% endif %}>
+            <span class="aw-avatar lg login-orb" aria-hidden="true"></span>
+            <p class="login-kicker">Centro de gestión</p>
+            <h1>Acceso de gestión</h1>
+            <p class="login-sub">Para dueños, administradores y supervisores del local.</p>
+            {% if side == 'gestion' %}
+                {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+                {% for e in mgmt_form.non_field_errors %}<div class="alert alert-error">{{ e }}</div>{% endfor %}
+            {% endif %}
+            <form method="post" action="{% url 'management:login' %}" class="login-form">
+                {% csrf_token %}
+                <label for="mgmt-user">Usuario</label>
+                <input id="mgmt-user" name="username" autocomplete="username" required placeholder="Usuario de gestión"
+                       value="{% if side == 'gestion' %}{{ mgmt_form.username.value|default:'' }}{% endif %}">
+                <label for="mgmt-pass">Contraseña</label>
+                <input id="mgmt-pass" type="password" name="password" autocomplete="current-password" required placeholder="Contraseña">
+                <button class="btn btn-primary login-submit" type="submit">Ingresar al centro de gestión</button>
+            </form>
+            <p class="login-links">¿Olvidaste tu contraseña? <a href="{% url 'authentication:password_reset' %}">Recuperarla aquí</a></p>
+            <button type="button" class="login-switch" data-flip="staff">← Acceso del personal</button>
+        </section>
+    </div>
+    <p class="login-legal">
+        Al ingresar aceptas los <a href="{% url 'core:legal_terms' %}">Términos de servicio</a> y la
+        <a href="{% url 'core:legal_privacy' %}">Política de privacidad</a>.
+        🔒 Sin reconocimiento facial: el análisis es anónimo y por mesa.
     </p>
-    <p>
-        ¿Olvidaste tu contraseña?
-        <a href="{% url 'authentication:password_reset' %}">
-            Recuperarla aquí
-        </a>.
-    </p>
-    <p class="muted">¿Eres dueño, administrador o supervisor? <a href="{% url 'management:login' %}">Acceso de gestión →</a></p>
-</section>
+</div>
+<script>
+    (function () {
+        const card = document.getElementById("login-flip");
+        if (!card) return;
+        const front = card.querySelector(".login-front");
+        const back = card.querySelector(".login-back");
+        function show(side) {
+            const management = side === "gestion";
+            card.classList.toggle("is-flipped", management);
+            [front, back].forEach((face) => {
+                const hidden = (face === back) !== management;
+                face.toggleAttribute("inert", hidden);
+                face.setAttribute("aria-hidden", String(hidden));
+            });
+            setTimeout(() => (management ? back : front).querySelector("input[name=username]").focus(), 350);
+        }
+        card.querySelectorAll("[data-flip]").forEach((button) => button.addEventListener("click", () => show(button.dataset.flip)));
+    })();
+</script>
 {% endblock %}

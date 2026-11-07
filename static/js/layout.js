@@ -7,6 +7,8 @@
     if (embedded) document.body.dataset.embed = "1";
     const sidebar = embedded ? null : document.querySelector(".app-sidebar");
     const header = sidebar ? sidebar.parentElement : null;
+    const navBar = document.querySelector(".main-nav");
+    if (navBar && navBar.parentElement && navBar.parentElement !== document.body) navBar.parentElement.classList.add("header-centered");
     if (embedded) {
         document.body.classList.add("embed-mode");
         const nav = document.querySelector(".main-nav");

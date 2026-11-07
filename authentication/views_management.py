@@ -54,7 +54,7 @@ def management_login(request):
             log_action(request, action=AuditLog.Action.LOGIN, module="authentication",
                        description=f"Inicio de sesión por el acceso de gestión ({user.get_username()}).")
             return redirect("management:home")
-    return render(request, "authentication/management_login.html", {"form": form, "error": error})
+    return render(request, "authentication/login.html", {"side": "gestion", "mgmt_form": form, "error": error})
 
 
 @login_required

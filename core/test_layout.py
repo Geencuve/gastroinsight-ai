@@ -1,4 +1,4 @@
-﻿from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from authentication.models import Profile
@@ -28,4 +28,4 @@ class LayoutTests(TestCase):
     def test_visitante_ve_ingresar_sin_barra_lateral(self):
         response = self.client.get("/legal/acerca/")
         self.assertNotContains(response, "app-sidebar")
-        self.assertContains(response, "Ingresar")
+        self.assertContains(response, 'id="theme-toggle"')

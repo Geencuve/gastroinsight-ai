@@ -1,4 +1,4 @@
-﻿"""Revisión de seguridad para el Centro de gestión: avisa de configuraciones riesgosas."""
+"""Revisión de seguridad para el Centro de gestión: avisa de configuraciones riesgosas."""
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -33,6 +33,9 @@ def security_warnings():
     if not getattr(settings, "USE_HTTPS", False) and not settings.DEBUG:
         items.append(("warning", "Conexión sin HTTPS",
                       "Fuera de la red local, publica el sistema con HTTPS (por ejemplo, con el túnel) y USE_HTTPS=True."))
+    if getattr(settings, "ALLOW_SELF_REGISTRATION", False):
+        items.append(("warning", "El registro público de cuentas está abierto",
+                      "Cualquiera puede crearse una cuenta. Desactívalo (ALLOW_SELF_REGISTRATION=False) salvo en un piloto controlado."))
     if not getattr(settings, "CONTACT_EMAIL", ""):
         items.append(("info", "Falta el correo de contacto", "Configura CONTACT_EMAIL para las solicitudes sobre datos personales."))
     without_venue = Profile.objects.filter(venues__isnull=True, user__is_active=True).exclude(role="platform_admin").count()
