@@ -1,4 +1,4 @@
-﻿"""Datos de la sección legal. Cambiar LEGAL_VERSION obliga a todos a aceptar de nuevo."""
+"""Datos de la sección legal. Cambiar LEGAL_VERSION obliga a todos a aceptar de nuevo."""
 LEGAL_VERSION = "1.0"
 LEGAL_DATE = "29 de octubre de 2026"
 TEAM = ["Gustavo Contreras", "Gerardo Cuellar", "Esteban Burgos"]
@@ -28,5 +28,7 @@ LICENSES = [
     ("pywebview", "Ventana de escritorio", "BSD-3-Clause"),
     ("segno", "Códigos QR", "BSD-3-Clause"),
     ("waitress", "Servidor de la versión de escritorio", "ZPL 2.1"),
+    ("YOLO26 Small (Ultralytics)", "Detección de mesas y personas, entrenado por el equipo", "AGPL-3.0"),
+    ("ONNX Runtime", "Ejecución local del modelo de mesas y personas", "MIT"),
     ("Inter y Space Grotesk", "Tipografías", "SIL Open Font License 1.1"),
 ]

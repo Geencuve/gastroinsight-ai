@@ -105,3 +105,4 @@ evidencias/
 .coverage
 htmlcov/
 parche_*.diff
+modelos_originales/

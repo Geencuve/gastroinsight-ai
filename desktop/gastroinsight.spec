@@ -1,4 +1,4 @@
-﻿# -*- mode: python ; coding: utf-8 -*-
+# -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
@@ -18,7 +18,7 @@ datas += collect_data_files("reportlab")
 
 hiddenimports = ["decouple", "waitress", "webview", "cv2", "numpy", "scipy", "scipy.stats", "sklearn",
                  "sklearn.linear_model", "sklearn.model_selection", "PIL", "reportlab", "reportlab.platypus",
-                 "reportlab.lib", "segno", "rest_framework"]
+                 "reportlab.lib", "segno", "rest_framework", "onnxruntime"]
 hiddenimports += collect_submodules("django.contrib") + collect_submodules("rest_framework")
 
 a = Analysis(
