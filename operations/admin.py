@@ -72,3 +72,11 @@ class SatisfactionEvaluationAdmin(admin.ModelAdmin):
         "comment",
     )
     readonly_fields = ("created_at",)
+
+from .models import WaitlistEntry  # noqa: E402
+
+
+@admin.register(WaitlistEntry)
+class WaitlistEntryAdmin(admin.ModelAdmin):
+    list_display = ("party_name", "guests", "venue", "arrived_at", "seated_at", "cancelled")
+    list_filter = ("venue", "cancelled")

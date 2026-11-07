@@ -1,0 +1,27 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Mapa de sala | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🗺️ Mapa de sala</h1>
+        <p class="muted">Estado de cada mesa, lista de espera y alertas. Se actualiza cada 10 segundos.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'operations:session_create' %}">＋ Abrir atención</a>
+</section>
+<div id="floor-board" data-url="{% url 'floor:board' %}">{% include "operations/_floor_board.html" %}</div>
+<script>
+    (function () {
+        const board = document.getElementById("floor-board");
+        setInterval(async () => {
+            const active = document.activeElement;
+            if (active && active !== document.body && board.contains(active)) return;
+            try {
+                const response = await fetch(board.dataset.url, { credentials: "same-origin" });
+                if (response.ok) board.innerHTML = await response.text();
+            } catch (error) { /* se reintenta en el siguiente ciclo */ }
+        }, 10000);
+    })();
+</script>
+{% endblock %}

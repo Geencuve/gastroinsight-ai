@@ -68,6 +68,10 @@ class RoleScopeMiddleware:
 
             profile = get_or_create_profile(request.user)
             prefixes = allowed_prefixes(profile)
+            if request.path == "/" and prefixes is not None and home_for(profile) != "/":
+                from django.shortcuts import redirect
+
+                return redirect(home_for(profile))
             if not is_path_allowed(request.path, prefixes):
                 return render(request, "core/forbidden_role.html",
                               {"role": profile.get_role_display(), "home": home_for(profile)}, status=403)

@@ -20,6 +20,8 @@ urlpatterns = [
     path("assistant/", include("assistant_chat.urls", namespace="assistant_chat")),
     path("sales/", include("sales.urls", namespace="sales")),
     path("opinion/", include("operations.feedback_urls", namespace="feedback")),
+    path("sala/", include("operations.floor_urls")),
+    path("caja/", include("operations.cashier_urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(

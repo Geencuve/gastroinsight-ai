@@ -1,0 +1,34 @@
+﻿{% extends "base.html" %}
+{% load gi_format %}
+
+{% block title %}Caja | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>💵 Caja</h1>
+        <p class="muted">Mesas por cobrar con su termómetro de experiencia, calculado por mesa con tiempos y métricas agregadas.</p>
+    </div>
+</section>
+<div class="cashier-grid">
+    {% for item in items %}
+        <article class="card cashier-card thermo-{{ item.thermo.level }}">
+            <header>
+                <div><strong>Mesa {{ item.session.table.code }}</strong>
+                    <small>{{ item.session.guests_count }} pers. · {{ item.minutes }} min{% if item.session.bill_requested_at %} · pidió la cuenta{% endif %}</small></div>
+                <span class="thermo-pill">{{ item.thermo.label }}</span>
+            </header>
+            <div class="thermo-bar"><span></span></div>
+            {% if item.thermo.reasons %}<ul class="thermo-reasons">{% for r in item.thermo.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+            {% if not item.thermo.has_visual %}<p class="muted">Sin lecturas de cámara: se evalúan solo los tiempos.</p>{% endif %}
+            <p class="thermo-suggestion">💡 {{ item.thermo.suggestion }}</p>
+            <div class="cashier-orders">
+                {% for o in item.orders %}<a class="btn btn-small btn-primary" href="{% url 'sales:order_detail' o.id %}">Cobrar pedido #{{ o.id }} · {{ o.total|clp }}</a>{% endfor %}
+            </div>
+            <a class="btn btn-small" href="{% url 'floor:session_qr' item.session.id %}">QR de opinión</a>
+        </article>
+    {% empty %}
+        <p class="muted">No hay mesas por cobrar en este momento.</p>
+    {% endfor %}
+</div>
+{% endblock %}

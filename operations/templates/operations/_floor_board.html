@@ -1,0 +1,64 @@
+﻿{% load gi_format %}
+<div class="floor-summary">
+    {% for label, css, count in counts %}<span class="floor-chip state-{{ css }}"><i></i>{{ label }} <strong>{{ count }}</strong></span>{% endfor %}
+    <span class="floor-chip">⏳ Esperando mesa <strong>{{ waitlist|length }}</strong></span>
+</div>
+<div class="floor-layout">
+    <div>
+        {% for zone, cards in zones %}
+            <h2 class="floor-zone">{{ zone }}</h2>
+            <div class="floor-grid">
+                {% for c in cards %}
+                    <article class="table-card state-{{ c.css }}">
+                        <header><strong>Mesa {{ c.table.code }}</strong><span class="state-pill">{{ c.state_label }}</span></header>
+                        {% if c.session %}
+                            <p class="table-meta">👥 {{ c.guests }} · ⏱ {{ c.seated_min }} min{% if c.first_order_min is not None %} · 1.er pedido a los {{ c.first_order_min }} min{% endif %}</p>
+                            {% if c.arrival_wait_min is not None %}<p class="table-meta">Esperó {{ c.arrival_wait_min }} min por la mesa</p>{% endif %}
+                            {% if c.pending_count %}<p class="table-meta">💵 Por cobrar: {{ c.pending_total|clp }}</p>{% endif %}
+                            {% if c.live and c.live.ieo is not None %}<p class="table-meta">IEO <strong>{{ c.live.ieo|floatformat:0 }}</strong></p>{% endif %}
+                            {% for alert in c.alerts %}<p class="table-alert">⚠️ {{ alert }}</p>{% endfor %}
+                            <div class="table-actions">
+                                <a class="btn btn-small" href="{% url 'sales:order_create' %}">＋ Pedido</a>
+                                <form method="post" action="{% url 'floor:toggle_bill' c.session.id %}">{% csrf_token %}
+                                    <button class="btn btn-small" type="submit">{% if c.session.bill_requested_at %}Quitar cuenta{% else %}🧾 Pidió la cuenta{% endif %}</button>
+                                </form>
+                                <a class="btn btn-small" href="{% url 'floor:session_qr' c.session.id %}">QR</a>
+                                {% if c.state == "por_cerrar" %}
+                                    <form method="post" action="{% url 'operations:session_close' c.session.id %}">{% csrf_token %}
+                                        <button class="btn btn-small btn-primary" type="submit">Cerrar mesa</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="table-meta">Capacidad {{ c.table.capacity }}</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <p class="muted">No hay mesas activas.</p>
+        {% endfor %}
+    </div>
+    <aside class="card waitlist">
+        <h2>⏳ Lista de espera</h2>
+        <form method="post" action="{% url 'floor:waitlist_add' %}" class="waitlist-form">{% csrf_token %}
+            <input type="text" name="party_name" placeholder="Nombre (opcional)" maxlength="80">
+            <input type="number" name="guests" value="2" min="1" max="30" aria-label="Comensales">
+            <button class="btn btn-primary btn-small" type="submit">Registrar llegada</button>
+        </form>
+        {% for e in waitlist %}
+            <div class="waitlist-row">
+                <div><strong>{{ e.party_name|default:"Grupo" }}</strong> · {{ e.guests }} pers.<small>Esperando {{ e.waiting_minutes }} min</small></div>
+                <form method="post" action="{% url 'floor:waitlist_seat' e.id %}">{% csrf_token %}
+                    <select name="table" aria-label="Mesa">{% for t in free_tables %}{% if t.venue_id == e.venue_id %}<option value="{{ t.id }}">{{ t.code }} ({{ t.capacity }})</option>{% endif %}{% endfor %}</select>
+                    <button class="btn btn-small" type="submit">Asignar</button>
+                </form>
+                <form method="post" action="{% url 'floor:waitlist_cancel' e.id %}">{% csrf_token %}
+                    <button class="btn btn-small" type="submit" title="Se retiró sin mesa" aria-label="Se retiró sin mesa">✕</button>
+                </form>
+            </div>
+        {% empty %}
+            <p class="muted">Nadie esperando mesa.</p>
+        {% endfor %}
+    </aside>
+</div>

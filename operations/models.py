@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -112,6 +113,10 @@ class ServiceSession(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    arrived_at = models.DateTimeField(null=True, blank=True, verbose_name="Llegada al local")
+    bill_requested_at = models.DateTimeField(null=True, blank=True, verbose_name="Cuenta solicitada")
 
     class Meta:
         ordering = ["-started_at"]
@@ -254,6 +259,19 @@ class SatisfactionEvaluation(models.Model):
         verbose_name="Registrada por",
     )
 
+
+    value_rating = models.PositiveSmallIntegerField(
+        null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)], verbose_name="Precio-calidad")
+    return_intent = models.CharField(
+        max_length=10, blank=True, choices=[("yes", "Sí"), ("maybe", "Tal vez"), ("no", "No")],
+        verbose_name="Intención de volver")
+    cleanliness_rating = models.PositiveSmallIntegerField(
+        null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)], verbose_name="Limpieza")
+    restroom_rating = models.PositiveSmallIntegerField(
+        null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)], verbose_name="Baños")
+    ambience_rating = models.PositiveSmallIntegerField(
+        null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)], verbose_name="Ambiente y comodidad")
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Evaluación voluntaria"
@@ -292,3 +310,31 @@ class SatisfactionEvaluation(models.Model):
                         )
                     }
                 )
+
+
+class WaitlistEntry(models.Model):
+    """Grupo que llegó al local y espera mesa (mide el tiempo hasta la asignación)."""
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="waitlist", verbose_name="Local")
+    party_name = models.CharField(max_length=80, blank=True, verbose_name="Nombre (opcional)")
+    guests = models.PositiveSmallIntegerField(default=2, verbose_name="Comensales")
+    arrived_at = models.DateTimeField(default=timezone.now, verbose_name="Llegada")
+    seated_at = models.DateTimeField(null=True, blank=True, verbose_name="Asignada a una mesa")
+    cancelled = models.BooleanField(default=False, verbose_name="Se retiró sin mesa")
+    service_session = models.ForeignKey("operations.ServiceSession", on_delete=models.SET_NULL, null=True,
+                                        blank=True, related_name="waitlist_entries", verbose_name="Atención")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   verbose_name="Registrado por")
+
+    class Meta:
+        ordering = ["arrived_at"]
+        verbose_name = "Llegada en espera"
+        verbose_name_plural = "Lista de espera"
+
+    def __str__(self):
+        return f"{self.party_name or 'Grupo'} ({self.guests})"
+
+    @property
+    def waiting_minutes(self):
+        end = self.seated_at or timezone.now()
+        return max(0, round((end - self.arrived_at).total_seconds() / 60))

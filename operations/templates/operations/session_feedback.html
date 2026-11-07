@@ -1,0 +1,36 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Tu opinión | {{ venue.name|default:"GastroInsight AI" }}{% endblock %}
+
+{% block content %}
+<div class="fb-wrap">
+    <section class="card">
+        {% if expired %}
+            <h1>Este código ya caducó</h1>
+            <p>Los códigos de opinión son válidos por 3 horas desde que se generan. ¡Gracias por visitarnos!</p>
+        {% elif done %}
+            <h1>¡Gracias por tu opinión! 🙌</h1>
+            <p>La atención de la mesa {{ table.code }} ya fue evaluada. Tu respuesta nos ayuda a mejorar.</p>
+            <a class="btn btn-primary" href="{{ menu_url }}">Ver la carta</a>
+        {% else %}
+            <p class="muted">{{ venue.name }} · Mesa {{ table.code }}</p>
+            <h1>¿Cómo estuvo tu visita?</h1>
+            <p class="muted">Es anónima y toma menos de un minuto.</p>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                {% for field in form %}
+                    <p class="fb-question">{{ field.label }}</p>
+                    {% if field.name == "comment" or field.name == "dish" %}
+                        {{ field }}
+                    {% else %}
+                        <div class="score-row">{% for radio in field %}<label class="score-option">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>{% endfor %}</div>
+                    {% endif %}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                {% endfor %}
+                <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1.2rem;">Enviar opinión</button>
+            </form>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

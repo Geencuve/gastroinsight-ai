@@ -1,4 +1,4 @@
-﻿"""
+"""
 Matriz de permisos por rol de GastroInsight AI.
 
 Los permisos se CONFIGURAN aquí (no se entrenan): cada rol declara qué secciones puede abrir.
@@ -20,14 +20,14 @@ ROLE_PREFIXES = {
     WAITER: ["/operations/sessions/", "/sales/", "/operations/evaluations/", "/opinion/", "/menus/", "/sala/"],
     KITCHEN: ["/cocina/", "/menus/"],
     BAR: ["/barra/", "/menus/"],
-    CASHIER: ["/caja/", "/sales/", "/operations/sessions/", "/operations/evaluations/", "/opinion/"],
+    CASHIER: ["/caja/", "/sala/", "/sales/", "/operations/sessions/", "/operations/evaluations/", "/opinion/"],
     SUPERVISOR: ["/operations/", "/sales/", "/opinion/", "/menus/", "/ai/monitor/", "/ai/sessions/", "/cameras/",
                  "/analytics/", "/reports/", "/promociones/", "/monitoring/incidents/",
                  "/sala/", "/cocina/", "/barra/", "/caja/", "/supervisor/"],
 }
 
 # Página de inicio de cada rol restringido (se completa en las fases B y C)
-ROLE_HOME = {WAITER: "/operations/sessions/", KITCHEN: "/menus/", BAR: "/menus/", CASHIER: "/sales/", SUPERVISOR: "/"}
+ROLE_HOME = {WAITER: "/sala/", KITCHEN: "/menus/", BAR: "/menus/", CASHIER: "/caja/", SUPERVISOR: "/"}
 
 # Lista que muestra Mi perfil: (etiqueta, roles que la tienen)
 PROFILE_CAPABILITIES = [
