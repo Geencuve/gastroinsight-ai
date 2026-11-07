@@ -85,6 +85,7 @@ class Command(BaseCommand):
                         table=camera.table, service_session=service,
                         occupancy=dec(s["occupancy"], 2), presence_ratio=dec(rng.uniform(0.85, 1.0)),
                         persons_detected=dec(s["occupancy"] + rng.choice([0, 0, 1]), 2), tables_detected=Decimal("1"),
+                        scene_boxes=fake_boxes(s["occupancy"], rng),
                         activity_level=dec(clamp(rng.gauss(22, 7), 3, 100), 2),
                         valence=dec(s["valence"]), attention_seeking=dec(s["attention"]),
                         experience_index=Decimal(str(index)) if index is not None else None,
@@ -104,3 +105,12 @@ class Command(BaseCommand):
                     total_faces_detected=counts[camera.id] * state[camera.id]["occupancy"] * 15,
                 )
         self.stdout.write(self.style.SUCCESS("Simulación finalizada."))
+
+
+def fake_boxes(occupancy, rng):
+    """Cajas sintéticas para la demostración: una mesa y una persona por puesto ocupado."""
+    boxes = [[0.5, 0.55, 0.36, 0.28, "t"]]
+    spots = [(0.3, 0.55), (0.7, 0.55), (0.5, 0.3), (0.5, 0.82), (0.33, 0.33), (0.67, 0.33)]
+    for x, y in spots[:max(0, min(int(occupancy), len(spots)))]:
+        boxes.append([round(x + rng.uniform(-0.02, 0.02), 3), y, 0.12, 0.3, "p"])
+    return boxes

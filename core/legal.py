@@ -1,8 +1,8 @@
-﻿"""Datos de la sección legal. Cambiar LEGAL_VERSION obliga a todos a aceptar de nuevo."""
+"""Datos de la sección legal. Cambiar LEGAL_VERSION obliga a todos a aceptar de nuevo."""
 from django.conf import settings
 
 APP_VERSION = "2.0.0"
-LEGAL_VERSION = "2.0"
+LEGAL_VERSION = "2.1"
 LEGAL_DATE = "7 de noviembre de 2026"
 TEAM = ["Gustavo Contreras", "Gerardo Cuellar", "Esteban Burgos"]
 ADVISOR = "Teresa Jesús Tapia Soto"

@@ -24,6 +24,12 @@ def login_view(request):
     )
 
     if request.method == "POST" and form.is_valid():
+        from .forms_management import is_manager
+
+        if is_manager(form.get_user()):
+            form.add_error(None, "Esta es una cuenta de gestión (dueño, administrador o supervisor). "
+                                 "Ingresa por el Acceso de gestión.")
+            return render(request, "authentication/login.html", {"form": form})
         login(request, form.get_user())
         log_action(request,action=AuditLog.Action.LOGIN,module="authentication",description=(f"Inicio de sesión de " f"{request.user.get_username()}."),
 )

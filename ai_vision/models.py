@@ -189,6 +189,10 @@ class DetectionEvent(models.Model):
     tables_detected = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True,
                                           verbose_name="Mesas detectadas (YOLO26)")
 
+
+    scene_boxes = models.JSONField(default=list, blank=True, verbose_name="Posiciones detectadas (normalizadas)",
+                                   help_text="[x, y, ancho, alto, 'p'|'t'] entre 0 y 1. Solo coordenadas, nunca imágenes.")
+
     class Meta:
         ordering = ["-detected_at"]
         verbose_name = "Evento de detección"

@@ -109,6 +109,7 @@ class Command(BaseCommand):
             service_session=service_session,
             persons_detected=to_decimal(summary.get("persons_detected")),
             tables_detected=to_decimal(summary.get("tables_detected")),
+            scene_boxes=summary.get("scene_boxes") or [],
             valence=to_decimal(summary["valence"]),
             attention_seeking=to_decimal(summary["attention_seeking"]),
             experience_index=Decimal(str(index)) if index is not None else None,

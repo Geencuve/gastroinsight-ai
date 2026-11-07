@@ -156,3 +156,6 @@ CONTACT_EMAIL = config('CONTACT_EMAIL', default='')
 SOURCE_CODE_URL = config('SOURCE_CODE_URL', default='https://github.com/Geencuve/gastroinsight-ai')
 SCENE_DETECTION = config('SCENE_DETECTION', default=True, cast=bool)
 CSRF_FAILURE_VIEW = 'core.views_errors.csrf_failure'
+
+# Permite incrustar páginas de la propia aplicación (pestañas de Visión IA); otros sitios siguen bloqueados.
+X_FRAME_OPTIONS = 'SAMEORIGIN'

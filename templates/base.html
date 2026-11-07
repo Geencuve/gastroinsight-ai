@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=20">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=24">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -41,7 +41,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body data-alerts-url="{{ gi_alerts_url|default:'' }}">
+<body data-alerts-url="{{ gi_alerts_url|default:'' }}" data-embed="{% if request.GET.embed %}1{% endif %}">
     <header class="site-header">
         <div class="brand">
             <a href="{% url 'core:home' %}">GastroInsight AI</a>
@@ -65,12 +65,8 @@
                     </div>
                     <div class="side-section">
                         <p class="side-title">Visión IA</p>
+                        <a class="side-link" href="{% url 'vision:home' %}"><span>👁️</span>Visión IA</a>
                         <a class="side-link" href="{% url 'supervisor:home' %}"><span>🧭</span>Supervisor</a>
-                        <a class="side-link" href="{% url 'ai_vision:monitor' %}"><span>📡</span>Monitor en vivo</a>
-                        <a class="side-link" href="{% url 'ai_vision:session_list' %}"><span>🎥</span>Sesiones de análisis</a>
-                        <a class="side-link" href="{% url 'cameras:list' %}"><span>📷</span>Cámaras</a>
-                        {% if user.is_staff %}<a class="side-link" href="{% url 'ai_vision:training' %}"><span>🧪</span>Entrenamiento</a>{% endif %}
-                        <a class="side-link" href="{% url 'analytics:correlation' %}"><span>📈</span>Correlación</a>
                     </div>
                     <div class="side-section">
                         <p class="side-title">Negocio</p>
@@ -225,9 +221,10 @@
             window.addEventListener("load", applyChartTheme);
         })();
     </script>
-    <script src="{% static 'js/main.js' %}?v=9"></script>
+    <script src="{% static 'js/main.js' %}?v=10"></script>
     <script src="{% static 'js/guide.js' %}?v=5"></script>
-    <script src="{% static 'js/layout.js' %}?v=2"></script>
+    <script src="{% static 'js/layout.js' %}?v=5"></script>
+    <script src="{% static 'js/thumb.js' %}?v=1"></script>
     {% if gi_alerts_url %}<script src="{% static 'js/alerts.js' %}?v=1"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 {% if gi_role_scope %}{{ gi_role_scope|json_script:"gi-role-scope" }}

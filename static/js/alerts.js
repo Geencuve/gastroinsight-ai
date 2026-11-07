@@ -1,9 +1,9 @@
-﻿/* GastroInsight AI · Avisos flotantes del equipo (alertas por rol, con "Voy" y sonido opcional). */
+/* GastroInsight AI · Avisos flotantes del equipo (alertas por rol, con "Voy" y sonido opcional). */
 (function () {
     "use strict";
     const root = document.body;
     const url = root.dataset.alertsUrl;
-    if (!url) return;
+    if (!url || root.dataset.embed === "1") return;
     const csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
     const seenKey = "gi-alerts-seen";
     const soundKey = "gi-alert-sound";

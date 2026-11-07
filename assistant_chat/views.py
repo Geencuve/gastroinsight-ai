@@ -299,6 +299,7 @@ def staff_widget_message(request):
             "links": metadata.get("links", []),
             "metrics": metadata.get("metrics", []),
             "bars": metadata.get("bars", []),
+            "thumbs": metadata.get("thumbs", []),
         }
     )
 

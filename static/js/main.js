@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.getElementById("assistant-widget-toggle");
     const panel = document.getElementById("assistant-widget-panel");
     const close = document.getElementById("assistant-widget-close");
@@ -47,6 +47,11 @@
                 row.appendChild(el("span", "chat-bar-value", b.value));
                 wrap.appendChild(row);
             });
+            bubble.appendChild(wrap);
+        }
+        if (!isUser && extra.thumbs && extra.thumbs.length && window.GIThumb) {
+            const wrap = el("div", "chat-thumbs");
+            wrap.innerHTML = extra.thumbs.map(window.GIThumb.mini).join("");
             bubble.appendChild(wrap);
         }
         if (!isUser && extra.links && extra.links.length) {

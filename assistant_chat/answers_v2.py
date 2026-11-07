@@ -1,4 +1,4 @@
-﻿"""Respuestas de Sazón para las funciones por rol: sala, cocina, barra, caja, cámaras e infraestructura."""
+"""Respuestas de Sazón para las funciones por rol: sala, cocina, barra, caja, cámaras e infraestructura."""
 from datetime import timedelta
 
 from django.db.models import Avg, Count
@@ -127,9 +127,13 @@ def answer_cameras(venues):
         if r["latency_ms"] is not None:
             parts.append(f"{r['latency_ms']:.0f} ms")
         text += f"\n• {r['camera'].name} (mesa {r['table']}): " + " · ".join(parts)
+    from ai_vision.services.thumbs import camera_thumbs
+
+    thumbs = [{k: t[k] for k in ("name", "ieo", "boxes", "people", "scene_people", "occupancy")}
+              for t in camera_thumbs(venues, limit=6)]
     ieos = [r["ieo"] for r in rows if r["ieo"] is not None]
     latencies = [r["latency_ms"] for r in rows if r["latency_ms"] is not None]
-    return text, {"links": links, "metrics": [
+    return text, {"links": links, "thumbs": thumbs, "metrics": [
         {"label": "En vivo", "value": f"{len(live)}/{len(rows)}"},
         {"label": "IEO promedio", "value": f"{sum(ieos) / len(ieos):.0f}" if ieos else "—"},
         {"label": "Latencia", "value": f"{sum(latencies) / len(latencies):.0f} ms" if latencies else "—"},

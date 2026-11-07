@@ -22,6 +22,7 @@ urlpatterns = [
     path("opinion/", include("operations.feedback_urls", namespace="feedback")),
     path("sala/", include("operations.floor_urls")),
     path("caja/", include("operations.cashier_urls")),
+    path("vision/", include("ai_vision.vision_urls")),
     path("gestion/", include("authentication.management_urls")),
     path("notificaciones/", include("operations.alerts_urls")),
     path("garzon/", include("operations.waiter_urls")),

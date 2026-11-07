@@ -128,12 +128,14 @@ class VisionPipeline:
                         "persons": sum(1 for d in detections if d["class"] == "person"),
                         "tables": sum(1 for d in detections if d["class"] == "dining_table"),
                         "ms": round(elapsed, 1),
+                        "boxes": scene_boxes(detections, getattr(self, "_scene_shape", None)),
                     }
                 except (cv2.error, RuntimeError, ValueError):
                     self.scene_detector = None
             if (self.scene_detector is not None and self._scene_future is None
                     and time.monotonic() - self._scene_last >= self.scene_every):
                 self._scene_last = time.monotonic()
+                self._scene_shape = frame.shape[:2]
                 self._scene_future = self._scene_executor.submit(self.scene_detector.detect, frame.copy())
         return result
 
@@ -214,6 +216,7 @@ class EventWindow:
         self.faces_away = 0
         self.scene_persons = []
         self.scene_tables = []
+        self.scene_boxes = []
         self.emotions = Counter()
         self.emotion_confidences = defaultdict(list)
         self.detector_scores = []
@@ -232,6 +235,7 @@ class EventWindow:
         if result.get("scene"):
             self.scene_persons.append(result["scene"]["persons"])
             self.scene_tables.append(result["scene"]["tables"])
+            self.scene_boxes = result["scene"].get("boxes") or self.scene_boxes
         for face in result["faces"]:
             self.detector_scores.append(face["detector_score"])
             self.faces_seen += 1
@@ -264,4 +268,17 @@ class EventWindow:
             "attention_seeking": self.faces_away / self.faces_seen if self.faces_seen else None,
             "persons_detected": float(np.median(self.scene_persons)) if self.scene_persons else None,
             "tables_detected": float(np.median(self.scene_tables)) if self.scene_tables else None,
+            "scene_boxes": self.scene_boxes,
         }
+
+
+def scene_boxes(detections, shape):
+    """Cajas de YOLO26 normalizadas (0-1): [x, y, ancho, alto, 'p'|'t']. Solo coordenadas, nunca imágenes."""
+    if not shape:
+        return []
+    height, width = shape
+    boxes = []
+    for d in detections[:24]:
+        boxes.append([round(d["x"] / width, 3), round(d["y"] / height, 3), round(d["width"] / width, 3),
+                      round(d["height"] / height, 3), "t" if d["class"] == "dining_table" else "p"])
+    return boxes

@@ -1,0 +1,104 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Visión IA | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>👁️ Visión IA</h1>
+        <p class="muted">Todo lo de visión en un solo lugar, según tu rol. Las miniaturas son esquemas anónimos: muestran lo que la IA entiende, no imágenes.</p>
+    </div>
+</section>
+
+<div data-tabs="vision">
+    <div class="tab-bar" role="tablist">
+        {% for tab in tabs %}<button type="button" data-tab-button role="tab">{{ tab.label }}</button>{% endfor %}
+    </div>
+    {% for tab in tabs %}
+        {% if tab.key == "camaras" %}
+            <section class="tab-panel vision-panel" data-tab-panel>
+                <div class="thumb-grid" id="thumb-grid" data-url="{% url 'vision:data' %}" data-live="{% if can_live %}1{% else %}0{% endif %}"></div>
+                <p class="muted vision-note">
+                    ℹ️ Cada miniatura dibuja la mesa y un punto por persona detectada, con el color del IEO (verde ≥ 65, ámbar 45-64, rojo &lt; 45).
+                    {% if can_live %}Toca una miniatura para voltearla y ver la cámara en vivo: no se graba ni se guarda, y queda registrado en la auditoría.{% else %}Tu rol ve solo el esquema anónimo.{% endif %}
+                </p>
+            </section>
+        {% else %}
+            <div class="tab-panel vision-panel" data-tab-panel>
+                <iframe data-src="{{ tab.url }}?embed=1" title="{{ tab.label }}"></iframe>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const grid = document.getElementById("thumb-grid");
+        const csrf = decodeURIComponent((document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "");
+        const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const cards = new Map();
+
+        async function flip(card) {
+            if (!grid || grid.dataset.live !== "1") return;
+            const back = card.querySelector(".thumb-back");
+            if (card.classList.contains("is-flipped")) {
+                card.classList.remove("is-flipped");
+                setTimeout(() => { back.innerHTML = "<span>Vista en vivo cerrada</span>"; }, 500);
+                return;
+            }
+            card.classList.add("is-flipped");
+            back.innerHTML = "<span>Conectando…</span>";
+            try {
+                const response = await fetch(card.dataset.liveUrl, { method: "POST", credentials: "same-origin", headers: { "X-CSRFToken": csrf } });
+                const data = await response.json();
+                back.innerHTML = data.available
+                    ? `<img src="${esc(data.url)}" alt="Vista en vivo"><span class="thumb-live-tag">EN VIVO · no se graba</span>`
+                    : `<span>${esc(data.reason)}</span>`;
+            } catch (error) {
+                back.innerHTML = "<span>No se pudo abrir la vista en vivo.</span>";
+            }
+        }
+
+        function render(d) {
+            let card = cards.get(d.id);
+            if (!card) {
+                card = document.createElement("article");
+                card.className = "thumb-card";
+                card.innerHTML = '<div class="thumb-inner"><div class="thumb-front"></div><div class="thumb-back"><span>Vista en vivo</span></div></div><footer></footer>';
+                card.dataset.liveUrl = d.live_url;
+                card.addEventListener("click", () => flip(card));
+                grid.appendChild(card);
+                cards.set(d.id, card);
+            }
+            card.title = grid.dataset.live === "1" ? "Toca para ver la cámara en vivo (no se graba)" : "Esquema anónimo de lo que detecta la IA";
+            card.querySelector(".thumb-front").innerHTML = window.GIThumb.svg(d) +
+                `<div class="thumb-chips"><span class="thumb-chip">${d.live ? "● En vivo" : esc(d.status)}</span><span class="thumb-chip">IEO ${d.ieo ?? "—"}</span></div>`;
+            const people = d.scene_people ?? d.people;
+            card.querySelector("footer").innerHTML =
+                `<div><strong>${esc(d.name)}</strong><small>${d.is_entrance ? "Entrada" : "Mesa " + esc(d.table)} · ${esc(d.zone || "Sin zona")}</small></div>` +
+                `<small>${people != null ? Math.round(people) + " pers." : "—"}</small>`;
+        }
+
+        async function refresh() {
+            if (!grid) return;
+            try {
+                const response = await fetch(grid.dataset.url, { credentials: "same-origin" });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!data.cameras.length && !cards.size) grid.innerHTML = '<p class="muted">No hay cámaras en tus zonas.</p>';
+                data.cameras.forEach(render);
+            } catch (error) { /* se reintenta */ }
+        }
+        refresh();
+        setInterval(refresh, 5000);
+
+        const container = document.querySelector('[data-tabs="vision"]');
+        const loadVisible = () => container.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+            const frame = panel.querySelector("iframe");
+            if (frame && !panel.hidden && !frame.getAttribute("src")) frame.src = frame.dataset.src;
+        });
+        new MutationObserver(loadVisible).observe(container, { attributes: true, subtree: true, attributeFilter: ["hidden"] });
+        setTimeout(loadVisible, 60);
+    });
+</script>
+{% endblock %}

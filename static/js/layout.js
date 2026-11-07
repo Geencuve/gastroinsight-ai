@@ -1,8 +1,23 @@
-﻿/* GastroInsight AI · Barra lateral, página activa, pestañas y ajuste a la ventana. */
+/* GastroInsight AI · Barra lateral, página activa, pestañas y ajuste a la ventana. */
 (function () {
     "use strict";
-    const sidebar = document.querySelector(".app-sidebar");
+    const embedded = document.body.dataset.embed === "1";
+    const sidebar = embedded ? null : document.querySelector(".app-sidebar");
     const header = sidebar ? sidebar.parentElement : null;
+    if (embedded) {
+        document.body.classList.add("embed-mode");
+        const nav = document.querySelector(".main-nav");
+        if (nav && nav.parentElement && nav.parentElement !== document.body) nav.parentElement.style.display = "none";
+        document.querySelectorAll("a[href^='/']").forEach((link) => {
+            const url = new URL(link.href, location.origin);
+            if (!url.searchParams.has("embed")) { url.searchParams.set("embed", "1"); link.href = url.pathname + url.search + url.hash; }
+        });
+        document.querySelectorAll("form[action^='/'], form:not([action])").forEach((form) => {
+            const action = new URL(form.getAttribute("action") || location.pathname, location.origin);
+            action.searchParams.set("embed", "1");
+            form.setAttribute("action", action.pathname + action.search);
+        });
+    }
 
     function syncHeader() {
         if (!header) return;
@@ -79,4 +94,50 @@
         });
     }
     document.querySelectorAll("[data-tabs]").forEach(initTabs);
+})();
+
+/* GastroInsight AI · Secciones plegables y modo compacto de la barra lateral. */
+(function () {
+    "use strict";
+    const sidebar = document.querySelector(".app-sidebar");
+    if (!sidebar || document.body.dataset.embed === "1") return;
+    const KEY = "gi-side-collapsed";
+    const MINI = "gi-side-mini";
+    let collapsed = {};
+    try { collapsed = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { collapsed = {}; }
+
+    sidebar.querySelectorAll(".side-section").forEach((section) => {
+        const title = section.querySelector(".side-title");
+        if (!title) return;
+        const name = title.textContent.trim();
+        title.setAttribute("role", "button");
+        title.setAttribute("tabindex", "0");
+        title.title = "Mostrar u ocultar esta sección";
+        if (collapsed[name] && !section.querySelector(".side-link.is-active")) section.classList.add("is-collapsed");
+        const toggle = () => {
+            section.classList.toggle("is-collapsed");
+            collapsed[name] = section.classList.contains("is-collapsed");
+            try { localStorage.setItem(KEY, JSON.stringify(collapsed)); } catch (e) { /* sin almacenamiento */ }
+        };
+        title.addEventListener("click", toggle);
+        title.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggle(); } });
+    });
+
+    sidebar.querySelectorAll(".side-link").forEach((link) => { if (!link.title) link.title = link.textContent.trim(); });
+
+    const mini = document.createElement("button");
+    mini.type = "button";
+    mini.className = "side-mini-toggle";
+    mini.title = "Contraer o expandir el menú";
+    mini.setAttribute("aria-label", "Contraer o expandir el menú");
+    sidebar.prepend(mini);
+    const apply = (on) => { document.body.classList.toggle("sidebar-mini", on); mini.textContent = on ? "⇥" : "⇤"; };
+    let saved = false;
+    try { saved = localStorage.getItem(MINI) === "1"; } catch (e) { saved = false; }
+    apply(saved);
+    mini.addEventListener("click", () => {
+        const on = !document.body.classList.contains("sidebar-mini");
+        apply(on);
+        try { localStorage.setItem(MINI, on ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
+    });
 })();
