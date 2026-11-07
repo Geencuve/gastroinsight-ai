@@ -4,6 +4,10 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    path("monitoring/audit/", __import__("monitoring.views_audit", fromlist=["x"]).audit_filtered,
+         name="audit_filtered"),
+    path("reports/explorar/", __import__("reports.views_explorer", fromlist=["x"]).sales_explorer,
+         name="sales_explorer"),
     path("admin/", admin.site.urls),
     path("", include("core.urls", namespace="core")),
     path("auth/",include("authentication.urls", namespace="authentication")),

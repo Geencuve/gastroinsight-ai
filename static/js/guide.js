@@ -26,6 +26,7 @@
         "/cameras/": "Cámaras registradas y la mesa que monitorea cada una.",
         "/analytics/correlation/": "Prueba estadística: relación entre tiempo de servicio, expresiones y satisfacción.",
         "/analytics/": "Dashboard del día: ventas, atención, evaluaciones y análisis visual.",
+        "/reports/explorar/": "Explorador de ventas: combina filtros de fecha, local, mesa, estado, pago y plato; exporta a CSV.",
         "/reports/": "Reportes diarios y por período, descargables en PDF y CSV.",
         "/promociones/": "Genera imágenes para redes sociales a partir de tu carta.",
         "/venues/": "Locales registrados en la plataforma.",
@@ -91,6 +92,16 @@
         [".tag-synthetic", "Lectura de la simulación de demostración, no de una cámara real."],
         [".reason", "Motivo de la alerta de esta mesa."],
         ["[data-start-tour]", "Recorre las funciones principales en un minuto."],
+        [".thumb-card", "Esquema anónimo de lo que detecta la cámara: la mesa y un punto por persona, con el color del IEO."],
+        [".kds-addon", "Plato agregado después de confirmar el pedido: se prepara como comanda aparte."],
+        [".thermo-pill", "Termómetro de la mesa: combina el IEO de la visita y los tiempos de espera. Nunca evalúa a una persona."],
+        [".state-pill", "Estado de la mesa: libre, esperando pedido, consumiendo, cuenta solicitada o pagada por cerrar."],
+        [".side-mini-toggle", "Contrae la barra lateral a solo íconos, o la expande."],
+        [".side-badge", "Alertas pendientes para ti."],
+        [".filter-bar", "Combina los filtros y presiona «Filtrar». «Limpiar» vuelve a mostrar todo."],
+        [".page-help-toggle", "Muestra u oculta la explicación de esta pantalla."],
+        [".mini-table", "Mesa y su estado. Toca para abrir el mapa de sala."],
+        [".live-chip", "Resumen en vivo de las mesas con cámara."],
     ];
 
     const clean = (node) => (node.textContent || "").replace(/\s+/g, " ").trim();
@@ -344,8 +355,82 @@
         }
     });
 
+    /* ---------------- Ayuda por página (botón ⓘ junto al título) ---------------- */
+    const PAGE_HELP = {
+        "/": "Tu día en números: ventas, mesas y satisfacción. «Para atender ahora» muestra lo urgente; las pestañas reúnen ideas de venta, marketing y experiencia.",
+        "/garzon/": "Tus alertas ordenadas por urgencia. Presiona «Voy» para avisar que la atiendes: desaparece para todo el equipo. Con «Conectar celular» las recibes en tu teléfono.",
+        "/sala/": "Cada mesa con su estado por color. Registra llegadas en la lista de espera, asigna mesas libres y marca cuándo una mesa pide la cuenta.",
+        "/cocina/": "Comandas por tiempo desde la confirmación (amarillo desde 10 min, rojo desde 20). Avanza cada una: Comenzar → Listo → Entregado. Lo agregado después de confirmar llega aparte.",
+        "/barra/": "Solo bebidas, con tiempos más cortos (amarillo desde 5 min, rojo desde 10). Avanza cada comanda hasta entregarla.",
+        "/caja/": "Mesas por cobrar con su termómetro de experiencia, calculado por mesa y nunca por persona. Tras el pago, imprime o muestra la boleta con el QR de evaluación.",
+        "/supervisor/": "Operación en tiempo real, mediciones por cámara, calidad del servicio e infraestructura, organizadas en pestañas.",
+        "/vision/": "Visión IA en un solo lugar. Las miniaturas son esquemas anónimos; si tu rol lo permite, tócalas para ver la cámara en vivo (no se graba y queda en la auditoría).",
+        "/gestion/": "Crea al personal con rol, locales y zonas; administra mesas y cámaras. El botón 📱 QR genera el acceso al celular de un garzón.",
+        "/monitoring/audit/": "Todas las acciones del sistema. Combina filtros por usuario, módulo, acción, local y fechas, y exporta el resultado a CSV.",
+        "/monitoring/incidents/": "Problemas técnicos detectados por el sistema, como cámaras sin señal. Revísalos y márcalos como resueltos.",
+        "/reports/explorar/": "Combina filtros de fechas, local, mesa, estado, medio de pago, plato y quién registró el pedido. Los totales consideran solo pedidos pagados.",
+        "/reports/": "Reportes diario y por período, listos para descargar en PDF o CSV (el CSV abre directo en Excel).",
+        "/analytics/correlation/": "Relación entre tiempo de servicio, expresiones e IEO con la satisfacción declarada. Por defecto excluye los datos de demostración.",
+        "/analytics/": "Dashboard del día: ventas, atención, evaluaciones y análisis visual, con filtros por local, mesa y cámara.",
+        "/ai/monitor/": "Estado en vivo de cada mesa con cámara: IEO, tendencia y alertas. «Simular mesas demo» genera lecturas sintéticas para demostraciones.",
+        "/ai/sessions/": "Crea e inicia análisis con la cámara. Los fotogramas se procesan en memoria y no se guardan.",
+        "/ai/entrenamiento/": "Sube imágenes etiquetadas con consentimiento para medir la precisión (matriz de confusión) y calibrar el modelo.",
+        "/operations/sessions/": "Abre y cierra la atención de cada mesa. Una mesa no se puede cerrar con pedidos sin pagar.",
+        "/operations/evaluations/": "Valoraciones de clientes registradas por el personal o por el QR de la boleta.",
+        "/operations/tables/": "Mesas del local con su código, capacidad y zona.",
+        "/sales/": "Crea pedidos eligiendo platos por su foto, aplica descuentos, confirma para enviar a cocina y registra el pago.",
+        "/menus/": "Carta visual: platos, precios, fotos y los más pedidos.",
+        "/promociones/": "Genera imágenes para redes sociales a partir de tu carta, con texto sugerido para publicar.",
+        "/assistant/staff/": "Pregúntale a Sazón en lenguaje natural. Responde con los datos de tus locales y solo con la información de tu rol.",
+        "/auth/profile/": "Tus datos, permisos, seguridad y preferencias (tema, leyendas de ayuda y tour guiado).",
+        "/privacy/": "Políticas de privacidad y autorizaciones del análisis visual de cada local.",
+    };
+
+    function helpFor(path) {
+        if (PAGE_HELP[path] !== undefined && path === "/") return PAGE_HELP[path];
+        let best = null;
+        Object.keys(PAGE_HELP).forEach((prefix) => {
+            if (prefix !== "/" && path.startsWith(prefix) && (!best || prefix.length > best.length)) best = prefix;
+        });
+        return best ? PAGE_HELP[best] : null;
+    }
+
+    function addPageHelp() {
+        if (document.body.dataset.embed === "1") return;
+        const header = document.querySelector("main .page-header");
+        const title = header && header.querySelector("h1");
+        const text = helpFor(location.pathname);
+        if (!title || !text || header.querySelector(".page-help-toggle")) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "page-help-toggle";
+        button.textContent = "ⓘ";
+        button.title = "¿Qué hace esta pantalla?";
+        button.setAttribute("aria-label", "¿Qué hace esta pantalla?");
+        title.appendChild(button);
+        const note = document.createElement("p");
+        note.className = "page-help";
+        note.textContent = text;
+        title.parentElement.appendChild(note);
+        const key = "gi-help-seen";
+        let seen = [];
+        try { seen = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { seen = []; }
+        const first = !seen.includes(location.pathname);
+        note.hidden = !first;
+        button.setAttribute("aria-expanded", String(first));
+        if (first) {
+            seen.push(location.pathname);
+            try { localStorage.setItem(key, JSON.stringify(seen.slice(-80))); } catch (e) { /* sin almacenamiento */ }
+        }
+        button.addEventListener("click", () => {
+            note.hidden = !note.hidden;
+            button.setAttribute("aria-expanded", String(!note.hidden));
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         markTipsChoice();
+        addPageHelp();
         if (!userId || location.pathname !== "/") return;
         const params = new URLSearchParams(location.search);
         let done = false;

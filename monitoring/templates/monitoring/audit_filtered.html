@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Bitácora de auditoría | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🗂️ Bitácora de auditoría</h1>
+        <p class="muted">Registro de todas las acciones del sistema. Filtra por persona, módulo, acción, local o fechas.</p>
+    </div>
+    <a class="btn btn-secondary" href="?{{ querystring }}{% if querystring %}&{% endif %}formato=csv">⬇️ Exportar CSV</a>
+</section>
+
+<form method="get" class="card filter-bar">
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Buscar en la descripción…" aria-label="Buscar">
+    <select name="usuario" aria-label="Usuario"><option value="">Todos los usuarios</option>{% for u in users %}<option value="{{ u.id }}" {% if f.usuario == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+    <select name="modulo" aria-label="Módulo"><option value="">Todos los módulos</option>{% for m in modules %}<option value="{{ m }}" {% if f.modulo == m %}selected{% endif %}>{{ m }}</option>{% endfor %}</select>
+    <select name="accion" aria-label="Acción"><option value="">Todas las acciones</option>{% for value, label in actions %}<option value="{{ value }}" {% if f.accion == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <select name="local" aria-label="Local"><option value="">Todos los locales</option>{% for v in venues %}<option value="{{ v.id }}" {% if f.local == v.id|stringformat:"s" %}selected{% endif %}>{{ v.name }}</option>{% endfor %}</select>
+    <label class="filter-date">Desde <input type="date" name="desde" value="{{ f.desde }}"></label>
+    <label class="filter-date">Hasta <input type="date" name="hasta" value="{{ f.hasta }}"></label>
+    <div class="filter-actions"><button class="btn btn-primary" type="submit">Filtrar</button><a class="btn btn-secondary" href="?">Limpiar</a></div>
+</form>
+
+<section class="card filter-results">
+    <p class="muted">{{ total }} registro(s){% if querystring %} con los filtros aplicados{% endif %}.</p>
+    <div class="table-responsive">
+        <table>
+            <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Módulo</th><th>Local</th><th>Descripción</th><th>IP</th></tr></thead>
+            <tbody>
+                {% for log in page %}
+                    <tr>
+                        <td style="white-space: nowrap;">{% if time_field == "created_at" %}{{ log.created_at|date:"d-m-Y H:i" }}{% elif time_field == "timestamp" %}{{ log.timestamp|date:"d-m-Y H:i" }}{% else %}—{% endif %}</td>
+                        <td>{{ log.user.username|default:"sistema" }}</td>
+                        <td><span class="role-badge">{{ log.get_action_display }}</span></td>
+                        <td>{{ log.module }}</td>
+                        <td>{{ log.venue.name|default:"—" }}</td>
+                        <td>{{ log.description }}</td>
+                        <td class="muted">{{ log.ip_address|default:"" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="muted">No hay registros con estos filtros.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page.paginator.num_pages > 1 %}
+        <nav class="pager">
+            {% if page.has_previous %}<a class="btn btn-small" href="?{{ querystring }}&page={{ page.previous_page_number }}">← Anterior</a>{% endif %}
+            <span class="muted">Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}<a class="btn btn-small" href="?{{ querystring }}&page={{ page.next_page_number }}">Siguiente →</a>{% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

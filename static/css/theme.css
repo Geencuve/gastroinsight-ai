@@ -1026,3 +1026,62 @@ html[data-theme] .receipt-qr .qr-box svg { width: 46mm; max-width: 220px; }
 /* QR escalable: siempre completo, con su margen blanco */
 html[data-theme] .qr-box svg { width: min(280px, 72vw); height: auto; aspect-ratio: 1 / 1; overflow: visible; }
 html[data-theme] .receipt-qr .qr-box svg { width: 46mm; max-width: 220px; }
+
+/* ---------- H5 · Barras de filtros, resultados y paginación ---------- */
+html[data-theme] .filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.5rem; align-items: end; padding: 0.8rem 1rem; }
+html[data-theme] .filter-bar input, html[data-theme] .filter-bar select { width: 100%; box-sizing: border-box; }
+html[data-theme] .filter-date { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.72rem; color: var(--muted); text-transform: none; letter-spacing: 0; }
+html[data-theme] .filter-actions { display: flex; gap: 0.4rem; }
+html[data-theme] .filter-results { margin-top: 0.8rem; }
+html[data-theme] .filter-results td { vertical-align: top; }
+html[data-theme] .pager { display: flex; justify-content: center; align-items: center; gap: 0.8rem; margin-top: 0.8rem; }
+main:has(.filter-results) .filter-results .table-responsive { max-height: calc(100vh - var(--app-header) - 22rem); min-height: 240px; overflow-y: auto; }
+
+/* =========================================================
+   H6 · Contenido centrado, responsive y ayuda por página
+   ========================================================= */
+body.has-sidebar main > * { max-width: 1440px; margin-left: auto !important; margin-right: auto !important; }
+body.has-sidebar main > .messages, body.has-sidebar main > .alert { max-width: 1440px; }
+html[data-theme] .page-header { flex-wrap: wrap; }
+html[data-theme] .page-header h1 { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+html[data-theme] .page-help-toggle {
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--accent); font-size: 0.85rem; font-weight: 700; cursor: pointer; line-height: 1;
+}
+html[data-theme] .page-help-toggle:hover, html[data-theme] .page-help-toggle[aria-expanded="true"] { background: var(--accent-soft); }
+html[data-theme] .page-help {
+    margin: 0.5rem 0 0; padding: 0.6rem 0.85rem; max-width: 780px; border-radius: 12px; font-size: 0.86rem;
+    background: var(--accent-soft); color: var(--text); border-left: 3px solid var(--accent);
+}
+html[data-theme] img, html[data-theme] svg, html[data-theme] video { max-width: 100%; }
+html[data-theme] .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 1200px) {
+    html[data-theme] .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+}
+
+@media (max-width: 760px) {
+    html[data-theme] { font-size: 14.5px; }
+    html[data-theme] main table:not(.receipt-items):not(.cm-table) { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    html[data-theme] .page-header { flex-direction: column; align-items: stretch; }
+    html[data-theme] .page-header > .btn, html[data-theme] .page-header > form, html[data-theme] .page-header > a { align-self: flex-start; }
+    html[data-theme] .tab-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.3rem; scrollbar-width: none; }
+    html[data-theme] .tab-bar button { flex: none; }
+    html[data-theme] .card { padding: 0.85rem; border-radius: 16px; }
+    html[data-theme] form .btn-primary[type="submit"] { width: 100%; }
+    html[data-theme] .filter-bar { grid-template-columns: 1fr 1fr; }
+    html[data-theme] .filter-actions { grid-column: 1 / -1; }
+    html[data-theme] .kpi-grid { grid-template-columns: 1fr 1fr; }
+    html[data-theme] .kpi strong { font-size: 1.3rem; }
+    html[data-theme] .supervisor-grid, html[data-theme] .mgmt-split, html[data-theme] .floor-layout,
+    html[data-theme] .kds-columns, html[data-theme] .waiter-grid, html[data-theme] .assistant-shell { grid-template-columns: 1fr !important; height: auto !important; }
+    html[data-theme] .vision-panel iframe { height: 70vh; min-height: 360px; }
+    html[data-theme] .assistant-widget-panel { position: fixed; inset: 0; width: 100vw; height: 100dvh; border-radius: 0; }
+    html[data-theme] .toast-stack { top: auto; bottom: 5.2rem; right: 0.6rem; left: 0.6rem; width: auto; }
+    html[data-theme] .thumb-grid { grid-template-columns: 1fr 1fr; }
+    html[data-theme] .site-footer { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 420px) {
+    html[data-theme] .kpi-grid, html[data-theme] .thumb-grid, html[data-theme] .filter-bar { grid-template-columns: 1fr; }
+}

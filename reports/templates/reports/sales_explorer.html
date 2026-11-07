@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load gi_format %}
+
+{% block title %}Explorador de ventas | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🔎 Explorador de ventas</h1>
+        <p class="muted">Combina filtros para analizar los pedidos del {{ start|date:"d-m-Y" }} al {{ end|date:"d-m-Y" }}. Los totales consideran solo pedidos pagados.</p>
+    </div>
+    <a class="btn btn-secondary" href="?{{ querystring }}{% if querystring %}&{% endif %}formato=csv">⬇️ Exportar CSV</a>
+</section>
+
+<form method="get" class="card filter-bar">
+    <label class="filter-date">Desde <input type="date" name="desde" value="{{ start|date:'Y-m-d' }}"></label>
+    <label class="filter-date">Hasta <input type="date" name="hasta" value="{{ end|date:'Y-m-d' }}"></label>
+    <select name="local" aria-label="Local"><option value="">Todos los locales</option>{% for v in venues %}<option value="{{ v.id }}" {% if f.local == v.id|stringformat:"s" %}selected{% endif %}>{{ v.name }}</option>{% endfor %}</select>
+    <input type="text" name="mesa" value="{{ f.mesa }}" placeholder="Mesa (ej. M01)" aria-label="Mesa">
+    <select name="estado" aria-label="Estado"><option value="">Todos los estados</option>{% for value, label in statuses %}<option value="{{ value }}" {% if f.estado == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <select name="pago" aria-label="Medio de pago"><option value="">Todos los medios de pago</option>{% for value, label in payments %}<option value="{{ value }}" {% if f.pago == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <input type="text" name="plato" value="{{ f.plato }}" placeholder="Contiene el plato…" aria-label="Plato">
+    <select name="registrado" aria-label="Registrado por"><option value="">Registrado por cualquiera</option>{% for u in staff %}<option value="{{ u.id }}" {% if f.registrado == u.id|stringformat:"s" %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select>
+    <div class="filter-actions"><button class="btn btn-primary" type="submit">Filtrar</button><a class="btn btn-secondary" href="?">Limpiar</a></div>
+</form>
+
+<div class="kpi-grid kpi-compact">
+    <article class="kpi"><span class="kpi-label">Pedidos encontrados</span><strong>{{ matched }}</strong><small>{{ totals.count }} pagado(s)</small></article>
+    <article class="kpi"><span class="kpi-label">Ventas</span><strong>{{ totals.revenue|clp }}</strong><small>Pedidos pagados</small></article>
+    <article class="kpi"><span class="kpi-label">Ticket promedio</span><strong>{{ totals.ticket|clp }}</strong><small>Por pedido pagado</small></article>
+    <article class="kpi"><span class="kpi-label">Descuentos</span><strong>{{ totals.discounts|clp }}</strong><small>Aplicados</small></article>
+</div>
+
+<section class="card filter-results">
+    <div class="table-responsive">
+        <table>
+            <thead><tr><th>Pedido</th><th>Fecha</th><th>Mesa</th><th>Platos</th><th>Estado</th><th>Pago</th><th>Total</th><th>Registró</th></tr></thead>
+            <tbody>
+                {% for o in page %}
+                    <tr>
+                        <td><a href="{% url 'sales:order_detail' o.id %}">#{{ o.id }}</a></td>
+                        <td style="white-space: nowrap;">{{ o.opened_at|date:"d-m H:i" }}</td>
+                        <td>{{ o.service_session.table.code }}</td>
+                        <td>{% for i in o.items.all %}{{ i.quantity }}× {{ i.dish_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                        <td>{{ o.get_status_display }}</td>
+                        <td>{% if o.payment_method %}{{ o.get_payment_method_display }}{% else %}—{% endif %}</td>
+                        <td>{{ o.total|clp }}</td>
+                        <td class="muted">{{ o.created_by.username|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8" class="muted">No hay pedidos con estos filtros.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page.paginator.num_pages > 1 %}
+        <nav class="pager">
+            {% if page.has_previous %}<a class="btn btn-small" href="?{{ querystring }}&page={{ page.previous_page_number }}">← Anterior</a>{% endif %}
+            <span class="muted">Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}<a class="btn btn-small" href="?{{ querystring }}&page={{ page.next_page_number }}">Siguiente →</a>{% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

@@ -226,18 +226,17 @@ class Command(BaseCommand):
                 window.add(result)
 
                 if preview_enabled:
-                    for face in result["faces"]:
-                        box = face["box"]
-                        x, y = box["x"], box["y"]
-                        cv2.rectangle(frame, (x, y), (x + box["width"], y + box["height"]), (0, 200, 0), 2)
-                        label = PREVIEW_LABELS.get(face["emotion"], face["emotion"])
-                        cv2.putText(frame, (f"{label} {face['emotion_confidence']:.2f}" if face["emotion"] else "rostro")
-                                    + (" | mira alrededor" if face.get("looking_away") else ""), (x, max(18, y - 8)),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 0), 2)
-                    cv2.putText(frame, f"Rostros: {result['faces_count']} | {result['processing_time_ms']} ms | "
-                                       f"eventos: {events_saved}", (15, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
-                    cv2.imshow("GastroInsight AI - Analisis (Q para detener)", frame)
+
+                    from ai_vision.services.hud import render_hud
+
+
+                    hud_info = {"camera": camera.name, "table": camera.table.code if camera.table_id else "",
+
+                                "events": events_saved, "frame": frame_number,
+
+                                "elapsed": time.monotonic() - started_at, "summary": window.summary()}
+
+                    cv2.imshow("GastroInsight AI - Analisis (Q para detener)", render_hud(frame, result, hud_info))
                 del frame  # el fotograma se descarta inmediatamente
 
                 if frame_number % sample_every == 0:
