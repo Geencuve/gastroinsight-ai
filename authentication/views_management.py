@@ -1,4 +1,4 @@
-﻿from django.contrib import messages
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -66,6 +66,7 @@ def home(request):
     zones = sorted({t.zone_name for t in tables if t.zone_name})
     return render(request, "authentication/management/home.html", {
         "users": users, "tables": tables, "cameras": cameras, "zones": zones,
+        "service_roles": ["waiter", "cashier", "kitchen", "bar", "operator"],
         "staff_form": StaffCreateForm(actor=actor, venues=venues), "table_form": TableForm(venues=venues),
         "camera_form": CameraForm(venues=venues),
         "kpis": {"staff": sum(1 for u in users if u.is_active), "tables": tables.count(), "zones": len(zones),
@@ -130,3 +131,16 @@ def camera_create(request):
     else:
         messages.error(request, "No se pudo registrar la cámara. " + _errors(form))
     return redirect("management:home")
+
+
+@login_required
+def staff_qr(request, user_id):
+    from operations.services.pairing import can_pair, pair_context
+
+    actor, venues = _actor(request)
+    target = get_object_or_404(User.objects.select_related("profile"), pk=user_id)
+    if target not in _managed_users(actor, venues) or not can_pair(target):
+        raise PermissionDenied("Solo puedes generar códigos de acceso para el personal de servicio de tus locales.")
+    log_action(request, action=AuditLog.Action.CREATE, module="authentication", object_type="Pairing",
+               object_id=str(target.pk), description=f"Generó un código QR de acceso para {target.get_username()}.")
+    return render(request, "operations/pair.html", pair_context(request, target))

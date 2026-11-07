@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 
 from . import views_management
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path("acceso/", views_management.management_login, name="login"),
     path("personal/nuevo/", views_management.staff_create, name="staff_create"),
     path("personal/<int:user_id>/", views_management.staff_edit, name="staff_edit"),
+    path("personal/<int:user_id>/qr/", views_management.staff_qr, name="staff_qr"),
     path("mesas/nueva/", views_management.table_create, name="table_create"),
     path("camaras/nueva/", views_management.camera_create, name="camera_create"),
 ]

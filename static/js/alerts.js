@@ -50,6 +50,7 @@
         while (stack.children.length > 4) stack.lastElementChild.remove();
         if (item.level !== "danger") setTimeout(close, 12000);
         beep(item.level);
+        if (item.level === "danger" && navigator.vibrate) navigator.vibrate([120, 60, 120]);
     }
 
     async function poll() {

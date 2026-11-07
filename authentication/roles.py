@@ -12,7 +12,7 @@ MANAGERS = {PLATFORM_ADMIN, VENUE_ADMIN}
 FULL_OPERATION = MANAGERS | {SUPERVISOR, OPERATOR}
 
 # Secciones comunes a todo el personal
-COMMON_PREFIXES = ["/auth/", "/legal/", "/assistant/staff/", "/static/", "/media/", "/primer-uso/", "/notificaciones/"]
+COMMON_PREFIXES = ["/auth/", "/legal/", "/assistant/staff/", "/static/", "/media/", "/primer-uso/", "/notificaciones/", "/.well-known/"]
 
 # Roles restringidos: rutas que pueden abrir. Los roles que no aparecen aquí no se restringen
 # (administradores, operador y visualizador mantienen los permisos de sus propias vistas).

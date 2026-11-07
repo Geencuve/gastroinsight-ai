@@ -1,4 +1,4 @@
-﻿"""Opiniones de clientes mediante un código QR por mesa (sin cuenta)."""
+"""Opiniones de clientes mediante un código QR por mesa (sin cuenta)."""
 from datetime import timedelta
 
 import segno
@@ -135,6 +135,6 @@ def table_qr_codes(request):
     cards = []
     for table in RestaurantTable.objects.filter(venue__in=venues, is_active=True).select_related("venue").order_by("venue__name", "code"):
         url = request.build_absolute_uri(reverse("feedback:form", args=[table_token(table)]))
-        svg = segno.make(url, error="m").svg_inline(scale=4, border=2, dark="#05070b", light="#ffffff")
+        svg = segno.make(url, error="m").svg_inline(omitsize=True, scale=4, border=2, dark="#05070b", light="#ffffff")
         cards.append({"table": table, "url": url, "svg": mark_safe(svg)})
     return render(request, "operations/feedback_qr.html", {"cards": cards})

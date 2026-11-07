@@ -1,0 +1,12 @@
+﻿{
+  "name": "GastroInsight AI",
+  "short_name": "GastroInsight",
+  "description": "Alertas y operación del local en tu celular.",
+  "start_url": "/garzon/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05070b",
+  "theme_color": "#0b0e15",
+  "lang": "es",
+  "icons": [{ "src": "/static/img/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

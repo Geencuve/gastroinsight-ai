@@ -159,3 +159,17 @@ CSRF_FAILURE_VIEW = 'core.views_errors.csrf_failure'
 
 # Permite incrustar páginas de la propia aplicación (pestañas de Visión IA); otros sitios siguen bloqueados.
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Dirección pública para los códigos QR (por ejemplo, el enlace del túnel). Vacío = se detecta automáticamente.
+PUBLIC_BASE_URL = config("PUBLIC_BASE_URL", default="")
+if DEBUG:
+    # En desarrollo, permite que los celulares de la misma red WiFi abran el servidor (runserver 0.0.0.0:8000).
+    import socket as _socket
+
+    try:
+        with _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM) as _sock:
+            _sock.connect(("10.255.255.255", 1))
+            if _sock.getsockname()[0] not in ALLOWED_HOSTS:
+                ALLOWED_HOSTS.append(_sock.getsockname()[0])
+    except OSError:
+        pass

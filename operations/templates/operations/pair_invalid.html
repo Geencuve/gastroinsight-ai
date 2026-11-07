@@ -1,0 +1,13 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Código no válido | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card pair-card">
+    <div style="font-size: 2.4rem;">⏱️</div>
+    <h1>No se pudo conectar</h1>
+    <p>{{ reason }}</p>
+    <p class="muted">Pide un código nuevo en «Mis alertas» o a tu supervisor. Cada código sirve una sola vez y dura 5 minutos.</p>
+    <a class="btn btn-primary" href="{% url 'authentication:login' %}">Ingresar con usuario y contraseña</a>
+</section>
+{% endblock %}

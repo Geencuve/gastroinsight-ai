@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Centro de gestión | GastroInsight AI{% endblock %}
 
@@ -37,7 +37,7 @@
                                 <td>{% for v in u.profile.venues.all %}{{ v.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="table-alert">Sin local</span>{% endfor %}</td>
                                 <td>{{ u.profile.zones|default:"Todas" }}</td>
                                 <td>{{ u.last_login|date:"d-m H:i"|default:"—" }}</td>
-                                <td>{% if u != request.user %}<a class="btn btn-small" href="{% url 'management:staff_edit' u.id %}">Editar</a>{% endif %}</td>
+                                <td>{% if u != request.user %}<a class="btn btn-small" href="{% url 'management:staff_edit' u.id %}">Editar</a>{% if u.profile.role in service_roles and u.is_active %} <a class="btn btn-small" href="{% url 'management:staff_qr' u.id %}" title="Código QR para conectar su celular">📱 QR</a>{% endif %}{% endif %}</td>
                             </tr>
                         {% empty %}
                             <tr><td colspan="6" class="muted">Aún no hay personal en tus locales.</td></tr>

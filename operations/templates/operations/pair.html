@@ -1,0 +1,25 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Conectar celular | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card pair-card">
+    <p class="muted">{{ target.get_full_name|default:target.username }} · {{ target.profile.get_role_display }}</p>
+    <h1>📱 Conecta tu celular</h1>
+    <p>Escanea este código con la cámara del celular. Se abrirá «Mis alertas» con tu cuenta, sin escribir la contraseña.</p>
+    <div class="qr-box">{{ qr_svg }}</div>
+    <p class="muted">Código de un solo uso · caduca a las {{ expires_at|date:"H:i:s" }} (5 minutos).</p>
+    {% if local_network %}
+        <div class="alert alert-info pair-help">
+            <strong>El código usa la red WiFi del local ({{ lan_ip }}).</strong>
+            El celular debe estar en la misma red y el servidor debe aceptar conexiones de la red:
+            <code>python manage.py runserver 0.0.0.0:8000</code>. Con el enlace del túnel funciona desde cualquier lugar.
+        </div>
+    {% endif %}
+    <div class="pair-actions">
+        <a class="btn btn-secondary" href="">🔄 Generar otro código</a>
+        <a class="btn btn-secondary" href="{% url 'waiter:home' %}">← Mis alertas</a>
+    </div>
+    <p class="muted pair-note">Por seguridad, no compartas este código. Para desconectar el celular, cierra sesión en él.</p>
+</section>
+{% endblock %}

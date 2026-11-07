@@ -116,7 +116,7 @@ def session_qr(request, session_id):
     session = get_object_or_404(ServiceSession.objects.select_related("table__venue"), pk=session_id,
                                 table__venue__in=_venues(request))
     url = request.build_absolute_uri(reverse("feedback:session_form", args=[session_token(session)]))
-    svg = segno.make(url, error="m").svg_inline(scale=8, dark="#111111", light="#ffffff")
+    svg = segno.make(url, error="m").svg_inline(omitsize=True, scale=8, dark="#111111", light="#ffffff")
     return render(request, "operations/session_qr.html", {
         "session": session, "table": session.table, "url": url, "qr_svg": mark_safe(svg),
         "expires_at": timezone.now() + timedelta(seconds=FEEDBACK_MAX_AGE),

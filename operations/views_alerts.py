@@ -54,7 +54,10 @@ def _waiter_context(request):
     cards = [card for card in cards if zone_ok(zones, card["table"].zone_name)]
     recent = (Notification.objects.filter(venue__in=venues, acknowledged_at__gte=timezone.now() - timedelta(minutes=10))
               .select_related("acknowledged_by", "table")[:5])
+    from .services.pairing import can_pair
+
     return {"alerts": [serialize(n) for n in active_for(profile, venues)], "cards": cards,
+            "can_pair": can_pair(request.user),
             "counts": floor["counts"], "waitlist": floor["waitlist"], "recent": recent}
 
 
