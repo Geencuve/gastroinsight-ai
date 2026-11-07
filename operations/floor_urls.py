@@ -5,6 +5,8 @@ from . import views_floor
 app_name = "floor"
 
 urlpatterns = [
+    path("mesa/<int:table_id>/abrir/", views_floor.quick_open, name="quick_open"),
+    path("mesa/<int:table_id>/pedido/", views_floor.quick_order, name="quick_order"),
     path("", views_floor.floor_map, name="map"),
     path("tablero/", views_floor.floor_board, name="board"),
     path("espera/", views_floor.waitlist_add, name="waitlist_add"),

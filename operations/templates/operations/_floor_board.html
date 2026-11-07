@@ -21,7 +21,7 @@
                                 {% if c.ready_count %}<form method="post" action="{% url 'floor:deliver_ready' c.session.id %}">{% csrf_token %}
                                     <button class="btn btn-small btn-primary" type="submit">🍽️ Entregar listos ({{ c.ready_count }})</button>
                                 </form>{% endif %}
-                                <a class="btn btn-small" href="{% url 'sales:order_create' %}">＋ Pedido</a>
+                                <a class="btn btn-small btn-primary" href="{% url 'floor:quick_order' c.table.id %}">＋ Pedido</a>
                                 <form method="post" action="{% url 'floor:toggle_bill' c.session.id %}">{% csrf_token %}
                                     <button class="btn btn-small" type="submit">{% if c.session.bill_requested_at %}Quitar cuenta{% else %}🧾 Pidió la cuenta{% endif %}</button>
                                 </form>
@@ -34,6 +34,10 @@
                             </div>
                         {% else %}
                             <p class="table-meta">Capacidad {{ c.table.capacity }}</p>
+                            <form method="post" action="{% url 'floor:quick_open' c.table.id %}" class="quick-open">{% csrf_token %}
+                                <input type="number" name="guests" value="2" min="1" max="30" aria-label="Comensales" title="Comensales">
+                                <button class="btn btn-small btn-primary" type="submit">Abrir mesa</button>
+                            </form>
                         {% endif %}
                     </article>
                 {% endfor %}

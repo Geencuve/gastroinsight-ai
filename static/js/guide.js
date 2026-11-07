@@ -382,7 +382,7 @@
         "/operations/sessions/": "Abre y cierra la atención de cada mesa. Una mesa no se puede cerrar con pedidos sin pagar.",
         "/operations/evaluations/": "Valoraciones de clientes registradas por el personal o por el QR de la boleta.",
         "/operations/tables/": "Mesas del local con su código, capacidad y zona.",
-        "/sales/": "Crea pedidos eligiendo platos por su foto, aplica descuentos, confirma para enviar a cocina y registra el pago.",
+        "/sales/": "Toca una foto para agregar el plato; el pedido queda a la derecha. Usa el buscador para encontrar platos. Confirma para enviar a cocina y barra.",
         "/menus/": "Carta visual: platos, precios, fotos y los más pedidos.",
         "/promociones/": "Genera imágenes para redes sociales a partir de tu carta, con texto sugerido para publicar.",
         "/assistant/staff/": "Pregúntale a Sazón en lenguaje natural. Responde con los datos de tus locales y solo con la información de tu rol.",

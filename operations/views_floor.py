@@ -296,3 +296,60 @@ def table_feedback(request, token):
     return render(request, "operations/session_feedback.html", {
         "unpaid": True, "table": table, "venue": table.venue, "menu_url": _reverse("menus:public", args=[table.venue_id]),
     })
+
+
+# ---------------- V2: abrir mesa y tomar pedido en un toque ----------------
+@login_required
+def quick_open(request, table_id):
+    """Abre la atención de una mesa libre y lleva directo al punto de venta."""
+    from django.contrib import messages as _messages
+    from django.db import IntegrityError, transaction
+    from django.shortcuts import get_object_or_404 as _get, redirect as _redirect
+
+    from monitoring.models import AuditLog
+    from monitoring.services.audit import log_action
+
+    from .models import RestaurantTable as _Table
+
+    if request.method != "POST":
+        return _redirect("floor:map")
+    table = _get(_Table, pk=table_id, venue__in=_venues(request))
+    try:
+        guests = max(1, min(30, int(request.POST.get("guests") or 2)))
+    except ValueError:
+        guests = 2
+    if not ServiceSession.objects.filter(table=table, status=ServiceSession.Status.OPEN).exists():
+        try:
+            with transaction.atomic():
+                session = ServiceSession.objects.create(table=table, guests_count=guests, created_by=request.user)
+            log_action(request, action=AuditLog.Action.CREATE, module="operations", venue=table.venue,
+                       object_type="ServiceSession", object_id=str(session.pk),
+                       description=f"Abrió la mesa {table.code} para {guests} comensal(es) desde el salón.")
+        except IntegrityError:
+            _messages.info(request, f"La mesa {table.code} ya tenía una atención abierta.")
+    return _redirect("floor:quick_order", table_id=table.id)
+
+
+@login_required
+def quick_order(request, table_id):
+    """Lleva al punto de venta de la mesa: retoma el pedido abierto o crea uno nuevo."""
+    from django.contrib import messages as _messages
+    from django.shortcuts import get_object_or_404 as _get, redirect as _redirect
+
+    from monitoring.models import AuditLog
+    from monitoring.services.audit import log_action
+    from sales.models import Order as _Order
+
+    from .models import RestaurantTable as _Table
+
+    table = _get(_Table, pk=table_id, venue__in=_venues(request))
+    session = ServiceSession.objects.filter(table=table, status=ServiceSession.Status.OPEN).first()
+    if session is None:
+        _messages.info(request, f"Primero abre la mesa {table.code}.")
+        return _redirect("floor:map")
+    order = _Order.objects.filter(service_session=session, status=_Order.Status.OPEN).order_by("-id").first()
+    if order is None:
+        order = _Order.objects.create(service_session=session, created_by=request.user)
+        log_action(request, action=AuditLog.Action.CREATE, module="sales", venue=table.venue, object_type="Order",
+                   object_id=str(order.pk), description=f"Creó el pedido #{order.pk} para la mesa {table.code} desde el salón.")
+    return _redirect("sales:order_detail", order.pk)
