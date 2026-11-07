@@ -12,7 +12,9 @@
     if (embedded) {
         document.body.classList.add("embed-mode");
         const nav = document.querySelector(".main-nav");
-        if (nav && nav.parentElement && nav.parentElement !== document.body) nav.parentElement.style.display = "none";
+        let top = nav;
+        while (top && top.parentElement && top.parentElement !== document.body) top = top.parentElement;
+        if (top && top !== document.body) top.style.display = "none";
         document.querySelectorAll("a[href^='/']").forEach((link) => {
             const url = new URL(link.href, location.origin);
             if (!url.searchParams.has("embed")) { url.searchParams.set("embed", "1"); link.href = url.pathname + url.search + url.hash; }
@@ -118,7 +120,9 @@
         title.setAttribute("role", "button");
         title.setAttribute("tabindex", "0");
         title.title = "Mostrar u ocultar esta sección";
-        if (collapsed[name] && !section.querySelector(".side-link.is-active")) section.classList.add("is-collapsed");
+        const pref = collapsed[name];
+        const hasActive = section.querySelector(".side-link.is-active");
+        if (!hasActive && (pref === true || (pref === undefined && name !== "Operación"))) section.classList.add("is-collapsed");
         const toggle = () => {
             section.classList.toggle("is-collapsed");
             collapsed[name] = section.classList.contains("is-collapsed");

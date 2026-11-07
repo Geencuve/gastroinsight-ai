@@ -418,7 +418,7 @@
         let seen = [];
         try { seen = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { seen = []; }
         const first = !seen.includes(location.pathname);
-        note.hidden = !first;
+        note.hidden = true;
         button.setAttribute("aria-expanded", String(first));
         if (first) {
             seen.push(location.pathname);

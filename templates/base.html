@@ -23,7 +23,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=36">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=37">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -55,40 +55,38 @@
                 <div class="side-scroll">
                     <a class="side-link" href="{% url 'core:home' %}"><span>🏠</span>Inicio</a>
                     <div class="side-section">
-                        <p class="side-title">Servicio</p>
+                        <p class="side-title">Operación</p>
                         <a class="side-link" href="{% url 'waiter:home' %}"><span>🔔</span>Mis alertas<b id="notif-count" class="side-badge" hidden></b></a>
-                        <a class="side-link" href="{% url 'floor:map' %}"><span>🗺️</span>Mapa de sala</a>
-                        <a class="side-link" href="{% url 'operations:session_list' %}"><span>🪑</span>Atención de mesas</a>
-                        <a class="side-link" href="{% url 'sales:order_list' %}"><span>🧾</span>Pedidos y ventas</a>
+                        <a class="side-link" href="{% url 'floor:map' %}"><span>🗺️</span>Salón</a>
+                        <a class="side-link" href="{% url 'sales:order_list' %}"><span>🧾</span>Pedidos</a>
                         <a class="side-link" href="{% url 'kitchen:home' %}"><span>👨‍🍳</span>Cocina</a>
                         <a class="side-link" href="{% url 'bar:home' %}"><span>🍹</span>Barra</a>
                         <a class="side-link" href="{% url 'cashier:home' %}"><span>💵</span>Caja</a>
-                        <a class="side-link" href="{% url 'operations:evaluation_list' %}"><span>⭐</span>Evaluaciones</a>
-                        <a class="side-link" href="{% url 'feedback:qr' %}"><span>📱</span>Códigos QR</a>
                     </div>
                     <div class="side-section">
-                        <p class="side-title">Visión IA</p>
+                        <p class="side-title">Inteligencia</p>
                         <a class="side-link" href="{% url 'vision:home' %}"><span>👁️</span>Visión IA</a>
-                        <a class="side-link" href="{% url 'supervisor:home' %}"><span>🧭</span>Supervisor</a>
                         <a class="side-link" href="{% url 'supervisor:journey' %}"><span>🛤️</span>Journey del cliente</a>
+                        <a class="side-link" href="{% url 'supervisor:home' %}"><span>🧭</span>Supervisor</a>
+                        <a class="side-link" href="{% url 'assistant_chat:staff_chat' %}"><span>✨</span>{{ assistant_name }}</a>
                     </div>
                     <div class="side-section">
                         <p class="side-title">Negocio</p>
                         <a class="side-link" href="{% url 'analytics:dashboard' %}"><span>📊</span>Dashboard</a>
-                        <a class="side-link" href="{% url 'reports:list' %}"><span>🧾</span>Reportes</a>
+                        <a class="side-link" href="{% url 'reports:list' %}"><span>📄</span>Reportes</a>
                         <a class="side-link" href="{% url 'sales_explorer' %}"><span>🔎</span>Explorador de ventas</a>
                         <a class="side-link" href="{% url 'core:promo_generator' %}"><span>🎨</span>Promociones</a>
-                        <a class="side-link" href="{% url 'assistant_chat:staff_chat' %}"><span>✨</span>{{ assistant_name }}</a>
                     </div>
                     <div class="side-section">
                         <p class="side-title">Gestión</p>
                         <a class="side-link" href="{% url 'management:home' %}"><span>🎛️</span>Centro de gestión</a>
-                        <a class="side-link" href="{% url 'venues:list' %}"><span>🏪</span>Locales</a>
                         <a class="side-link" href="{% url 'menus:list' %}"><span>🍽️</span>Carta y fotos</a>
-                        <a class="side-link" href="{% url 'operations:table_list' %}"><span>🪑</span>Mesas</a>
+                        <a class="side-link" href="{% url 'operations:evaluation_list' %}"><span>⭐</span>Evaluaciones</a>
+                        <a class="side-link" href="{% url 'feedback:qr' %}"><span>📱</span>Códigos QR</a>
                         <a class="side-link" href="{% url 'monitoring:incident_list' %}"><span>🛠️</span>Incidencias</a>
                         <a class="side-link" href="{% url 'privacy:policy_list' %}"><span>🔒</span>Privacidad</a>
                         {% if user.is_superuser %}<a class="side-link" href="{% url 'monitoring:audit_log_list' %}"><span>🗂️</span>Auditoría</a>{% endif %}
+                        <a class="side-link" href="{% url 'venues:list' %}"><span>🏪</span>Locales</a>
                     </div>
                 </div>
                 <details class="nav-group user-menu side-user">
@@ -225,8 +223,8 @@
         })();
     </script>
     <script src="{% static 'js/main.js' %}?v=11"></script>
-    <script src="{% static 'js/guide.js' %}?v=8"></script>
-    <script src="{% static 'js/layout.js' %}?v=8"></script>
+    <script src="{% static 'js/guide.js' %}?v=9"></script>
+    <script src="{% static 'js/layout.js' %}?v=9"></script>
     <script src="{% static 'js/thumb.js' %}?v=1"></script>
     {% if gi_sazon_prompts %}{{ gi_sazon_prompts|json_script:"gi-sazon-prompts" }}{% endif %}
     <script src="{% static 'js/sazon_plus.js' %}?v=1"></script>

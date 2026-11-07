@@ -1278,3 +1278,47 @@ html[data-theme] .idea-method .method-kind { display: inline-block; padding: 0.0
 /* Journey: gráfico centrado con ancho cómodo de lectura */
 .journey-card .journey-svg { max-width: 1100px; margin: 0 auto; }
 .journey-card { text-align: left; }
+
+/* =========================================================
+   V1 · Sistema visual limpio (menos texto, jerarquía clara)
+   ========================================================= */
+/* Menos texto: el subtítulo de cada página pasa al ícono ⓘ */
+html[data-theme] main .page-header > div > p:not(.page-help) { display: none; }
+html[data-theme] main .page-header { margin-bottom: 1rem; align-items: center; }
+html[data-theme] main .page-header h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
+html[data-theme] main .page-header h1 .page-help-toggle { width: 22px; height: 22px; font-size: 0.75rem; }
+
+/* Tarjetas uniformes */
+html[data-theme] .card { border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05); }
+html[data-theme] .card h2 { font-size: 1.02rem; margin: 0 0 0.7rem; }
+html[data-theme] .card > p.muted:first-of-type { font-size: 0.85rem; }
+
+/* Botones sólidos y de altura constante */
+html[data-theme] .btn { min-height: 38px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; }
+html[data-theme] .btn-small { min-height: 30px; padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+html[data-theme] .btn-primary { background: var(--accent); background-image: none; border: 0; color: #ffffff; box-shadow: none; }
+html[data-theme] .btn-primary:hover { filter: brightness(0.93); transform: none; }
+html[data-theme] .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text-strong); }
+
+/* Tablas legibles */
+html[data-theme] table { font-size: 0.86rem; border-collapse: separate; border-spacing: 0; }
+html[data-theme] thead th { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); padding: 0.6rem 0.75rem; }
+html[data-theme] tbody td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+html[data-theme] tbody tr:hover td { background: var(--surface-2); }
+
+/* Estados vacíos amigables */
+html[data-theme] .kds-column .muted:only-child, html[data-theme] .idea-empty, html[data-theme] .waiter-empty {
+    display: grid; place-items: center; min-height: 110px; text-align: center; color: var(--muted); font-size: 0.88rem;
+}
+
+/* Menú lateral más compacto y ordenado */
+html[data-theme] .side-section { margin-top: 0.35rem; }
+html[data-theme] .side-title { margin-top: 0.5rem; }
+html[data-theme] .side-link { font-size: 0.85rem; min-height: 34px; }
+
+/* Sazón: sugerencias en una sola fila deslizable */
+html[data-theme] .chat-chips { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 0.25rem; scrollbar-width: thin; }
+html[data-theme] .chat-chips .chip { white-space: nowrap; flex: none; }
+
+/* Alertas y avisos con menos peso visual */
+html[data-theme] .alert { border-radius: 12px; font-size: 0.88rem; }
