@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load l10n %}
+
+{% block title %}Journey del cliente | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🛤️ Journey del cliente</h1>
+        <p class="muted">Experiencia observable (IEO) en cada etapa de la visita, por mesa y sin identificar a nadie.</p>
+    </div>
+    <div class="journey-periods">
+        {% for p in periods %}<a class="btn btn-small {% if p == days %}btn-primary{% else %}btn-secondary{% endif %}" href="?dias={{ p }}">{% if p == 1 %}Hoy{% else %}{{ p }} días{% endif %}</a>{% endfor %}
+    </div>
+</section>
+
+<section class="card journey-card">
+    {% localize off %}<svg viewBox="0 0 900 330" class="journey-svg" role="img" aria-label="Curva de experiencia por etapa">
+        <rect x="0" y="40" width="900" height="110" class="journey-zone-pos"/>
+        <rect x="0" y="150" width="900" height="100" class="journey-zone-neg"/>
+        <line x1="0" y1="150" x2="900" y2="150" class="journey-mid"/>
+        <text x="8" y="58" class="journey-zone-label">Experiencias positivas</text>
+        <text x="8" y="242" class="journey-zone-label">Experiencias negativas</text>
+        {% for s in stages %}
+            <g>
+                <rect x="{{ s.note_x }}" y="262" width="140" height="56" rx="6" class="journey-note{% if pain and s.key == pain.key %} is-pain{% endif %}"/>
+                <text x="{{ s.x }}" y="286" class="journey-note-text">{{ s.label }}</text>
+                <text x="{{ s.x }}" y="306" class="journey-note-sub">{% if s.ieo is not None %}IEO {{ s.ieo|floatformat:0 }} · {{ s.n }} atenc.{% else %}sin lecturas{% endif %}</text>
+            </g>
+        {% endfor %}
+        {% if polyline %}<polyline points="{{ polyline }}" class="journey-line"/>{% endif %}
+        {% for s in stages %}{% if s.y is not None %}
+            <circle cx="{{ s.x }}" cy="{{ s.y }}" r="17" class="journey-dot"/>
+            <text x="{{ s.x }}" y="{{ s.ey }}" class="journey-emoji">{{ s.emoji }}</text>
+        {% endif %}{% endfor %}
+    </svg>{% endlocalize %}
+    {% if pain %}
+        <div class="journey-pain">
+            <strong>📍 Punto de dolor: «{{ pain.label }}» (IEO {{ pain.ieo|floatformat:0 }})</strong>
+            <p>{{ pain.action }}</p>
+            {% if best and best.key != pain.key %}<small class="muted">La mejor etapa es «{{ best.label }}» (IEO {{ best.ieo|floatformat:0 }}).</small>{% endif %}
+        </div>
+    {% else %}
+        <p class="muted">Aún no hay atenciones con análisis visual en este período. Inicia un análisis o usa la simulación de mesas demo.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Journey de cada atención</h2>
+    <div class="journey-sessions">
+        {% for s in sessions %}
+            <a class="mini-table" href="{% url 'supervisor:journey_session' s.id %}"><strong>Mesa {{ s.table.code }}</strong><small>{{ s.started_at|date:"d-m H:i" }}</small></a>
+        {% empty %}
+            <p class="muted">Sin atenciones con análisis visual.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -185,3 +185,20 @@ def answer_how_it_works():
             "(promedios, variación semanal, análisis de canasta y correlaciones). Cada una muestra cómo se calculó.\n"
             "• La visión usa YOLO26 (personas y mesas), YuNet (rostros) y FER+ (expresiones), en este equipo y sin guardar imágenes."), {
         "links": [{"label": "Ver cómo funciona", "url": reverse("vision:how_it_works")}]}
+
+
+def answer_journey(venues):
+    from operations.services.journey import journey_stats
+
+    stages = journey_stats(venues, 14)
+    measured = [s for s in stages if s["ieo"] is not None]
+    links = [{"label": "Ver journey del cliente", "url": reverse("supervisor:journey")}]
+    if not measured:
+        return "Aún no hay atenciones con análisis visual para armar el journey (últimos 14 días).", {"links": links}
+    pain = min(measured, key=lambda s: s["ieo"])
+    lines = [f"• {s['label']}: " + (f"IEO {s['ieo']:.0f} ({s['n']} atenciones)" if s["ieo"] is not None else "sin lecturas")
+             for s in stages]
+    text = ("🛤️ Experiencia por etapa (14 días):\n" + "\n".join(lines)
+            + f"\n📍 Punto de dolor: «{pain['label']}». {pain['action']}")
+    return text, {"links": links, "bars": [{"label": s["label"], "value": f"{s['ieo']:.0f}", "pct": max(2, round(s["ieo"]))}
+                                           for s in measured]}

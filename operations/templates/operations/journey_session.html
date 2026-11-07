@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load l10n %}
+
+{% block title %}Journey · Mesa {{ session.table.code }} | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🛤️ Mesa {{ session.table.code }} · {{ session.started_at|date:"d-m-Y H:i" }}</h1>
+        <p class="muted">{{ minutes }} minutos de atención · {{ events }} lecturas de experiencia observable.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'supervisor:journey' %}">← Journey del local</a>
+</section>
+
+<section class="card journey-card">
+    {% localize off %}<svg viewBox="0 0 900 300" class="journey-svg" role="img" aria-label="Línea de tiempo de la atención">
+        {% for b in bands %}
+            <rect x="{{ b.x }}" y="40" width="{{ b.w }}" height="210" class="journey-band band-{{ b.key }}"/>
+            <text x="{{ b.mid }}" y="30" class="journey-band-label">{{ b.label }}</text>
+            <text x="{{ b.mid }}" y="272" class="journey-note-sub">{{ b.minutes }} min · {{ b.emoji }} {% if b.ieo is not None %}IEO {{ b.ieo|floatformat:0 }}{% else %}sin lecturas{% endif %}</text>
+        {% endfor %}
+        <line x1="40" y1="150" x2="860" y2="150" class="journey-mid"/>
+        {% if polyline %}<polyline points="{{ polyline }}" class="journey-line thin"/>{% endif %}
+        {% for px, py in points %}<circle cx="{{ px }}" cy="{{ py }}" r="3.5" class="journey-point"/>{% endfor %}
+    </svg>{% endlocalize %}
+    {% if pain %}
+        <div class="journey-pain"><strong>📍 La experiencia bajó en «{{ pain.label }}» (IEO {{ pain.ieo|floatformat:0 }})</strong><p>{{ pain.action }}</p></div>
+    {% endif %}
+</section>
+{% endblock %}

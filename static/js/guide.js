@@ -363,6 +363,7 @@
         "/cocina/": "Comandas por tiempo desde la confirmación (amarillo desde 10 min, rojo desde 20). Avanza cada una: Comenzar → Listo → Entregado. Lo agregado después de confirmar llega aparte.",
         "/barra/": "Solo bebidas, con tiempos más cortos (amarillo desde 5 min, rojo desde 10). Avanza cada comanda hasta entregarla.",
         "/caja/": "Mesas por cobrar con su termómetro de experiencia, calculado por mesa y nunca por persona. Tras el pago, imprime o muestra la boleta con el QR de evaluación.",
+        "/supervisor/journey/": "Curva de la experiencia en cada etapa de la visita, como un Customer Journey Map con datos reales. El punto de dolor es la etapa con el IEO más bajo.",
         "/supervisor/": "Operación en tiempo real, mediciones por cámara, calidad del servicio e infraestructura, organizadas en pestañas.",
         "/vision/": "Visión IA en un solo lugar. Las miniaturas son esquemas anónimos; si tu rol lo permite, tócalas para ver la cámara en vivo (no se graba y queda en la auditoría).",
         "/gestion/camaras/detectar/": "Busca las cámaras conectadas o prueba una de red, y asígnala a una mesa, a la entrada o a la caja. No se guardan imágenes.",
