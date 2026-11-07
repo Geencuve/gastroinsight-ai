@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ config.title }} | GastroInsight AI{% endblock %}
 
@@ -12,8 +12,8 @@
 
 <div id="kds-board" data-url="{{ board_url }}">{% include "sales/_kds_board.html" %}</div>
 
-<section class="card">
-    <h2>Aceptación de {{ config.noun }} (últimos 7 días)</h2>
+<details class="card fold-card">
+    <summary><h2>Aceptación de {{ config.noun }} (últimos 7 días)</h2></summary>
     <p class="muted">Asociación agregada por mesa: balance de expresiones (IBE) en los 15 minutos posteriores a la entrega comparado con los 15 anteriores, junto con la valoración de los clientes. No mide el sabor de forma individual.</p>
     <div class="table-responsive">
         <table>
@@ -34,7 +34,7 @@
             </tbody>
         </table>
     </div>
-</section>
+</details>
 
 <script>
     (function () {

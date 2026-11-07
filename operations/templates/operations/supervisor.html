@@ -6,112 +6,120 @@
 <section class="page-header">
     <div>
         <h1>🧭 Panel del supervisor</h1>
-        <p class="muted">Operación en tiempo real, mediciones por cámara, calidad del servicio e infraestructura del local.</p>
+        <p class="muted">Operación en tiempo real, mediciones por cámara, calidad del servicio e infraestructura.</p>
     </div>
-    <a class="btn btn-secondary" href="{% url 'analytics:correlation' %}">Ver panel de correlación</a>
+    <a class="btn btn-secondary" href="{% url 'analytics:correlation' %}">Panel de correlación</a>
 </section>
 
-<div class="kpi-grid">
+<div class="kpi-grid kpi-compact">
     <article class="kpi"><span class="kpi-label">Comensales actuales</span><strong>{{ kpis.guests }}</strong><small>En mesas con atención abierta</small></article>
     <article class="kpi"><span class="kpi-label">Mesas ocupadas</span><strong>{{ kpis.occupied }}/{{ kpis.tables }}</strong><small>{{ kpis.waiting }} grupo(s) esperando mesa</small></article>
     <article class="kpi"><span class="kpi-label">Personal en turno</span><strong>{{ kpis.staff }}</strong><small>{% for role, n in roles %}{{ role }}: {{ n }}{% if not forloop.last %} · {% endif %}{% empty %}Con ingreso en las últimas 12 h{% endfor %}</small></article>
+    <article class="kpi"><span class="kpi-label">Cámaras en vivo</span><strong>{% with live=cameras|dictsort:"live" %}{{ cameras|length }}{% endwith %}</strong><small>Registradas en tus locales</small></article>
 </div>
 
-<div class="supervisor-grid">
-    <section class="card">
-        <h2>Flujo de entrada (comensales por hora)</h2>
-        <div class="chat-bars">
-            {% for f in flow %}<div class="chat-bar"><span class="chat-bar-label">{{ f.label }}</span><span class="chat-bar-track"><span class="chat-bar-fill" style="width: {{ f.pct }}%"></span></span><span class="chat-bar-value">{{ f.value }}</span></div>{% endfor %}
+<div data-tabs="supervisor">
+    <div class="tab-bar" role="tablist">
+        <button type="button" data-tab-button role="tab">📷 Cámaras</button>
+        <button type="button" data-tab-button role="tab">📈 Calidad y flujo</button>
+        <button type="button" data-tab-button role="tab">🛠️ Infraestructura y ambiente</button>
+        <button type="button" data-tab-button role="tab">ℹ️ Índices</button>
+    </div>
+
+    <section class="card tab-panel" data-tab-panel>
+        <h2>📷 Mediciones por cámara (últimos 15 minutos)</h2>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Cámara</th><th>Mesa</th><th>Estado</th><th>Lecturas</th><th>Personas (rostros)</th><th>Personas / mesas (YOLO26)</th><th>IEO</th><th>IBE</th><th>Atención</th><th>Latencia</th><th>Detector</th></tr></thead>
+                <tbody>
+                    {% for c in cameras %}
+                        <tr>
+                            <td>{{ c.camera.name }}{% if c.camera.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}{% if c.synthetic %} <span class="tag-synthetic">sintético</span>{% endif %}</td>
+                            <td>{{ c.table }}</td>
+                            <td>{% if c.live %}<span class="live-dot"></span>{% endif %}{{ c.status }}</td>
+                            <td>{{ c.readings }}</td>
+                            <td>{{ c.people|default_if_none:"—" }}</td>
+                            <td>{% if c.scene_people is not None %}{{ c.scene_people }} / {{ c.scene_tables|default_if_none:"—" }}{% else %}—{% endif %}</td>
+                            <td>{{ c.ieo|default_if_none:"—" }}</td>
+                            <td>{{ c.ibe|default_if_none:"—" }}</td>
+                            <td>{% if c.attention_pct is not None %}{{ c.attention_pct }}%{% else %}—{% endif %}</td>
+                            <td>{% if c.latency_ms is not None %}{{ c.latency_ms }} ms{% else %}—{% endif %}</td>
+                            <td>{{ c.detector|default_if_none:"—" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="11" class="muted">No hay cámaras activas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </section>
 
-    <section class="card">
-        <h2>Calidad del servicio: Ts vs IEO (30 días)</h2>
-        {% if quality.r is not None %}
-            <div class="acc-compare">
-                <div><span>Pearson r</span><strong>{{ quality.r }}</strong></div>
-                <div><span>Spearman ρ</span><strong>{{ quality.rho }}</strong></div>
-                <div><span>n</span><strong>{{ quality.n }}</strong></div>
+    <div class="tab-panel supervisor-grid" data-tab-panel>
+        <section class="card">
+            <h2>Flujo de entrada (comensales por hora)</h2>
+            <div class="chat-bars">
+                {% for f in flow %}<div class="chat-bar"><span class="chat-bar-label">{{ f.label }}</span><span class="chat-bar-track"><span class="chat-bar-fill" style="width: {{ f.pct }}%"></span></span><span class="chat-bar-value">{{ f.value }}</span></div>{% endfor %}
             </div>
-            <p>{% if quality.significant %}Relación estadísticamente significativa (p &lt; 0,05){% else %}Sin relación significativa (p ≥ 0,05){% endif %}: tiempo de servicio promedio {{ quality.ts_avg }} min, IEO promedio {{ quality.ieo_avg }}.</p>
-            {% if quality.synthetic %}<p class="muted">⚠️ No hay suficientes atenciones reales: el cálculo incluye datos sintéticos de demostración y no es evidencia empírica.</p>{% endif %}
-        {% else %}
-            <p class="muted">Aún no hay suficientes atenciones con análisis visual para calcular la relación (se necesitan al menos 5).</p>
-        {% endif %}
+        </section>
+        <section class="card">
+            <h2>Calidad del servicio: Ts vs IEO (30 días)</h2>
+            {% if quality.r is not None %}
+                <div class="acc-compare">
+                    <div><span>Pearson r</span><strong>{{ quality.r }}</strong></div>
+                    <div><span>Spearman ρ</span><strong>{{ quality.rho }}</strong></div>
+                    <div><span>n</span><strong>{{ quality.n }}</strong></div>
+                </div>
+                <p>{% if quality.significant %}Relación estadísticamente significativa (p &lt; 0,05){% else %}Sin relación significativa (p ≥ 0,05){% endif %}: tiempo de servicio promedio {{ quality.ts_avg }} min, IEO promedio {{ quality.ieo_avg }}.</p>
+                {% if quality.synthetic %}<p class="muted">⚠️ No hay suficientes atenciones reales: el cálculo incluye datos sintéticos de demostración y no es evidencia empírica.</p>{% endif %}
+            {% else %}
+                <p class="muted">Aún no hay suficientes atenciones con análisis visual para calcular la relación (se necesitan al menos 5).</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="tab-panel supervisor-grid" data-tab-panel>
+        <section class="card">
+            <h2>🌡️ Condiciones ambientales</h2>
+            {% for r in environment %}
+                <div class="setting-row"><div><strong>{{ r.zone }}</strong><small>{{ r.recorded_at|date:"d-m H:i" }}{% if r.notes %} · {{ r.notes }}{% endif %}</small></div>
+                    <div class="muted">Luz {{ r.lighting|default_if_none:"—" }}/5 · Ruido {{ r.noise|default_if_none:"—" }}/5 · {% if r.temperature_c is not None %}{{ r.temperature_c }} °C{% else %}— °C{% endif %}</div></div>
+            {% empty %}
+                <p class="muted">Sin registros en las últimas 24 horas.</p>
+            {% endfor %}
+            <form method="post" action="{% url 'supervisor:add_environment' %}" class="supervisor-form">{% csrf_token %}
+                <input type="text" name="zone" placeholder="Zona (ej. Terraza)" maxlength="80">
+                <select name="lighting" aria-label="Iluminación"><option value="">Iluminación</option>{% for i in "12345" %}<option value="{{ i }}">{{ i }}</option>{% endfor %}</select>
+                <select name="noise" aria-label="Ruido"><option value="">Ruido</option>{% for i in "12345" %}<option value="{{ i }}">{{ i }}</option>{% endfor %}</select>
+                <input type="number" step="0.1" name="temperature_c" placeholder="°C" aria-label="Temperatura">
+                <input type="text" name="notes" placeholder="Notas (opcional)" maxlength="200">
+                <button class="btn btn-primary btn-small" type="submit">Registrar</button>
+            </form>
+        </section>
+        <section class="card">
+            <h2>🛠️ Infraestructura y servicios</h2>
+            <p class="muted">Opiniones del QR (7 días, {{ infra_scores.answers }} respuestas): limpieza {{ infra_scores.cleanliness|floatformat:1|default:"—" }} · baños {{ infra_scores.restroom|floatformat:1|default:"—" }} · ambiente {{ infra_scores.ambience|floatformat:1|default:"—" }} · precio-calidad {{ infra_scores.value|floatformat:1|default:"—" }}</p>
+            {% for report in reports %}
+                <div class="setting-row"><div><strong>{{ report.get_area_display }}</strong><small>{{ report.description }} · {{ report.created_at|date:"d-m H:i" }}</small></div>
+                    <form method="post" action="{% url 'supervisor:resolve_report' report.id %}">{% csrf_token %}<button class="btn btn-small" type="submit">Resuelto</button></form></div>
+            {% empty %}
+                <p class="muted">Sin incidencias de infraestructura abiertas.</p>
+            {% endfor %}
+            <form method="post" action="{% url 'supervisor:add_report' %}" class="supervisor-form">{% csrf_token %}
+                <select name="area" aria-label="Área">{% for value, label in areas %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+                <input type="text" name="description" placeholder="Qué ocurre (ej. falta papel en el baño)" maxlength="255" required>
+                <button class="btn btn-primary btn-small" type="submit">Reportar</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="card tab-panel" data-tab-panel>
+        <h2>Cómo se calculan los índices</h2>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Índice</th><th>Rango</th><th>Cálculo</th><th>Uso</th></tr></thead>
+                <tbody>{% for i in indices %}<tr><td><strong>{{ i.code }}</strong> · {{ i.name }}</td><td>{{ i.range }}</td><td>{{ i.formula }}</td><td>{{ i.use }}</td></tr>{% endfor %}</tbody>
+            </table>
+        </div>
     </section>
 </div>
-
-<section class="card">
-    <h2>📷 Mediciones por cámara (últimos 15 minutos)</h2>
-    <div class="table-responsive">
-        <table>
-            <thead><tr><th>Cámara</th><th>Mesa</th><th>Estado</th><th>Lecturas</th><th>Personas (rostros)</th><th>Personas / mesas (YOLO26)</th><th>IEO</th><th>IBE</th><th>Atención</th><th>Latencia</th><th>Detector</th></tr></thead>
-            <tbody>
-                {% for c in cameras %}
-                    <tr>
-                        <td>{{ c.camera.name }}{% if c.synthetic %} <span class="tag-synthetic">sintético</span>{% endif %}</td>
-                        <td>{{ c.table }}</td>
-                        <td>{% if c.live %}<span class="live-dot"></span>{% endif %}{{ c.status }}</td>
-                        <td>{{ c.readings }}</td>
-                        <td>{{ c.people|default_if_none:"—" }}</td>
-                        <td>{% if c.scene_people is not None %}{{ c.scene_people }} / {{ c.scene_tables|default_if_none:"—" }}{% else %}—{% endif %}</td>
-                        <td>{{ c.ieo|default_if_none:"—" }}</td>
-                        <td>{{ c.ibe|default_if_none:"—" }}</td>
-                        <td>{% if c.attention_pct is not None %}{{ c.attention_pct }}%{% else %}—{% endif %}</td>
-                        <td>{% if c.latency_ms is not None %}{{ c.latency_ms }} ms{% else %}—{% endif %}</td>
-                        <td>{{ c.detector|default_if_none:"—" }}</td>
-                    </tr>
-                {% empty %}
-                    <tr><td colspan="11" class="muted">No hay cámaras activas.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<div class="supervisor-grid">
-    <section class="card">
-        <h2>🌡️ Condiciones ambientales</h2>
-        {% for r in environment %}
-            <div class="setting-row"><div><strong>{{ r.zone }}</strong><small>{{ r.recorded_at|date:"d-m H:i" }}{% if r.notes %} · {{ r.notes }}{% endif %}</small></div>
-                <div class="muted">Luz {{ r.lighting|default_if_none:"—" }}/5 · Ruido {{ r.noise|default_if_none:"—" }}/5 · {% if r.temperature_c is not None %}{{ r.temperature_c }} °C{% else %}— °C{% endif %}</div></div>
-        {% empty %}
-            <p class="muted">Sin registros en las últimas 24 horas.</p>
-        {% endfor %}
-        <form method="post" action="{% url 'supervisor:add_environment' %}" class="supervisor-form">{% csrf_token %}
-            <input type="text" name="zone" placeholder="Zona (ej. Terraza)" maxlength="80">
-            <select name="lighting" aria-label="Iluminación"><option value="">Iluminación</option>{% for i in "12345" %}<option value="{{ i }}">{{ i }}</option>{% endfor %}</select>
-            <select name="noise" aria-label="Ruido"><option value="">Ruido</option>{% for i in "12345" %}<option value="{{ i }}">{{ i }}</option>{% endfor %}</select>
-            <input type="number" step="0.1" name="temperature_c" placeholder="°C" aria-label="Temperatura">
-            <input type="text" name="notes" placeholder="Notas (opcional)" maxlength="200">
-            <button class="btn btn-primary btn-small" type="submit">Registrar</button>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2>🛠️ Infraestructura y servicios</h2>
-        <p class="muted">Opiniones del QR (7 días, {{ infra_scores.answers }} respuestas): limpieza {{ infra_scores.cleanliness|floatformat:1|default:"—" }} · baños {{ infra_scores.restroom|floatformat:1|default:"—" }} · ambiente {{ infra_scores.ambience|floatformat:1|default:"—" }} · precio-calidad {{ infra_scores.value|floatformat:1|default:"—" }}</p>
-        {% for report in reports %}
-            <div class="setting-row"><div><strong>{{ report.get_area_display }}</strong><small>{{ report.description }} · {{ report.created_at|date:"d-m H:i" }}</small></div>
-                <form method="post" action="{% url 'supervisor:resolve_report' report.id %}">{% csrf_token %}<button class="btn btn-small" type="submit">Resuelto</button></form></div>
-        {% empty %}
-            <p class="muted">Sin incidencias de infraestructura abiertas.</p>
-        {% endfor %}
-        <form method="post" action="{% url 'supervisor:add_report' %}" class="supervisor-form">{% csrf_token %}
-            <select name="area" aria-label="Área">{% for value, label in areas %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
-            <input type="text" name="description" placeholder="Qué ocurre (ej. falta papel en el baño)" maxlength="255" required>
-            <button class="btn btn-primary btn-small" type="submit">Reportar</button>
-        </form>
-    </section>
-</div>
-
-<section class="card">
-    <h2>Cómo se calculan los índices</h2>
-    <div class="table-responsive">
-        <table>
-            <thead><tr><th>Índice</th><th>Rango</th><th>Cálculo</th><th>Uso</th></tr></thead>
-            <tbody>{% for i in indices %}<tr><td><strong>{{ i.code }}</strong> · {{ i.name }}</td><td>{{ i.range }}</td><td>{{ i.formula }}</td><td>{{ i.use }}</td></tr>{% endfor %}</tbody>
-        </table>
-    </div>
-</section>
 {% endblock %}

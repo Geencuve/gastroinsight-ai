@@ -1,0 +1,16 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Acceso restringido | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card" style="text-align: center;">
+    <div style="font-size: 2.4rem;">🔒</div>
+    <h1>Acceso restringido</h1>
+    <p>{% if exception %}{{ exception }}{% else %}No tienes permiso para ver esta sección.{% endif %}</p>
+    <p class="muted">Si crees que deberías tener acceso, pide al administrador que revise tu rol y los locales asignados en tu perfil.</p>
+    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+        <a class="btn btn-primary" href="{% if gi_role_home %}{{ gi_role_home }}{% else %}/{% endif %}">Ir a mi sección</a>
+        {% if user.is_authenticated %}<a class="btn btn-secondary" href="{% url 'authentication:profile' %}">Ver mi perfil</a>{% endif %}
+    </div>
+</section>
+{% endblock %}

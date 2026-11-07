@@ -18,8 +18,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=16">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=19">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -46,61 +47,54 @@
             <a href="{% url 'core:home' %}">GastroInsight AI</a>
         </div>
 
-        <nav class="main-nav">
+        <nav class="main-nav{% if user.is_authenticated %} app-sidebar{% endif %}" aria-label="Navegación principal">
             {% if user.is_authenticated %}
-                <details class="nav-group">
-                    <summary>Operación</summary>
-                    <div class="nav-menu">
-                        <a href="{% url 'operations:session_list' %}">Atención de mesas</a>
-                        <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
-                        <a href="{% url 'waiter:home' %}">🔔 Mis alertas</a>
-                        <a href="{% url 'floor:map' %}">🗺️ Mapa de sala</a>
-                        <a href="{% url 'cashier:home' %}">💵 Caja</a>
-                        <a href="{% url 'kitchen:home' %}">👨‍🍳 Cocina</a>
-                        <a href="{% url 'bar:home' %}">🍹 Barra</a>
-                        <a href="{% url 'operations:evaluation_list' %}">Evaluaciones</a>
-                        <a href="{% url 'feedback:qr' %}">Códigos QR de opinión</a>
-                        <a href="{% url 'operations:table_list' %}">Mesas</a>
+                <div class="side-scroll">
+                    <a class="side-link" href="{% url 'core:home' %}"><span>🏠</span>Inicio</a>
+                    <div class="side-section">
+                        <p class="side-title">Servicio</p>
+                        <a class="side-link" href="{% url 'waiter:home' %}"><span>🔔</span>Mis alertas<b id="notif-count" class="side-badge" hidden></b></a>
+                        <a class="side-link" href="{% url 'floor:map' %}"><span>🗺️</span>Mapa de sala</a>
+                        <a class="side-link" href="{% url 'operations:session_list' %}"><span>🪑</span>Atención de mesas</a>
+                        <a class="side-link" href="{% url 'sales:order_list' %}"><span>🧾</span>Pedidos y ventas</a>
+                        <a class="side-link" href="{% url 'kitchen:home' %}"><span>👨‍🍳</span>Cocina</a>
+                        <a class="side-link" href="{% url 'bar:home' %}"><span>🍹</span>Barra</a>
+                        <a class="side-link" href="{% url 'cashier:home' %}"><span>💵</span>Caja</a>
+                        <a class="side-link" href="{% url 'operations:evaluation_list' %}"><span>⭐</span>Evaluaciones</a>
+                        <a class="side-link" href="{% url 'feedback:qr' %}"><span>📱</span>Códigos QR</a>
                     </div>
-                </details>
-                <details class="nav-group">
-                    <summary>Visión IA</summary>
-                    <div class="nav-menu">
-                        <a href="{% url 'supervisor:home' %}">🧭 Panel del supervisor</a>
-                        <a href="{% url 'ai_vision:monitor' %}">📡 Monitor en vivo</a>
-                        {% if user.is_staff %}<a href="{% url 'ai_vision:training' %}">🧪 Datos para entrenamiento</a>{% endif %}
-                        <a href="{% url 'ai_vision:session_list' %}">Sesiones de análisis</a>
-                        <a href="{% url 'cameras:list' %}">Cámaras</a>
-                        <a href="{% url 'analytics:correlation' %}">Panel de correlación</a>
+                    <div class="side-section">
+                        <p class="side-title">Visión IA</p>
+                        <a class="side-link" href="{% url 'supervisor:home' %}"><span>🧭</span>Supervisor</a>
+                        <a class="side-link" href="{% url 'ai_vision:monitor' %}"><span>📡</span>Monitor en vivo</a>
+                        <a class="side-link" href="{% url 'ai_vision:session_list' %}"><span>🎥</span>Sesiones de análisis</a>
+                        <a class="side-link" href="{% url 'cameras:list' %}"><span>📷</span>Cámaras</a>
+                        {% if user.is_staff %}<a class="side-link" href="{% url 'ai_vision:training' %}"><span>🧪</span>Entrenamiento</a>{% endif %}
+                        <a class="side-link" href="{% url 'analytics:correlation' %}"><span>📈</span>Correlación</a>
                     </div>
-                </details>
-                <details class="nav-group">
-                    <summary>Análisis</summary>
-                    <div class="nav-menu">
-                        <a href="{% url 'analytics:dashboard' %}">Dashboard</a>
-                        <a href="{% url 'reports:list' %}">Reportes</a>
-                        <a href="{% url 'core:promo_generator' %}">Promociones</a>
+                    <div class="side-section">
+                        <p class="side-title">Negocio</p>
+                        <a class="side-link" href="{% url 'analytics:dashboard' %}"><span>📊</span>Dashboard</a>
+                        <a class="side-link" href="{% url 'reports:list' %}"><span>🧾</span>Reportes</a>
+                        <a class="side-link" href="{% url 'core:promo_generator' %}"><span>🎨</span>Promociones</a>
+                        <a class="side-link" href="{% url 'assistant_chat:staff_chat' %}"><span>✨</span>{{ assistant_name }}</a>
                     </div>
-                </details>
-                <details class="nav-group">
-                    <summary>Gestión</summary>
-                    <div class="nav-menu">
-                        <a href="{% url 'venues:list' %}">Locales</a>
-                        <a href="{% url 'menus:list' %}">Cartas y fotos</a>
-                        <a href="{% url 'monitoring:incident_list' %}">Incidencias</a>
-                        <a href="{% url 'privacy:policy_list' %}">Privacidad</a>
-                        {% if user.is_superuser %}<a href="{% url 'monitoring:audit_log_list' %}">Auditoría</a>{% endif %}
-                        {% if user.is_staff %}<a href="/admin/">Administración</a>{% endif %}
+                    <div class="side-section">
+                        <p class="side-title">Gestión</p>
+                        <a class="side-link" href="{% url 'venues:list' %}"><span>🏪</span>Locales</a>
+                        <a class="side-link" href="{% url 'menus:list' %}"><span>🍽️</span>Carta y fotos</a>
+                        <a class="side-link" href="{% url 'operations:table_list' %}"><span>🪑</span>Mesas</a>
+                        <a class="side-link" href="{% url 'monitoring:incident_list' %}"><span>🛠️</span>Incidencias</a>
+                        <a class="side-link" href="{% url 'privacy:policy_list' %}"><span>🔒</span>Privacidad</a>
+                        {% if user.is_superuser %}<a class="side-link" href="{% url 'monitoring:audit_log_list' %}"><span>🗂️</span>Auditoría</a>{% endif %}
                     </div>
-                </details>
-                <a href="{% url 'assistant_chat:staff_chat' %}">✨ {{ assistant_name }}</a>
-                {% if gi_alerts_url %}<a class="notif-bell" href="{% url 'waiter:home' %}" title="Mis alertas" aria-label="Mis alertas">🔔<span id="notif-count" hidden></span></a>{% endif %}
-                <details class="nav-group user-menu">
+                </div>
+                <details class="nav-group user-menu side-user">
                     <summary aria-label="Menú de usuario">
                         <span class="user-avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
-                        <span class="user-name">{{ user.first_name|default:user.username }}</span>
+                        <span class="user-name">{{ user.first_name|default:user.username }}<small class="user-role">{{ gi_role_label }}</small></span>
                     </summary>
-                    <div class="nav-menu nav-menu-right">
+                    <div class="nav-menu nav-menu-up">
                         <div class="user-menu-head">
                             <strong>{{ user.get_full_name|default:user.username }}</strong>
                             <small>{{ user.email|default:"Sin correo registrado" }}</small>
@@ -232,6 +226,7 @@
     </script>
     <script src="{% static 'js/main.js' %}?v=9"></script>
     <script src="{% static 'js/guide.js' %}?v=5"></script>
+    <script src="{% static 'js/layout.js' %}?v=2"></script>
     {% if gi_alerts_url %}<script src="{% static 'js/alerts.js' %}?v=1"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 {% if gi_role_scope %}{{ gi_role_scope|json_script:"gi-role-scope" }}
@@ -239,12 +234,15 @@
         (function () {
             const scope = JSON.parse(document.getElementById("gi-role-scope").textContent);
             const allowed = (path) => path === "/" || scope.some((prefix) => path.startsWith(prefix));
-            document.querySelectorAll(".nav-menu a[href]").forEach((link) => {
+            document.querySelectorAll(".nav-menu a[href], .side-link[href]").forEach((link) => {
                 const url = new URL(link.getAttribute("href"), location.origin);
                 if (url.origin === location.origin && !allowed(url.pathname)) link.remove();
             });
             document.querySelectorAll(".nav-group:not(.user-menu)").forEach((group) => {
                 if (!group.querySelector(".nav-menu a")) group.remove();
+            });
+            document.querySelectorAll(".side-section").forEach((section) => {
+                if (!section.querySelector(".side-link")) section.remove();
             });
         })();
     </script>{% endif %}
