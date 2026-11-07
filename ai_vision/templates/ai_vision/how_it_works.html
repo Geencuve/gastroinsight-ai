@@ -1,0 +1,53 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Cómo funciona | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🧠 Cómo funciona GastroInsight AI</h1>
+        <p class="muted">Qué entra, qué procesa cada modelo, qué sale y qué se guarda. Sin cajas negras.</p>
+    </div>
+</section>
+
+<div class="model-grid">
+    <section class="card">
+        <h2>Del fotograma a la decisión</h2>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Etapa</th><th>Componente</th><th>Salida</th></tr></thead>
+                <tbody>
+                    <tr><td>1. Entrada</td><td>Cámara del local</td><td>Fotogramas de video, procesados <strong>en memoria y descartados</strong></td></tr>
+                    <tr><td>2. Escena</td><td>YOLO26 Small (modelo propio, entrenado en Roboflow)</td><td>Personas y mesas detectadas con su posición: ocupación, gente de pie esperando</td></tr>
+                    <tr><td>3. Rostros</td><td>YuNet</td><td>Ubicación de cada rostro (sin identificar a nadie)</td></tr>
+                    <tr><td>4. Expresiones</td><td>FER+ (8 clases)</td><td>% de alegría, neutral, sorpresa, tristeza, enojo, disgusto, miedo y desprecio</td></tr>
+                    <tr><td>5. Métricas por mesa</td><td>Ventana de análisis</td><td>Ocupación, <strong>IBE</strong> (−1 a 1), búsqueda de atención (%), actividad y latencia</td></tr>
+                    <tr><td>6. Índices</td><td>Fórmulas documentadas</td><td><strong>IEO</strong> (0–100) a partir del IBE, la atención y la espera; se cruza con el <strong>CSAT</strong> de la boleta</td></tr>
+                    <tr><td>7. Uso</td><td>Reglas y estadística</td><td>Alertas al personal, termómetro de caja, aceptación por plato, correlación y respuestas de Sazón</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Modelos instalados</h2>
+        {% for m in models %}
+            <div class="setting-row"><div><strong>{{ m.name }}</strong><small>{{ m.purpose }}</small></div>
+                <span class="{% if m.present %}tag-synthetic{% else %}table-alert{% endif %}">{% if m.present %}instalado{% else %}no encontrado{% endif %}</span></div>
+        {% endfor %}
+        <p class="muted">Detección de escena en paralelo: {% if scene_detection %}activada{% else %}desactivada (SCENE_DETECTION=False){% endif %}. Todo se ejecuta en este equipo: no se envía video a internet.</p>
+    </section>
+
+    <section class="card">
+        <h2>Qué se guarda y qué no</h2>
+        <p>✅ <strong>Se guarda:</strong> métricas agregadas por mesa cada ventana de análisis (números) y las posiciones normalizadas de personas y mesas (coordenadas).</p>
+        <p>❌ <strong>No se guarda:</strong> imágenes, video, rostros ni datos biométricos. No hay reconocimiento facial: el sistema no sabe quién es nadie.</p>
+    </section>
+
+    <section class="card">
+        <h2>Recomendaciones y Sazón</h2>
+        <p><strong>Las ideas del inicio no usan modelos predictivos.</strong> Son reglas de negocio y estadística descriptiva: promedios por día, variación semanal, reglas de asociación entre platos (análisis de canasta) y correlaciones. Cada idea muestra cómo se calculó.</p>
+        <p><strong>Sazón</strong> es un módulo propio del proyecto: una <em>interfaz de lenguaje natural a bases de datos</em> (NLIDB) basada en reglas. Clasifica la intención de la pregunta y ejecuta consultas predefinidas y parametrizadas. No usa modelos de lenguaje externos, no envía datos a terceros y no tiene costo por consulta.</p>
+    </section>
+</div>
+{% endblock %}

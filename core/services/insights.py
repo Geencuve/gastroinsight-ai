@@ -354,3 +354,13 @@ def build_insights(venues, today=None, per_section=3):
             sections[key] = sections[key][:per_section]
     sections["synthetic"] = synthetic
     return sections
+
+
+# Transparencia (K1): cada idea declara su método de cálculo
+_build_insights_raw = build_insights
+
+
+def build_insights(*args, **kwargs):  # noqa: F811
+    from .explain import annotate
+
+    return annotate(_build_insights_raw(*args, **kwargs))

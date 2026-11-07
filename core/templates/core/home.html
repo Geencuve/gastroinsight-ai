@@ -97,7 +97,7 @@
                             <p class="idea-why">{{ item.why }}</p>
                             <p class="idea-action">💡 <strong>Qué hacer:</strong> {{ item.action }}</p>
                             {% if item.impact %}<p class="idea-impact">Potencial estimado: {{ item.impact }}</p>{% endif %}
-                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: auto;">{% if item.promo_url %}<a class="btn btn-small btn-primary" href="{{ item.promo_url }}">🎨 Crear promo</a>{% endif %}{% if item.url %}<a href="{{ item.url }}">Ver detalle →</a>{% endif %}</div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: auto;">{% if item.promo_url %}<a class="btn btn-small btn-primary" href="{{ item.promo_url }}">🎨 Crear promo</a>{% endif %}{% if item.method %}<details class="idea-method"><summary>🔎 ¿Cómo se calculó?</summary><p><span class="method-kind">{{ item.method.kind }}</span> {{ item.method.name }}</p><p>{{ item.method.calc }}</p><p class="muted">Datos: {{ item.method.data }}</p>{% if item.method.impact_note %}<p class="muted">{{ item.method.impact_note }}</p>{% endif %}</details>{% endif %}{% if item.url %}<a href="{{ item.url }}">Ver detalle →</a>{% endif %}</div>
                         </article>
                     {% endfor %}
                 </div>
@@ -120,7 +120,7 @@
     </section>
 
     <p class="footnote">
-        Las sugerencias se generan automáticamente con los datos de las últimas semanas; los potenciales son estimaciones simples para orientar decisiones.
+        Las sugerencias se generan automáticamente con los datos de las últimas semanas; los potenciales son estimaciones simples para orientar decisiones. No usan modelos predictivos: son reglas de negocio y estadística descriptiva sobre tus datos (revisa «¿Cómo se calculó?» en cada idea).
         {% if uses_synthetic %}Las sugerencias de experiencia basadas en análisis visual usan datos sintéticos de demostración.{% endif %}
     </p>
 {% else %}

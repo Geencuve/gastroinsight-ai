@@ -39,6 +39,8 @@ UNSAFE_PHRASES = (
 STAFF_RULES = [
     ("help", ("que puedes hacer", "ayuda", "como funcionas", "que sabes hacer")),
     ("live_status", ("en vivo", "tiempo real", "como estan las mesas", "mesas ahora", "monitor")),
+    ("how_it_works", ("que algoritmo", "que modelo usas", "como funcionas", "como calculas", "como se calcula",
+                      "eres una ia", "eres inteligencia artificial", "cuanto cuesta sazon", "que es sazon", "sazon se paga")),
     ("ready_dishes", ("listos para servir", "platos listos", "por entregar", "para servir")),
     ("kitchen_queue", ("comanda", "cocina", "por preparar", "en preparacion")),
     ("bar_queue", ("barra", "bebidas pendientes", "tragos pendientes", "cocteles pendientes")),
@@ -624,7 +626,7 @@ def build_staff_response(user, message):
         return denied, "out_of_scope", {"links": []}
 
     if intent not in ("advice", "top_dishes", "low_dishes", "help", "pending_orders", "weekday_sales", "live_status", "ready_dishes", "kitchen_queue", "bar_queue", "floor_status",
-                      "cashier_status", "camera_metrics", "infrastructure", "role_help"):
+                      "cashier_status", "camera_metrics", "infrastructure", "role_help", "how_it_works"):
         dish = find_dish(venues, message) if intent_allowed(profile, "dish_detail") else None
         if dish:
             text, meta = answer_dish(venues, dish, message)
@@ -641,6 +643,7 @@ def build_staff_response(user, message):
         "camera_metrics": lambda: answers_v2.answer_cameras(venues),
         "infrastructure": lambda: answers_v2.answer_infrastructure(venues),
         "role_help": lambda: answers_v2.answer_role_help(profile),
+        "how_it_works": lambda: answers_v2.answer_how_it_works(),
         "advice": lambda: answer_advice(venues, message),
         "sales_summary": lambda: answer_sales(venues, message),
         "average_ticket": lambda: answer_ticket(venues, message),

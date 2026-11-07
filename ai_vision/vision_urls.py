@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 
 from . import views_vision
 
@@ -7,5 +7,6 @@ app_name = "vision"
 urlpatterns = [
     path("", views_vision.vision_home, name="home"),
     path("camaras/datos/", views_vision.vision_data, name="data"),
+    path("como-funciona/", views_vision.how_it_works, name="how_it_works"),
     path("camaras/<int:camera_id>/vivo/", views_vision.vision_live, name="live"),
 ]

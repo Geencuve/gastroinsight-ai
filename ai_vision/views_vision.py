@@ -1,4 +1,4 @@
-﻿from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -23,6 +23,7 @@ TABS = [
     ("registro", "🗂️ Registro de cámaras", "cameras:list"),
     ("entrenamiento", "🧪 Entrenamiento", "ai_vision:training"),
     ("correlacion", "📈 Correlación", "analytics:correlation"),
+    ("modelo", "🧠 Cómo funciona", "vision:how_it_works"),
 ]
 LIVE_ROLES = {PLATFORM_ADMIN, VENUE_ADMIN, SUPERVISOR, OPERATOR}
 
@@ -76,3 +77,20 @@ def vision_live(request, camera_id):
     log_action(request, action=AuditLog.Action.START, module="ai_vision", venue=camera.venue, object_type="Camera",
                object_id=str(camera.pk), description=f"Abrió la vista en vivo de «{camera.name}» (no se graba).")
     return JsonResponse({"available": True, "url": reverse("ai_vision:camera_preview", args=[camera.id])})
+
+
+@login_required
+def how_it_works(request):
+    from pathlib import Path as _Path
+
+    from django.conf import settings as _settings
+
+    folder = _Path(_settings.BASE_DIR) / "ai_vision" / "ml_models"
+    files = {p.name.lower() for p in folder.glob("*.onnx")} if folder.exists() else set()
+    models = [
+        {"name": "YOLO26 Small", "purpose": "Personas y mesas (escena)", "present": any("yolo" in f for f in files)},
+        {"name": "YuNet", "purpose": "Detección de rostros, sin identificación", "present": any("yunet" in f or "face_detector" in f for f in files)},
+        {"name": "FER+ (8 clases)", "purpose": "Clasificación de expresiones faciales", "present": any("ferplus" in f or "emotion" in f for f in files)},
+    ]
+    return render(request, "ai_vision/how_it_works.html", {
+        "models": models, "scene_detection": getattr(_settings, "SCENE_DETECTION", True)})

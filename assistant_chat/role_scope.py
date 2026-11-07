@@ -1,4 +1,4 @@
-﻿"""
+"""
 Qué puede consultar cada rol en Sazón. Es configuración (no entrenamiento):
 cada intención declara los roles que la usan y Sazón explica cuando una consulta corresponde a otro rol.
 """
@@ -39,6 +39,8 @@ DEFAULT_CHIPS = [("📡 Mesas ahora", "¿Cómo están las mesas ahora?"), ("💰
 
 
 def intent_allowed(profile, intent):
+    if intent == "how_it_works":
+        return True
     key = role_key(profile)
     if key in ROLE_INTENTS:
         return intent in ROLE_INTENTS[key]

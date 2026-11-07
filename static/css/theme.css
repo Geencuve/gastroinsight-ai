@@ -1241,3 +1241,12 @@ html[data-theme] .footer-links a {
 html[data-theme] .footer-links a:hover { border-color: var(--accent); color: var(--accent); }
 html[data-theme] .footer-compliance { flex-basis: 100%; margin: 0; font-size: 0.74rem; color: var(--muted); line-height: 1.5; }
 @media (max-width: 760px) { html[data-theme] .site-footer { justify-content: center; text-align: center; } html[data-theme] .footer-links { justify-content: center; } }
+
+/* ---------- K1 · Transparencia ---------- */
+.model-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1rem; }
+.model-grid .card { margin: 0; }
+html[data-theme] .idea-method { margin: 0.5rem 0; font-size: 0.8rem; }
+html[data-theme] .idea-method summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+html[data-theme] .idea-method p { margin: 0.3rem 0 0; }
+html[data-theme] .idea-method .method-kind { display: inline-block; padding: 0.05rem 0.5rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 0.72rem; }
+@media (max-width: 760px) { .model-grid { grid-template-columns: 1fr; } }

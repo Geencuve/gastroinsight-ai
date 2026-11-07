@@ -174,3 +174,14 @@ def answer_role_help(profile):
     examples = " · ".join(f"«{prompt}»" for _, prompt in ROLE_CHIPS.get(key, []))
     return (f"Como {profile.get_role_display().lower()} puedo ayudarte con {ROLE_HELP.get(key, 'las funciones de tu rol')}."
             + (f"\nPrueba con: {examples}" if examples else "")), {"links": []}
+
+
+def answer_how_it_works():
+    return ("🧠 Soy Sazón, un módulo propio de GastroInsight AI. Técnicamente soy una interfaz de lenguaje natural a "
+            "bases de datos (NLIDB) basada en reglas: identifico la intención de tu pregunta y ejecuto consultas "
+            "predefinidas y parametrizadas sobre los datos de tu local.\n"
+            "• No uso modelos de lenguaje externos, no envío datos a terceros y no tengo costo por consulta.\n"
+            "• Las ideas del inicio no son predicciones: son reglas de negocio y estadística descriptiva "
+            "(promedios, variación semanal, análisis de canasta y correlaciones). Cada una muestra cómo se calculó.\n"
+            "• La visión usa YOLO26 (personas y mesas), YuNet (rostros) y FER+ (expresiones), en este equipo y sin guardar imágenes."), {
+        "links": [{"label": "Ver cómo funciona", "url": reverse("vision:how_it_works")}]}
