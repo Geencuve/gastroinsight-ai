@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -48,6 +48,10 @@ def _waiter_context(request):
         generate(venues)
     floor = build_floor(venues)
     cards = [card for _, zone_cards in floor["zones"] for card in zone_cards]
+    from authentication.zones import user_zones, zone_ok
+
+    zones = user_zones(profile)
+    cards = [card for card in cards if zone_ok(zones, card["table"].zone_name)]
     recent = (Notification.objects.filter(venue__in=venues, acknowledged_at__gte=timezone.now() - timedelta(minutes=10))
               .select_related("acknowledged_by", "table")[:5])
     return {"alerts": [serialize(n) for n in active_for(profile, venues)], "cards": cards,

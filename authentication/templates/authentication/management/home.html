@@ -1,0 +1,122 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Centro de gestión | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🎛️ Centro de gestión</h1>
+        <p class="muted">Personal, mesas, zonas y cámaras de tus locales, en un solo lugar.</p>
+    </div>
+</section>
+
+<div class="kpi-grid kpi-compact">
+    <article class="kpi"><span class="kpi-label">Personal activo</span><strong>{{ kpis.staff }}</strong><small>Cuentas que puedes administrar</small></article>
+    <article class="kpi"><span class="kpi-label">Mesas</span><strong>{{ kpis.tables }}</strong><small>{{ kpis.zones }} zona(s)</small></article>
+    <article class="kpi"><span class="kpi-label">Cámaras</span><strong>{{ kpis.cameras }}</strong><small>{{ kpis.entrances }} de entrada</small></article>
+</div>
+
+<div data-tabs="gestion">
+    <div class="tab-bar" role="tablist">
+        <button type="button" data-tab-button role="tab">👥 Personal</button>
+        <button type="button" data-tab-button role="tab">🪑 Mesas y zonas</button>
+        <button type="button" data-tab-button role="tab">📷 Cámaras</button>
+    </div>
+
+    <div class="tab-panel mgmt-split" data-tab-panel>
+        <section class="card mgmt-scroll">
+            <h2>Personal</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Persona</th><th>Rol</th><th>Locales</th><th>Zonas</th><th>Último ingreso</th><th></th></tr></thead>
+                    <tbody>
+                        {% for u in users %}
+                            <tr class="{% if not u.is_active %}muted{% endif %}">
+                                <td><strong>{{ u.get_full_name|default:u.username }}</strong><br><small class="muted">@{{ u.username }}{% if not u.is_active %} · inactiva{% endif %}</small></td>
+                                <td><span class="role-badge role-{{ u.profile.role }}">{{ u.profile.get_role_display }}</span></td>
+                                <td>{% for v in u.profile.venues.all %}{{ v.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="table-alert">Sin local</span>{% endfor %}</td>
+                                <td>{{ u.profile.zones|default:"Todas" }}</td>
+                                <td>{{ u.last_login|date:"d-m H:i"|default:"—" }}</td>
+                                <td>{% if u != request.user %}<a class="btn btn-small" href="{% url 'management:staff_edit' u.id %}">Editar</a>{% endif %}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="muted">Aún no hay personal en tus locales.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="card mgmt-scroll">
+            <h2>Agregar persona</h2>
+            <form method="post" action="{% url 'management:staff_create' %}" class="mgmt-form">
+                {% csrf_token %}
+                {% for field in staff_form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-primary" type="submit">Crear cuenta</button>
+            </form>
+        </section>
+    </div>
+
+    <div class="tab-panel mgmt-split" data-tab-panel>
+        <section class="card mgmt-scroll">
+            <h2>Mesas por zona</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Local</th><th>Zona</th><th>Mesa</th><th>Capacidad</th><th>Cámara</th></tr></thead>
+                    <tbody>
+                        {% for t in tables %}
+                            <tr><td>{{ t.venue.name }}</td><td>{{ t.zone_name|default:"—" }}</td><td><strong>{{ t.code }}</strong></td><td>{{ t.capacity }}</td>
+                                <td>{% for c in cameras %}{% if c.table_id == t.id %}📷 {{ c.name }}{% endif %}{% endfor %}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="muted">Aún no hay mesas.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="card mgmt-scroll">
+            <h2>Agregar mesa</h2>
+            <form method="post" action="{% url 'management:table_create' %}" class="mgmt-form">
+                {% csrf_token %}
+                {% for field in table_form %}<div class="form-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+                <button class="btn btn-primary" type="submit">Crear mesa</button>
+            </form>
+            {% if zones %}<p class="muted">Zonas actuales: {{ zones|join:", " }}</p>{% endif %}
+        </section>
+    </div>
+
+    <div class="tab-panel mgmt-split" data-tab-panel>
+        <section class="card mgmt-scroll">
+            <h2>Cámaras</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Cámara</th><th>Local</th><th>Mesa</th><th>Zona</th><th>Tipo</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        {% for c in cameras %}
+                            <tr><td><strong>{{ c.name }}</strong>{% if c.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}</td><td>{{ c.venue.name }}</td>
+                                <td>{{ c.table.code|default:"—" }}</td><td>{{ c.zone_name|default:"—" }}</td><td>{{ c.get_source_type_display }}</td>
+                                <td>{% if c.is_active %}Activa{% else %}<span class="muted">Inactiva</span>{% endif %}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="muted">Aún no hay cámaras.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="card mgmt-scroll">
+            <h2>Registrar cámara</h2>
+            <form method="post" action="{% url 'management:camera_create' %}" class="mgmt-form">
+                {% csrf_token %}
+                {% for field in camera_form %}<div class="form-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+                <button class="btn btn-primary" type="submit">Registrar cámara</button>
+            </form>
+            <p class="muted">Una cámara solo se analiza con una política de privacidad y una autorización vigentes.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

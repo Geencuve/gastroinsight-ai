@@ -1,4 +1,4 @@
-﻿"""Mediciones agregadas por cámara (últimos minutos), para el supervisor y el asistente Sazón."""
+"""Mediciones agregadas por cámara (últimos minutos), para el supervisor y el asistente Sazón."""
 from datetime import timedelta
 
 from django.db.models import Avg, Count, Max
@@ -14,11 +14,16 @@ def _num(value, digits=1):
     return round(float(value), digits) if value is not None else None
 
 
-def camera_measurements(venues, minutes=15):
+def camera_measurements(venues, minutes=15, zones=None):
     now = timezone.now()
     since = now - timedelta(minutes=minutes)
     rows = []
     for camera in Camera.objects.filter(venue__in=venues, is_active=True).select_related("table", "venue").order_by("name"):
+        if zones is not None:
+            from authentication.zones import zone_ok
+
+            if not zone_ok(zones, camera.zone_name or (camera.table.zone_name if camera.table_id else "")):
+                continue
         events = DetectionEvent.objects.filter(session__camera=camera, detected_at__gte=since)
         agg = events.aggregate(
             readings=Count("id"), people=Avg("occupancy"), ieo=Avg("experience_index"), ibe=Avg("valence"),

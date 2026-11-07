@@ -1,4 +1,4 @@
-﻿from django.contrib import messages
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -30,7 +30,15 @@ def monitor(request):
 
 @login_required
 def monitor_data(request):
-    return JsonResponse(build_live_state(_venues(request)))
+    from authentication.zones import user_zones, zone_ok
+
+    state = build_live_state(_venues(request))
+    zones = user_zones(get_or_create_profile(request.user))
+    if zones is not None:
+        state["cards"] = [c for c in state["cards"] if zone_ok(zones, c["zone"])]
+        codes = {c["table"] for c in state["cards"]}
+        state["alerts"] = [a for a in state["alerts"] if a["table"] in codes]
+    return JsonResponse(state)
 
 
 @login_required

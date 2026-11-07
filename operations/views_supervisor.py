@@ -1,4 +1,4 @@
-﻿from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -39,7 +39,16 @@ def _score(value):
 
 @login_required
 def dashboard(request):
-    return render(request, "operations/supervisor.html", build_supervisor(_venues(request)))
+    from ai_vision.services.camera_metrics import camera_measurements
+    from authentication.zones import user_zones
+
+    venues = _venues(request)
+    context = build_supervisor(venues)
+    zones = user_zones(get_or_create_profile(request.user))
+    if zones is not None:
+        context["cameras"] = camera_measurements(venues, zones=zones)
+    context["kpis"]["cameras_live"] = sum(1 for c in context["cameras"] if c["live"])
+    return render(request, "operations/supervisor.html", context)
 
 
 @login_required

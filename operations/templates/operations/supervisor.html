@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Panel del supervisor | GastroInsight AI{% endblock %}
 
@@ -15,7 +15,7 @@
     <article class="kpi"><span class="kpi-label">Comensales actuales</span><strong>{{ kpis.guests }}</strong><small>En mesas con atención abierta</small></article>
     <article class="kpi"><span class="kpi-label">Mesas ocupadas</span><strong>{{ kpis.occupied }}/{{ kpis.tables }}</strong><small>{{ kpis.waiting }} grupo(s) esperando mesa</small></article>
     <article class="kpi"><span class="kpi-label">Personal en turno</span><strong>{{ kpis.staff }}</strong><small>{% for role, n in roles %}{{ role }}: {{ n }}{% if not forloop.last %} · {% endif %}{% empty %}Con ingreso en las últimas 12 h{% endfor %}</small></article>
-    <article class="kpi"><span class="kpi-label">Cámaras en vivo</span><strong>{% with live=cameras|dictsort:"live" %}{{ cameras|length }}{% endwith %}</strong><small>Registradas en tus locales</small></article>
+    <article class="kpi"><span class="kpi-label">Cámaras en vivo</span><strong>{{ kpis.cameras_live }}/{{ cameras|length }}</strong><small>Con lecturas en los últimos 2 min</small></article>
 </div>
 
 <div data-tabs="supervisor">

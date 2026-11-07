@@ -1,0 +1,28 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Acceso de gestión | GastroInsight AI{% endblock %}
+
+{% block content %}
+<div class="mgmt-login">
+    <section class="mgmt-login-card">
+        <span class="aw-avatar lg" aria-hidden="true"></span>
+        <p class="mgmt-kicker">Centro de gestión</p>
+        <h1>Acceso exclusivo</h1>
+        <p class="mgmt-sub">Para dueños, administradores y supervisores del local.</p>
+        <form method="post">
+            {% csrf_token %}
+            {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+            {% for error in form.non_field_errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for e in field.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit" style="width: 100%;">Ingresar al centro de gestión</button>
+        </form>
+        <p class="mgmt-sub"><a href="{% url 'authentication:login' %}">← Acceso del personal</a></p>
+    </section>
+</div>
+{% endblock %}

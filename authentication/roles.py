@@ -23,7 +23,7 @@ ROLE_PREFIXES = {
     CASHIER: ["/caja/", "/sala/", "/sales/", "/operations/sessions/", "/operations/evaluations/", "/opinion/"],
     SUPERVISOR: ["/operations/", "/sales/", "/opinion/", "/menus/", "/ai/monitor/", "/ai/sessions/", "/cameras/",
                  "/analytics/", "/reports/", "/promociones/", "/monitoring/incidents/",
-                 "/sala/", "/cocina/", "/barra/", "/caja/", "/supervisor/", "/garzon/"],
+                 "/sala/", "/cocina/", "/barra/", "/caja/", "/supervisor/", "/garzon/", "/gestion/"],
 }
 
 # Página de inicio de cada rol restringido (se completa en las fases B y C)

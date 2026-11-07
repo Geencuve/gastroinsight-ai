@@ -42,6 +42,10 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    zones = models.CharField(max_length=200, blank=True, verbose_name="Zonas asignadas",
+                             help_text="Separadas por coma (por ejemplo: Salón, Terraza). Vacío = todas las zonas.")
+
     class Meta:
         verbose_name = "Perfil"
         verbose_name_plural = "Perfiles"

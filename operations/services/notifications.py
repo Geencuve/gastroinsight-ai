@@ -1,4 +1,4 @@
-﻿"""
+"""
 Motor de alertas del local. Revisa el estado en vivo y crea notificaciones sin duplicarlas.
 Todo es por mesa (métricas agregadas): nunca identifica ni sigue a una persona.
 """
@@ -124,6 +124,10 @@ def active_for(profile, venues, limit=20):
     since = timezone.now() - timedelta(minutes=ACTIVE_MINUTES)
     items = list(Notification.objects.filter(venue__in=venues, kind__in=kinds, acknowledged_at__isnull=True,
                                              created_at__gte=since).select_related("table")[:limit])
+    from authentication.zones import user_zones, zone_ok
+
+    zones = user_zones(profile)
+    items = [n for n in items if n.table_id is None or zone_ok(zones, n.table.zone_name)]
     return sorted(items, key=lambda n: (PRIORITY.get(n.level, 9), -n.created_at.timestamp()))
 
 
