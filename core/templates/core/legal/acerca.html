@@ -1,13 +1,14 @@
-<p>GastroInsight AI es un Testbed experimental de investigación aplicada que integra la operación de un restaurante con visión artificial no biométrica, para estudiar si el tiempo de servicio se relaciona con las expresiones faciales observables de forma agregada.</p>
+﻿<p>GastroInsight AI es una plataforma de gestión para restaurantes y locales de comida rápida que une la operación del local (mesas, pedidos, cocina, barra y caja) con visión artificial no biométrica, para medir la experiencia de los clientes sin identificarlos.</p>
 
-<h2>El problema que abordamos</h2>
-<p>Las encuestas de satisfacción las responde una fracción pequeña de los clientes y llegan tarde. GastroInsight AI combina datos de la operación (mesas, pedidos, tiempos y ventas) con señales visuales agregadas por mesa, sin identificar a nadie, y los convierte en indicadores y sugerencias de venta, marketing y servicio.</p>
+<h2>El problema que resolvemos</h2>
+<p>Las encuestas de satisfacción las responde una fracción pequeña de los clientes y llegan tarde. GastroInsight AI combina los datos de la operación con señales visuales agregadas por mesa y las convierte en alertas, indicadores y sugerencias de venta, marketing y servicio, mientras el servicio ocurre.</p>
 
 <h2>Qué hace</h2>
 <ul>
-    <li>Gestiona mesas, atención, pedidos, pagos, carta con fotos y opiniones de clientes por código QR.</li>
-    <li>Estima la distribución de expresiones, la búsqueda de atención y la actividad por mesa, procesando los fotogramas solo en memoria.</li>
-    <li>Calcula el Índice de Experiencia Observable y evalúa su relación con el tiempo de servicio y la valoración de clientes (Pearson, Spearman y valor p).</li>
+    <li>Gestiona mesas, atención, pedidos, cocina, barra, caja, carta con fotos y opiniones de clientes por código QR.</li>
+    <li>Cada rol del local (mesero, cocina, barra, caja, supervisor y administración) ve solo las funciones que le corresponden.</li>
+    <li>Estima la distribución de expresiones, la búsqueda de atención y la ocupación por mesa, procesando los fotogramas solo en memoria.</li>
+    <li>Calcula el Índice de Experiencia Observable y su relación con el tiempo de servicio y la valoración de los clientes.</li>
     <li>Genera sugerencias, piezas promocionales y respuestas en lenguaje natural con el asistente Sazón.</li>
 </ul>
 
@@ -15,17 +16,13 @@
 <table>
     <thead><tr><th>Nombre</th><th>Rol</th></tr></thead>
     <tbody>
-        {% for name in legal.team %}<tr><td>{{ name }}</td><td>Integrante del equipo de desarrollo e investigación</td></tr>{% endfor %}
+        {% for name in legal.team %}<tr><td>{{ name }}</td><td>Equipo de desarrollo</td></tr>{% endfor %}
         <tr><td>{{ legal.advisor }}</td><td>Académica guía</td></tr>
     </tbody>
 </table>
-<p>{{ legal.course }}.</p>
+<p>Desarrollado en {{ legal.course }}.</p>
 
-<h2>Componentes de terceros y licencias</h2>
-<p>GastroInsight AI se construye sobre software de código abierto, usado conforme a sus licencias.</p>
-<div class="table-responsive">
-    <table>
-        <thead><tr><th>Componente</th><th>Uso en el sistema</th><th>Licencia</th></tr></thead>
-        <tbody>{% for name, use, license in legal.licenses %}<tr><td>{{ name }}</td><td>{{ use }}</td><td>{{ license }}</td></tr>{% endfor %}</tbody>
-    </table>
-</div>
+<h2>Código abierto</h2>
+<p>GastroInsight AI es software libre bajo la licencia AGPL-3.0. Su código fuente está disponible en
+    <a href="{{ legal.source_url }}" target="_blank" rel="noopener">{{ legal.source_url }}</a>.
+    El detalle de las licencias está en <a href="{% url 'core:legal_license' %}">Licencia y código fuente</a>.</p>

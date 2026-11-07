@@ -1,4 +1,4 @@
-﻿"""
+"""
 Detección local de mesas y personas en una imagen, un video o la webcam, con resultados en JSON.
 
 Ejemplos:
@@ -55,7 +55,8 @@ class Command(BaseCommand):
         parser.add_argument("--iou", type=float, default=DEFAULT_IOU, help="Umbral de NMS (0.45).")
         parser.add_argument("--every", type=float, default=1.0, help="Segundos entre análisis en video (1.0).")
         parser.add_argument("--seconds", type=float, default=0, help="Duración máxima para video o cámara.")
-        parser.add_argument("--engine", choices=["auto", "onnxruntime", "opencv"], default="auto")
+        parser.add_argument("--engine", choices=["auto", "onnxruntime", "opencv"], default="opencv",
+                            help="Motor de inferencia (por defecto OpenCV DNN; onnxruntime es más rápido si el equipo lo soporta).")
         parser.add_argument("--compare", help="JSON de Roboflow de la misma imagen, para medir equivalencia.")
         parser.add_argument("--annotate", help="Guardar imagen o video con recuadros (solo material de prueba).")
 

@@ -1,0 +1,22 @@
+﻿<p>GastroInsight AI {{ legal.app_version }} es software libre: puede usarse, estudiarse, modificarse y redistribuirse según los términos de la <strong>GNU Affero General Public License, versión 3 (AGPL-3.0)</strong>.</p>
+
+<h2>Código fuente</h2>
+<p>El código fuente completo de esta versión está disponible en
+    <a href="{{ legal.source_url }}" target="_blank" rel="noopener">{{ legal.source_url }}</a>.
+    El texto íntegro de la licencia se incluye en el archivo <code>LICENSE</code> del repositorio y del instalador.</p>
+
+<h2>Qué implica la AGPL-3.0</h2>
+<ul>
+    <li>Cualquier persona puede usar el sistema para cualquier fin, incluido el comercial.</li>
+    <li>Quien distribuya el sistema, modificado o no, debe entregar también su código fuente bajo la misma licencia.</li>
+    <li>Quien modifique el sistema y lo ofrezca a otros usuarios a través de una red debe darles acceso al código fuente de esa versión modificada.</li>
+    <li>El software se entrega sin garantía, en la medida que lo permite la ley.</li>
+</ul>
+
+<h2>Componentes de terceros</h2>
+<div class="table-responsive">
+    <table>
+        <thead><tr><th>Componente</th><th>Uso en el sistema</th><th>Licencia</th></tr></thead>
+        <tbody>{% for name, use, license in legal.licenses %}<tr><td>{{ name }}</td><td>{{ use }}</td><td>{{ license }}</td></tr>{% endfor %}</tbody>
+    </table>
+</div>

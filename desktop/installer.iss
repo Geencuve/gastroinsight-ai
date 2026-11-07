@@ -1,4 +1,4 @@
-﻿#define AppName "GastroInsight AI"
+#define AppName "GastroInsight AI"
 #define AppVersion "1.0.2"
 
 [Setup]
@@ -10,6 +10,7 @@ DefaultDirName={localappdata}\Programs\GastroInsight AI
 DefaultGroupName=GastroInsight AI
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
+LicenseFile=..\LICENSE
 OutputDir=..\dist
 OutputBaseFilename=GastroInsightAI-Setup-{#AppVersion}
 SetupIconFile=icon.ico

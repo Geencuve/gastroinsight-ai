@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=12">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -131,12 +131,12 @@
     </main>
 
     <footer class="site-footer">
-        <div><strong>GastroInsight AI</strong> · v1.0.2 <span class="edu-badge">Testbed experimental académico · uso educativo</span></div>
+        <div><strong>GastroInsight AI</strong> · v2.0.0 <span class="edu-badge">Código abierto · AGPL-3.0</span></div>
         <nav aria-label="Información legal">
             <a href="{% url 'core:legal_about' %}">Acerca de nosotros</a>
-            <a href="{% url 'core:legal_terms' %}">Términos y condiciones</a>
+            <a href="{% url 'core:legal_terms' %}">Términos de servicio</a>
             <a href="{% url 'core:legal_privacy' %}">Privacidad</a>
-            <a href="{% url 'core:legal_education' %}">Uso educativo</a>
+            <a href="{% url 'core:legal_license' %}">Licencia y código fuente</a>
             <a href="{% url 'core:legal_contact' %}">Contacto</a>
         </nav>
     </footer>
@@ -228,5 +228,19 @@
     <script src="{% static 'js/main.js' %}?v=9"></script>
     <script src="{% static 'js/guide.js' %}?v=2"></script>
     {% block extra_js %}{% endblock %}
+{% if gi_role_scope %}{{ gi_role_scope|json_script:"gi-role-scope" }}
+    <script>
+        (function () {
+            const scope = JSON.parse(document.getElementById("gi-role-scope").textContent);
+            const allowed = (path) => path === "/" || scope.some((prefix) => path.startsWith(prefix));
+            document.querySelectorAll(".nav-menu a[href]").forEach((link) => {
+                const url = new URL(link.getAttribute("href"), location.origin);
+                if (url.origin === location.origin && !allowed(url.pathname)) link.remove();
+            });
+            document.querySelectorAll(".nav-group:not(.user-menu)").forEach((group) => {
+                if (!group.querySelector(".nav-menu a")) group.remove();
+            });
+        })();
+    </script>{% endif %}
 </body>
 </html>

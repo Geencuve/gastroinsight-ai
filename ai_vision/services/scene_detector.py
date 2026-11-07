@@ -1,4 +1,4 @@
-﻿"""
+"""
 Detector local de mesas y personas (YOLO26 Small, entrenado por el equipo en Roboflow).
 
 - Se ejecuta en el equipo con ONNX Runtime (CPU) o, si no está instalado, con OpenCV DNN.
@@ -81,7 +81,7 @@ def assign_people_to_tables(detections, max_distance_factor=1.6):
 
 
 class SceneDetector:
-    def __init__(self, model_path=None, confidence=DEFAULT_CONFIDENCE, iou=DEFAULT_IOU, engine="auto"):
+    def __init__(self, model_path=None, confidence=DEFAULT_CONFIDENCE, iou=DEFAULT_IOU, engine="opencv"):
         self.model_path = Path(model_path or MODELS_DIR / SCENE_MODEL_FILE)
         if not self.model_path.exists():
             raise SceneModelNotAvailable(

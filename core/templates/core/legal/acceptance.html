@@ -1,23 +1,23 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}Toma de conocimiento | GastroInsight AI{% endblock %}
+{% block title %}Términos de servicio | GastroInsight AI{% endblock %}
 
 {% block content %}
 <div class="setup-wrap" style="max-width: 720px; margin: 1rem auto 3rem;">
     <section class="card">
-        <span class="role-badge role-operator">Uso educativo · v{{ legal.version }}</span>
+        <span class="role-badge role-venue_admin">Términos de servicio · v{{ legal.version }}</span>
         <h1 style="margin-top: 0.8rem;">Antes de comenzar</h1>
-        <p>GastroInsight AI es un <strong>Testbed experimental académico</strong>. Lee este resumen y confirma que lo conoces.</p>
+        <p>Lee este resumen de las condiciones de uso de GastroInsight AI y confirma que las aceptas.</p>
         <ul>
-            <li>Su uso actual es <strong>solo con fines educativos</strong>; parte de los datos son sintéticos.</li>
+            <li>Accederás solo a las funciones de tu rol y a los locales asignados.</li>
             <li>El análisis visual <strong>no identifica personas</strong>: procesa los fotogramas en memoria y guarda solo métricas agregadas.</li>
             <li>Los indicadores y sugerencias son <strong>orientativos</strong>; no miden la satisfacción directamente.</li>
             <li>Tu aceptación queda registrada con fecha y versión.</li>
         </ul>
         <p>
-            Lee los <a href="{% url 'core:legal_terms' %}" target="_blank">Términos y condiciones</a>,
-            la <a href="{% url 'core:legal_privacy' %}" target="_blank">Política de privacidad</a> y el
-            <a href="{% url 'core:legal_education' %}" target="_blank">Aviso de uso educativo</a>.
+            Lee los <a href="{% url 'core:legal_terms' %}" target="_blank">Términos de servicio</a>,
+            la <a href="{% url 'core:legal_privacy' %}" target="_blank">Política de privacidad</a> y la
+            <a href="{% url 'core:legal_license' %}" target="_blank">Licencia</a>.
         </p>
         <form method="post" style="display: grid; gap: 0.8rem; margin-top: 1rem;">
             {% csrf_token %}

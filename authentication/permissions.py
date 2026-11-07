@@ -42,7 +42,7 @@ def user_can_operate_camera(user, venue):
     return (
         profile.is_platform_admin
         or profile.is_venue_admin
-        or profile.role == Profile.Role.OPERATOR
+        or profile.role in (Profile.Role.OPERATOR, Profile.Role.SUPERVISOR)
     )
 
 

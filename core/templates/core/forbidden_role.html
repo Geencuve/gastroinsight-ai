@@ -1,0 +1,13 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Sin acceso | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card" style="text-align: center;">
+    <div style="font-size: 2.4rem;">🔒</div>
+    <h1>Tu rol no tiene acceso a esta sección</h1>
+    <p class="muted">Ingresaste como <strong>{{ role }}</strong>. Esta sección corresponde a otro rol del local.
+        Si necesitas acceso, pídeselo al administrador.</p>
+    <a class="btn btn-primary" href="{{ home }}">Ir a mi sección</a>
+</section>
+{% endblock %}

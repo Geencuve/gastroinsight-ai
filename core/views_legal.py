@@ -1,5 +1,4 @@
-from django import forms
-from django.conf import settings
+﻿from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -9,13 +8,17 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from monitoring.models import AuditLog
 from monitoring.services.audit import log_action
 
-from .legal import ADVISOR, COURSE, LEGAL_DATE, LEGAL_VERSION, LICENSES, PAGES, TEAM, URL_NAMES
+from .legal import (ADVISOR, APP_VERSION, COURSE, LEGAL_DATE, LEGAL_VERSION, LICENSES, PAGES, TEAM, URL_NAMES,
+                    source_url)
 from .models import LegalAcceptance
 
 
 def _context():
+    from django.conf import settings
+
     return {"version": LEGAL_VERSION, "date": LEGAL_DATE, "team": TEAM, "advisor": ADVISOR, "course": COURSE,
-            "licenses": LICENSES, "contact_email": getattr(settings, "CONTACT_EMAIL", "")}
+            "licenses": LICENSES, "contact_email": getattr(settings, "CONTACT_EMAIL", ""),
+            "source_url": source_url(), "app_version": APP_VERSION}
 
 
 def legal_page(request, slug):
@@ -28,10 +31,9 @@ def legal_page(request, slug):
 
 
 class AcceptanceForm(forms.Form):
+    terms = forms.BooleanField(label="He leído y acepto los Términos de servicio y la Política de privacidad.")
     educational = forms.BooleanField(
-        label="Entiendo que GastroInsight AI es un Testbed experimental académico y lo usaré solo con fines educativos.")
-    terms = forms.BooleanField(
-        label="He leído y acepto los Términos y condiciones y la Política de privacidad.")
+        label="Usaré el análisis visual solo con la autorización del local y con el aviso visible al público.")
     responsible = forms.BooleanField(
         label="Me comprometo a no usar el sistema para identificar, vigilar o evaluar a personas en particular.")
     full_name = forms.CharField(label="Escribe tu nombre completo como firma", max_length=150)
@@ -55,7 +57,6 @@ def acceptance(request):
         )
         request.session[f"legal_ok_{LEGAL_VERSION}"] = True
         log_action(request, action=AuditLog.Action.CREATE, module="core", object_type="LegalAcceptance",
-                   object_id=LEGAL_VERSION,
-                   description=f"Aceptó la toma de conocimiento de uso educativo v{LEGAL_VERSION}.")
+                   object_id=LEGAL_VERSION, description=f"Aceptó los términos de servicio v{LEGAL_VERSION}.")
         return redirect(next_url)
     return render(request, "core/legal/acceptance.html", {"form": form, "next": next_url, "legal": _context()})

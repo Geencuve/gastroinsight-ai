@@ -10,6 +10,11 @@ class Profile(models.Model):
         VENUE_ADMIN = "venue_admin", "Administrador de local"
         OPERATOR = "operator", "Operador"
         VIEWER = "viewer", "Visualizador"
+        SUPERVISOR = "supervisor", "Supervisor"
+        WAITER = "waiter", "Mesero"
+        KITCHEN = "kitchen", "Cocina"
+        BAR = "bar", "Barra"
+        CASHIER = "cashier", "Caja"
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

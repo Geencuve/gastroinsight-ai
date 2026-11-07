@@ -51,3 +51,24 @@ class LegalAcceptanceMiddleware:
                     query = urlencode({"next": request.get_full_path()})
                     return redirect(f"{reverse('core:legal_acceptance')}?{query}")
         return self.get_response(request)
+
+
+class RoleScopeMiddleware:
+    """Aplica la matriz de roles: cada rol restringido solo abre las secciones que le corresponden."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            from django.shortcuts import render
+
+            from authentication.permissions import get_or_create_profile
+            from authentication.roles import allowed_prefixes, home_for, is_path_allowed
+
+            profile = get_or_create_profile(request.user)
+            prefixes = allowed_prefixes(profile)
+            if not is_path_allowed(request.path, prefixes):
+                return render(request, "core/forbidden_role.html",
+                              {"role": profile.get_role_display(), "home": home_for(profile)}, status=403)
+        return self.get_response(request)

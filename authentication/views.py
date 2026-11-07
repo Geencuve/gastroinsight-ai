@@ -11,17 +11,7 @@ from venues.models import Venue
 from .forms import AccountForm, LoginForm, RegisterForm
 from .models import Profile
 
-ALL_ROLES = {"platform_admin", "venue_admin", "operator", "viewer"}
-OPERATORS = {"platform_admin", "venue_admin", "operator"}
-MANAGERS = {"platform_admin", "venue_admin"}
-CAPABILITIES = [
-    ("Ver inicio, dashboard, reportes y correlación", ALL_ROLES),
-    ("Operar mesas, pedidos, pagos y evaluaciones", OPERATORS),
-    ("Iniciar análisis visual y el monitor en vivo", OPERATORS),
-    ("Gestionar mesas, carta y fotos de platos", MANAGERS),
-    ("Editar políticas de privacidad", MANAGERS),
-    ("Ver auditoría y administrar la plataforma", {"platform_admin"}),
-]
+from .roles import PROFILE_CAPABILITIES as CAPABILITIES  # noqa: E402
 
 
 def login_view(request):

@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.FirstRunMiddleware',
     'core.middleware.LegalAcceptanceMiddleware',
+    'core.middleware.RoleScopeMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -67,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'assistant_chat.context_processors.assistant_widget_access',
                 'assistant_chat.branding.assistant_brand',
+                'core.context_role.role_scope',
             ],
         },
     },
@@ -151,3 +153,4 @@ LEGAL_ACCEPTANCE_REQUIRED = config('LEGAL_ACCEPTANCE_REQUIRED', default=True, ca
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     LEGAL_ACCEPTANCE_REQUIRED = False  # las pruebas que lo necesitan lo activan explícitamente
 CONTACT_EMAIL = config('CONTACT_EMAIL', default='')
+SOURCE_CODE_URL = config('SOURCE_CODE_URL', default='https://github.com/Geencuve/gastroinsight-ai')

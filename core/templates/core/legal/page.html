@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}{{ title }} | GastroInsight AI{% endblock %}
 
@@ -9,11 +9,11 @@
     </nav>
     <article class="legal-article">
         <h1>{{ title }}</h1>
-        <p class="legal-meta">Versión {{ legal.version }} · Vigente desde el {{ legal.date }}</p>
+        <p class="legal-meta">Versión {{ legal.version }} · Vigente desde el {{ legal.date }} · GastroInsight AI {{ legal.app_version }}</p>
         {% include body_template %}
         <p class="legal-meta legal-disclaimer">
-            Texto elaborado con fines académicos en el marco de un Testbed experimental de proyecto de título.
-            No constituye asesoría legal; antes de un uso comercial debe revisarlo un profesional del derecho.
+            Textos de referencia elaborados por el equipo de GastroInsight AI. Cada local debe revisarlos con un
+            profesional del derecho y adaptarlos a su operación antes de adoptarlos.
         </p>
     </article>
 </div>

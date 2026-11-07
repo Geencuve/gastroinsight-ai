@@ -1,11 +1,12 @@
-﻿<p>Para consultas sobre el proyecto, los términos o el tratamiento de datos personales, contacta al equipo de GastroInsight AI.</p>
+﻿<p>Para consultas sobre GastroInsight AI, sus términos o el tratamiento de datos, contacta al equipo.</p>
 <table>
     <tbody>
         <tr><th>Equipo</th><td>{{ legal.team|join:" · " }}</td></tr>
         <tr><th>Académica guía</th><td>{{ legal.advisor }}</td></tr>
-        <tr><th>Contexto</th><td>{{ legal.course }}</td></tr>
+        <tr><th>Desarrollado en</th><td>{{ legal.course }}</td></tr>
         <tr><th>Correo</th><td>{% if legal.contact_email %}<a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>{% else %}Por definir (configurar CONTACT_EMAIL){% endif %}</td></tr>
+        <tr><th>Código fuente</th><td><a href="{{ legal.source_url }}" target="_blank" rel="noopener">{{ legal.source_url }}</a></td></tr>
     </tbody>
 </table>
 <h2>Solicitudes sobre tus datos</h2>
-<p>Indica tu nombre, tu usuario en GastroInsight AI y el derecho que quieres ejercer (acceso, rectificación, supresión, oposición, portabilidad o bloqueo). Te responderemos al correo desde el que escribas.</p>
+<p>El responsable de los datos es el local donde se usa GastroInsight AI: dirige tu solicitud de acceso, rectificación, supresión, oposición, portabilidad o bloqueo a ese local. Para consultas sobre el software, escribe al correo del equipo.</p>
