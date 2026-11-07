@@ -11,6 +11,15 @@
     if (navBar && navBar.parentElement && navBar.parentElement !== document.body) navBar.parentElement.classList.add("header-centered");
     if (embedded) {
         document.body.classList.add("embed-mode");
+        // Oculta todo lo que precede al contenido principal (encabezado, logo, menú), sea cual sea su estructura.
+        const mainContent = document.querySelector("main");
+        if (mainContent) {
+            [...document.body.children].forEach((element) => {
+                if (element.contains(mainContent) || element.tagName === "SCRIPT") return;
+                if (element.compareDocumentPosition(mainContent) & Node.DOCUMENT_POSITION_FOLLOWING) element.style.display = "none";
+            });
+            document.querySelectorAll("header").forEach((h) => { if (!h.contains(mainContent)) h.style.display = "none"; });
+        }
         const nav = document.querySelector(".main-nav");
         let top = nav;
         while (top && top.parentElement && top.parentElement !== document.body) top = top.parentElement;

@@ -1322,3 +1322,7 @@ html[data-theme] .chat-chips .chip { white-space: nowrap; flex: none; }
 
 /* Alertas y avisos con menos peso visual */
 html[data-theme] .alert { border-radius: 12px; font-size: 0.88rem; }
+
+/* Pestaña incrustada: el encabezado no alcanza a mostrarse mientras carga */
+body[data-embed="1"] > header, body[data-embed="1"] .site-header, body[data-embed="1"] .header-centered,
+body.embed-mode > header, body.embed-mode .header-centered { display: none !important; }

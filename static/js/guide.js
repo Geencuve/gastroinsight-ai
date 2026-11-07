@@ -35,6 +35,8 @@
         "/privacy/": "Políticas de privacidad y autorizaciones del análisis visual.",
         "/monitoring/audit/": "Registro de todas las acciones realizadas en el sistema.",
         "/assistant/staff/": "Sazón: pregunta en lenguaje natural por ventas, platos, mesas o ideas para vender más.",
+        "/auth/password": "Cambia tu contraseña. Debe tener al menos 8 caracteres y no parecerse a tus datos personales.",
+        "/gestion/personal/": "Edita el rol, los locales, las zonas o la contraseña de esta persona.",
         "/auth/profile/": "Tus datos, permisos, seguridad y preferencias.",
         "/auth/password/change/": "Cambia la contraseña de tu cuenta.",
         "/admin/": "Panel de administración: usuarios, roles y datos maestros.",
@@ -400,9 +402,9 @@
     function addPageHelp() {
         if (document.body.dataset.embed === "1") return;
         const header = document.querySelector("main .page-header");
-        const title = header && header.querySelector("h1");
+        const title = (header && header.querySelector("h1")) || document.querySelector("main h1");
         const text = helpFor(location.pathname);
-        if (!title || !text || header.querySelector(".page-help-toggle")) return;
+        if (!title || !text || title.querySelector(".page-help-toggle")) return;
         const button = document.createElement("button");
         button.type = "button";
         button.className = "page-help-toggle";
