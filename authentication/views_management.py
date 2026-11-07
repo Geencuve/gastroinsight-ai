@@ -145,3 +145,64 @@ def staff_qr(request, user_id):
     log_action(request, action=AuditLog.Action.CREATE, module="authentication", object_type="Pairing",
                object_id=str(target.pk), description=f"Generó un código QR de acceso para {target.get_username()}.")
     return render(request, "operations/pair.html", pair_context(request, target))
+
+
+@login_required
+def camera_discover(request):
+    """Detecta cámaras locales o prueba una de red, y las registra con su uso (mesa, entrada o caja)."""
+    from ai_vision.models import AnalysisSession
+    from ai_vision.services.discovery import probe_local, probe_url, validate_url
+
+    actor, venues = _actor(request)
+    registered = {c.source: c for c in Camera.objects.filter(venue__in=venues)}
+    running = set(AnalysisSession.objects.filter(status=AnalysisSession.Status.RUNNING, camera__venue__in=venues)
+                  .values_list("camera__source", flat=True))
+
+    if request.method == "POST" and request.POST.get("accion") == "registrar":
+        source = (request.POST.get("source") or "").strip()
+        purpose = request.POST.get("uso", "mesa")
+        venue = venues.filter(pk=request.POST.get("venue")).first()
+        table = RestaurantTable.objects.filter(pk=request.POST.get("table") or 0, venue__in=venues).first()
+        try:
+            if not source.isdigit():
+                source = validate_url(source)
+        except ValueError as error:
+            messages.error(request, str(error))
+            return redirect("management:camera_discover")
+        if venue is None:
+            messages.error(request, "Elige el local de la cámara.")
+            return redirect("management:camera_discover")
+        if purpose == "mesa" and table is None:
+            messages.error(request, "Elige la mesa que cubre la cámara.")
+            return redirect("management:camera_discover")
+        url_type = next((value for value, _ in Camera.SourceType.choices
+                         if value not in (Camera.SourceType.WEBCAM, Camera.SourceType.DEMO)), Camera.SourceType.WEBCAM)
+        camera = Camera.objects.create(
+            venue=venue, name=(request.POST.get("name") or "").strip()[:100] or f"Cámara {source}",
+            source=source, source_type=Camera.SourceType.WEBCAM if source.isdigit() else url_type,
+            table=table if purpose == "mesa" else None, zone_name=(request.POST.get("zone") or "").strip()[:80],
+            is_entrance=purpose == "entrada", is_checkout=purpose == "caja", is_active=True,
+        )
+        log_action(request, action=AuditLog.Action.CREATE, module="cameras", venue=venue, object_type="Camera",
+                   object_id=str(camera.pk), description=f"Registró la cámara «{camera.name}» ({purpose}) desde la detección.")
+        messages.success(request, f"Cámara «{camera.name}» registrada como cámara de {purpose}.")
+        return redirect("management:camera_discover")
+
+    tested = None
+    if request.method == "POST" and request.POST.get("accion") == "probar":
+        try:
+            tested = probe_url(request.POST.get("url", ""))
+            tested["registered"] = registered.get(tested["source"])
+        except ValueError as error:
+            messages.error(request, str(error))
+
+    devices = []
+    if request.GET.get("buscar") == "1":
+        for device in probe_local():
+            device["registered"] = registered.get(device["source"])
+            devices.append(device)
+    busy = [c for c in registered.values() if c.source in running]
+    return render(request, "authentication/management/camera_discover.html", {
+        "devices": devices, "searched": request.GET.get("buscar") == "1", "tested": tested, "busy": busy,
+        "venues": venues, "tables": RestaurantTable.objects.filter(venue__in=venues).order_by("code"),
+    })

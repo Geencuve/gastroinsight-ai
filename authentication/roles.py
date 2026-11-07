@@ -17,7 +17,7 @@ COMMON_PREFIXES = ["/auth/", "/legal/", "/assistant/staff/", "/static/", "/media
 # Roles restringidos: rutas que pueden abrir. Los roles que no aparecen aquí no se restringen
 # (administradores, operador y visualizador mantienen los permisos de sus propias vistas).
 ROLE_PREFIXES = {
-    WAITER: ["/garzon/", "/operations/sessions/", "/sales/", "/operations/evaluations/", "/opinion/", "/menus/", "/sala/"],
+    WAITER: ["/garzon/", "/caja/boleta/", "/operations/sessions/", "/sales/", "/operations/evaluations/", "/opinion/", "/menus/", "/sala/"],
     KITCHEN: ["/cocina/", "/menus/"],
     BAR: ["/barra/", "/menus/"],
     CASHIER: ["/caja/", "/sala/", "/sales/", "/operations/sessions/", "/operations/evaluations/", "/opinion/"],

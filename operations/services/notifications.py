@@ -11,22 +11,22 @@ from authentication.roles import (BAR, CASHIER, KITCHEN, MANAGERS, OPERATOR, SUP
 from operations.models import Notification, RestaurantTable, WaitlistEntry
 
 ACTIVE_MINUTES = 15
-ICONS = {"attention": "🙋", "discomfort": "😟", "approval": "😊", "arrival": "🚶", "waiting": "⏱️", "ready": "🍽️", "bill": "🧾"}
+ICONS = {"attention": "🙋", "discomfort": "😟", "approval": "😊", "arrival": "🚶", "waiting": "⏱️", "ready": "🍽️", "bill": "🧾", "checkout": "💵"}
 PRIORITY = {"danger": 0, "warning": 1, "info": 2, "success": 3}
 SERVICE_KINDS = {"attention", "discomfort", "arrival", "waiting", "ready", "bill"}
 KIND_ROLES = {
     WAITER: SERVICE_KINDS,
-    CASHIER: {"bill"},
+    CASHIER: {"bill", "checkout"},
     KITCHEN: set(), BAR: set(), VIEWER: set(),
-    SUPERVISOR: SERVICE_KINDS | {"approval"},
-    OPERATOR: SERVICE_KINDS | {"approval"},
+    SUPERVISOR: SERVICE_KINDS | {"approval", "checkout"},
+    OPERATOR: SERVICE_KINDS | {"approval", "checkout"},
 }
 
 
 def kinds_for(profile):
     key = role_key(profile)
     if key in MANAGERS:
-        return SERVICE_KINDS | {"approval"}
+        return SERVICE_KINDS | {"approval", "checkout"}
     return KIND_ROLES.get(key, set())
 
 
@@ -115,6 +115,7 @@ def generate(venues):
         _from_live(venue, tables)
         _from_floor(venue)
         _arrivals(venue)
+        _checkout_alert(venue)
 
 
 def active_for(profile, venues, limit=20):
@@ -139,3 +140,12 @@ def serialize(notification):
             "icon": ICONS.get(notification.kind, "🔔"), "title": notification.title, "message": notification.message,
             "table": notification.table.code if notification.table_id else "", "minutes": minutes,
             "ack_url": reverse("alerts:ack", args=[notification.id])}
+
+
+def _checkout_alert(venue):
+    from ai_vision.services.checkout import live_checkout
+
+    reading = live_checkout([venue])
+    if reading and reading["ieo"] is not None and reading["ieo"] < 45:
+        _notify(venue, None, "checkout", "warning", "Cliente en caja: posible disconformidad",
+                f"IEO {reading['ieo']} frente a la caja. Atiende con calma y ofrece ayuda.", f"checkout:{venue.id}", 5)

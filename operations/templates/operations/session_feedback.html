@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Tu opinión | {{ venue.name|default:"GastroInsight AI" }}{% endblock %}
 
@@ -8,6 +8,11 @@
         {% if expired %}
             <h1>Este código ya caducó</h1>
             <p>Los códigos de opinión son válidos por 3 horas desde que se generan. ¡Gracias por visitarnos!</p>
+        {% elif unpaid %}
+            <p class="muted">{{ venue.name }} · Mesa {{ table.code }}</p>
+            <h1>La evaluación se habilita al pagar 🧾</h1>
+            <p>Encontrarás el código para evaluar en tu boleta. ¡Gracias por visitarnos!</p>
+            <a class="btn btn-primary" href="{{ menu_url }}">Ver la carta</a>
         {% elif done %}
             <h1>¡Gracias por tu opinión! 🙌</h1>
             <p>La atención de la mesa {{ table.code }} ya fue evaluada. Tu respuesta nos ayuda a mejorar.</p>

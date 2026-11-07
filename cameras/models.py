@@ -65,6 +65,10 @@ class Camera(models.Model):
     is_entrance = models.BooleanField(default=False, verbose_name="Cámara de entrada",
                                       help_text="Cuenta a las personas que ingresan al local (YOLO26).")
 
+
+    is_checkout = models.BooleanField(default=False, verbose_name="Cámara de caja",
+                                      help_text="Mide la experiencia observable al momento de pagar (agregada, sin identificar).")
+
     class Meta:
         ordering = ["venue__name", "name"]
         verbose_name = "Cámara"

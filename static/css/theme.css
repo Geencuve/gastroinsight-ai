@@ -1136,3 +1136,41 @@ html[data-theme] .security-item small { display: block; color: var(--muted); }
 body.embed-mode .assistant-widget, body.embed-mode .aw-toggle, body.embed-mode .toast-stack,
 body.embed-mode .app-sidebar, body.embed-mode .sidebar-toggle, body.embed-mode .site-footer { display: none !important; }
 body.embed-mode main { margin: 0.6rem !important; max-width: none !important; }
+
+/* ---------- I2 · Detección de cámaras y lectura de caja ---------- */
+.discover-item { margin-top: 0.8rem; padding: 0.8rem; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.discover-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem; }
+.assign-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.4rem; align-items: center; }
+.assign-form input, .assign-form select { width: 100%; box-sizing: border-box; }
+.discover-note { margin-top: 1rem; font-size: 0.82rem; }
+main:has(.discover-grid) .discover-grid > .card { max-height: calc(100vh - var(--app-header) - 10rem); }
+.checkout-live { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 0.9rem; border-left: 4px solid var(--checkout, var(--muted)); }
+.checkout-live.level-verde { --checkout: var(--success); } .checkout-live.level-amarillo { --checkout: var(--warning); } .checkout-live.level-rojo { --checkout: var(--danger); }
+.checkout-live .checkout-ieo { font-family: "Space Grotesk", sans-serif; font-size: 2rem; font-weight: 700; color: var(--checkout, var(--muted)); }
+.checkout-live small { display: block; color: var(--muted); }
+
+/* ---------- H4 · Boleta con QR (pantalla e impresora térmica de 80 mm) ---------- */
+.receipt-wrap { max-width: 420px; margin: 0.5rem auto 2rem; }
+.receipt-actions { display: flex; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.8rem; }
+.receipt { padding: 1.2rem 1.1rem; border-radius: 14px; background: #ffffff; color: #111111; border: 1px dashed #c8ccd6; font-family: "Inter", "Segoe UI", sans-serif; box-shadow: var(--shadow); }
+.receipt header { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; padding-bottom: 0.6rem; border-bottom: 1px dashed #c8ccd6; text-align: center; }
+.receipt header strong { font-size: 1.1rem; }
+.receipt header small, .receipt footer small, .receipt-qr small { color: #4b5563; }
+.receipt-items { width: 100%; margin: 0.6rem 0; border-collapse: collapse; font-size: 0.88rem; }
+.receipt-items td { padding: 0.2rem 0; border: 0 !important; background: transparent !important; color: #111111 !important; }
+.receipt-items td:last-child { text-align: right; white-space: nowrap; }
+.receipt-totals { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.6rem; padding: 0.6rem 0; border-top: 1px dashed #c8ccd6; border-bottom: 1px dashed #c8ccd6; font-size: 0.9rem; }
+.receipt-totals span:nth-child(even), .receipt-totals strong:nth-child(even) { text-align: right; }
+.receipt-qr { padding-top: 0.8rem; text-align: center; }
+.receipt-qr p { margin: 0 0 0.3rem; }
+.receipt footer { margin-top: 0.6rem; text-align: center; }
+.kds-addon { display: inline-block; margin-left: 0.35rem; padding: 0.05rem 0.45rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 0.7rem; font-weight: 700; }
+.recent-paid { margin-top: 1rem; }
+.recent-paid .setting-row small { display: block; }
+@media print {
+    @page { size: 80mm auto; margin: 3mm; }
+    body * { visibility: hidden !important; }
+    .receipt, .receipt * { visibility: visible !important; }
+    .receipt { position: absolute; left: 0; top: 0; width: 74mm; border: 0; box-shadow: none; padding: 0; }
+    .no-print { display: none !important; }
+}

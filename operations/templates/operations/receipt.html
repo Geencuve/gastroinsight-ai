@@ -1,0 +1,36 @@
+﻿{% extends "base.html" %}
+{% load gi_format %}
+
+{% block title %}Boleta · Pedido #{{ order.id }} | GastroInsight AI{% endblock %}
+
+{% block content %}
+<div class="receipt-wrap">
+    <div class="receipt-actions no-print">
+        <a class="btn btn-secondary" href="{% url 'cashier:home' %}">← Caja</a>
+        <button class="btn btn-primary" type="button" onclick="window.print()">🖨️ Imprimir boleta</button>
+    </div>
+    <article class="receipt">
+        <header>
+            <strong>{{ venue.name }}</strong>
+            {% if venue.address %}<small>{{ venue.address }}</small>{% endif %}
+            <small>Mesa {{ table.code }} · Pedido #{{ order.id }}</small>
+            <small>{{ order.paid_at|date:"d-m-Y H:i" }}</small>
+        </header>
+        <table class="receipt-items">
+            {% for item in items %}<tr><td>{{ item.quantity }}× {{ item.dish_name }}</td><td>{{ item.line_total|clp }}</td></tr>{% endfor %}
+        </table>
+        <div class="receipt-totals">
+            <span>Subtotal</span><span>{{ order.subtotal|clp }}</span>
+            {% if order.discount_amount %}<span>Descuento</span><span>−{{ order.discount_amount|clp }}</span>{% endif %}
+            <strong>Total</strong><strong>{{ order.total|clp }}</strong>
+            {% if payment %}<span>Medio de pago</span><span>{{ payment }}</span>{% endif %}
+        </div>
+        <div class="receipt-qr">
+            <p><strong>¿Cómo estuvo tu visita?</strong></p>
+            <div class="qr-box">{{ qr_svg }}</div>
+            <small>Escanea para evaluar tu experiencia. Es anónimo, toma un minuto y es válido por 3 horas.</small>
+        </div>
+        <footer><small>Comprobante de consumo. No reemplaza la boleta electrónica del SII.</small></footer>
+    </article>
+</div>
+{% endblock %}

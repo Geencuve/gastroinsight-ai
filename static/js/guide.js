@@ -365,6 +365,7 @@
         "/caja/": "Mesas por cobrar con su termómetro de experiencia, calculado por mesa y nunca por persona. Tras el pago, imprime o muestra la boleta con el QR de evaluación.",
         "/supervisor/": "Operación en tiempo real, mediciones por cámara, calidad del servicio e infraestructura, organizadas en pestañas.",
         "/vision/": "Visión IA en un solo lugar. Las miniaturas son esquemas anónimos; si tu rol lo permite, tócalas para ver la cámara en vivo (no se graba y queda en la auditoría).",
+        "/gestion/camaras/detectar/": "Busca las cámaras conectadas o prueba una de red, y asígnala a una mesa, a la entrada o a la caja. No se guardan imágenes.",
         "/gestion/": "Crea al personal con rol, locales y zonas; administra mesas y cámaras. El botón 📱 QR genera el acceso al celular de un garzón.",
         "/monitoring/audit/": "Todas las acciones del sistema. Combina filtros por usuario, módulo, acción, local y fechas, y exporta el resultado a CSV.",
         "/monitoring/incidents/": "Problemas técnicos detectados por el sistema, como cámaras sin señal. Revísalos y márcalos como resueltos.",

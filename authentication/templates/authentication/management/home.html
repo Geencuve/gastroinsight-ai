@@ -101,13 +101,13 @@
 
     <div class="tab-panel mgmt-split" data-tab-panel>
         <section class="card mgmt-scroll">
-            <h2>Cámaras</h2>
+            <h2>Cámaras <a class="btn btn-small btn-primary" href="{% url 'management:camera_discover' %}" style="float: right;">🔍 Detectar cámaras</a></h2>
             <div class="table-responsive">
                 <table>
                     <thead><tr><th>Cámara</th><th>Local</th><th>Mesa</th><th>Zona</th><th>Tipo</th><th>Estado</th></tr></thead>
                     <tbody>
                         {% for c in cameras %}
-                            <tr><td><strong>{{ c.name }}</strong>{% if c.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}</td><td>{{ c.venue.name }}</td>
+                            <tr><td><strong>{{ c.name }}</strong>{% if c.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}{% if c.is_checkout %} <span class="tag-synthetic">caja</span>{% endif %}</td><td>{{ c.venue.name }}</td>
                                 <td>{{ c.table.code|default:"—" }}</td><td>{{ c.zone_name|default:"—" }}</td><td>{{ c.get_source_type_display }}</td>
                                 <td>{% if c.is_active %}Activa{% else %}<span class="muted">Inactiva</span>{% endif %}</td></tr>
                         {% empty %}

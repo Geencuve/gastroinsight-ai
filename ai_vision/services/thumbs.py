@@ -1,4 +1,4 @@
-﻿"""Datos de las miniaturas esquemáticas por cámara (coordenadas y métricas; nunca imágenes)."""
+"""Datos de las miniaturas esquemáticas por cámara (coordenadas y métricas; nunca imágenes)."""
 
 
 def camera_thumbs(venues, zones=None, limit=None):
@@ -17,7 +17,7 @@ def camera_thumbs(venues, zones=None, limit=None):
             "attention_pct": row["attention_pct"], "people": row["people"], "scene_people": row["scene_people"],
             "latency_ms": row["latency_ms"], "boxes": last.get("scene_boxes") or [],
             "occupancy": float(last["occupancy"]) if last.get("occupancy") is not None else None,
-            "is_entrance": camera.is_entrance, "synthetic": row["synthetic"],
+            "is_entrance": camera.is_entrance, "is_checkout": camera.is_checkout, "synthetic": row["synthetic"],
             "running": AnalysisSession.objects.filter(camera=camera, status=AnalysisSession.Status.RUNNING).exists(),
         })
         if limit and len(items) >= limit:

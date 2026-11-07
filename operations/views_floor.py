@@ -115,6 +115,13 @@ def session_token(session):
 def session_qr(request, session_id):
     session = get_object_or_404(ServiceSession.objects.select_related("table__venue"), pk=session_id,
                                 table__venue__in=_venues(request))
+    from sales.models import Order as _Order
+
+    last_paid = _Order.objects.filter(service_session=session, status=_Order.Status.PAID).order_by("-paid_at").first()
+    if last_paid is None:
+        messages.info(request, "El código de evaluación se entrega con la boleta, cuando la mesa paga.")
+        return redirect("floor:map")
+    return redirect("cashier:receipt", order_id=last_paid.id)
     url = request.build_absolute_uri(reverse("feedback:session_form", args=[session_token(session)]))
     svg = segno.make(url, error="m").svg_inline(omitsize=True, scale=8, dark="#111111", light="#ffffff")
     return render(request, "operations/session_qr.html", {
@@ -161,6 +168,12 @@ def session_feedback(request, token):
         raise Http404("Código de opinión no válido.")
 
     venue = session.table.venue
+    if not _paid(session):
+        from django.urls import reverse as _reverse
+
+        return render(request, "operations/session_feedback.html", {
+            "unpaid": True, "table": session.table, "venue": venue,
+            "menu_url": _reverse("menus:public", args=[venue.id])})
     context = {"session": session, "table": session.table, "venue": venue,
                "menu_url": reverse("menus:public", args=[venue.id])}
     if SatisfactionEvaluation.objects.filter(service_session=session,
@@ -199,7 +212,21 @@ def cashier(request):
         items.append({"session": session, "orders": pending, "minutes": minutes_between(session.started_at, now),
                       "thermo": thermometer(session, now)})
     items.sort(key=lambda item: (item["session"].bill_requested_at is None, -(item["minutes"] or 0)))
-    return render(request, "operations/cashier.html", {"items": items})
+    from ai_vision.services.checkout import checkout_at_payment, live_checkout
+    from cameras.models import Camera as _Camera
+
+    _ctx = {"items": items}
+    _scope = _venues(request)
+    from datetime import timedelta as _td
+    from django.utils import timezone as _tz
+
+    _recent = (Order.objects.filter(service_session__table__venue__in=_scope, status=Order.Status.PAID,
+                                    paid_at__gte=_tz.now() - _td(hours=1))
+               .select_related("service_session__table").order_by("-paid_at")[:8])
+    _ctx["recent"] = [(o, checkout_at_payment(o)) for o in _recent]
+    _ctx["checkout_camera"] = _Camera.objects.filter(venue__in=_scope, is_checkout=True, is_active=True).exists()
+    _ctx["checkout_live"] = live_checkout(_scope)
+    return render(request, "operations/cashier.html", _ctx)
 
 
 @login_required
@@ -212,3 +239,60 @@ def deliver_ready(request, session_id):
     count = mark_delivered(session)
     messages.success(request, f"{count} plato(s) entregados en la mesa {session.table.code}.")
     return redirect("floor:map")
+
+
+# ---------------- Boleta con QR de evaluación (H4) ----------------
+def _paid(session):
+    from sales.models import Order as _Order
+
+    return _Order.objects.filter(service_session=session, status=_Order.Status.PAID).exists()
+
+
+@login_required
+def receipt(request, order_id):
+    import segno
+    from django.contrib import messages as _messages
+    from django.shortcuts import get_object_or_404 as _get, redirect as _redirect
+    from django.urls import reverse as _reverse
+    from django.utils.safestring import mark_safe as _safe
+
+    from sales.models import Order as _Order, OrderItem as _Item
+
+    from .services.pairing import base_url
+
+    order = _get(_Order.objects.select_related("service_session__table__venue"), pk=order_id,
+                 service_session__table__venue__in=_venues(request))
+    if order.status != _Order.Status.PAID:
+        _messages.info(request, "La boleta y el código de evaluación se generan cuando el pedido está pagado.")
+        return _redirect("cashier:home")
+    session = order.service_session
+    root, _ = base_url(request)
+    url = root + _reverse("feedback:session_form", args=[session_token(session)])
+    payment = order.get_payment_method_display() if getattr(order, "payment_method", "") else ""
+    return render(request, "operations/receipt.html", {
+        "order": order, "session": session, "table": session.table, "venue": session.table.venue,
+        "items": _Item.objects.filter(order=order), "payment": payment, "url": url,
+        "qr_svg": _safe(segno.make(url, error="m").svg_inline(omitsize=True, scale=5, dark="#111111", light="#ffffff")),
+    })
+
+
+def table_feedback(request, token):
+    """QR por mesa: lleva al formulario solo si la atención ya se pagó; si no, explica que es con la boleta."""
+    from django.core import signing as _signing
+    from django.http import Http404 as _Http404
+    from django.shortcuts import redirect as _redirect
+    from django.urls import reverse as _reverse
+
+    from .feedback import feedback_session, table_from_token
+    from .models import RestaurantTable as _Table
+
+    try:
+        table = table_from_token(token)
+    except (_signing.BadSignature, ValueError, _Table.DoesNotExist):
+        raise _Http404("Código no válido.")
+    session = feedback_session(table)
+    if session is not None and _paid(session):
+        return _redirect("feedback:session_form", token=session_token(session))
+    return render(request, "operations/session_feedback.html", {
+        "unpaid": True, "table": table, "venue": table.venue, "menu_url": _reverse("menus:public", args=[table.venue_id]),
+    })

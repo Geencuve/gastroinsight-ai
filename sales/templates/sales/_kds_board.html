@@ -1,11 +1,11 @@
-﻿<div class="kds-columns">
+<div class="kds-columns">
     {% for column in columns %}
         <section class="kds-column">
             <h2>{{ column.title }} <span>{{ column.cards|length }}</span></h2>
             {% for card in column.cards %}
                 <article class="kds-ticket level-{{ card.level }}">
                     <header><strong>Mesa {{ card.table.code }}</strong><span class="kds-time">{{ card.minutes }} min</span></header>
-                    <p class="kds-order">Pedido #{{ card.order.id }}</p>
+                    <p class="kds-order">Pedido #{{ card.order.id }}{% if card.addon %}<span class="kds-addon">➕ Agregado</span>{% endif %}</p>
                     <ul>{% for item in card.items %}<li><strong>{{ item.quantity }}×</strong> {{ item.dish_name }}</li>{% endfor %}</ul>
                     {% if card.order.notes %}<p class="kds-notes">📝 {{ card.order.notes }}</p>{% endif %}
                     <form method="post" action="{{ advance_url }}">{% csrf_token %}

@@ -60,6 +60,7 @@ class FloorAndCashierTests(TestCase):
         self.assertGreaterEqual((session.started_at - session.arrived_at).total_seconds(), 11 * 60)
 
     def test_qr_por_atencion_guarda_infraestructura_una_sola_vez(self):
+        self._order(Order.Status.PAID)
         url = f"/opinion/atencion/{session_token(self.session)}/"
         self.assertContains(self.client.get(url), "precio-calidad")
         data = {"rating": "4", "value_rating": "5", "return_intent": "yes", "cleanliness_rating": "5",

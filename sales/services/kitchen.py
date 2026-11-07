@@ -1,4 +1,4 @@
-﻿"""Pantallas de comandas (KDS) de cocina y barra, y aceptación agregada por plato o bebida."""
+"""Pantallas de comandas (KDS) de cocina y barra, y aceptación agregada por plato o bebida."""
 from collections import OrderedDict, defaultdict
 from datetime import timedelta
 from statistics import mean
@@ -51,15 +51,23 @@ def queue(venues, station, now=None):
     for item in items:
         if station_for(item) != station:
             continue
-        key = (item.prep_status, item.order_id)
+        confirmed = item.order.confirmed_at
+        # «Agregado»: creado después de confirmar Y el pedido ya tenía platos de antes de la confirmación.
+        first = (OrderItem.objects.filter(order_id=item.order_id).order_by("created_at")
+                 .values_list("created_at", flat=True).first())
+        addon = bool(confirmed and item.created_at and first
+                     and (item.created_at - confirmed).total_seconds() > 5
+                     and (first - confirmed).total_seconds() <= 5)
+        key = (item.prep_status, item.order_id, addon)
         card = groups.setdefault(key, {"order": item.order, "table": item.order.service_session.table,
-                                       "status": item.prep_status, "since": _since(item), "items": [], "ids": []})
+                                       "status": item.prep_status, "addon": addon,
+                                       "since": item.created_at if addon else _since(item), "items": [], "ids": []})
         card["items"].append(item)
         card["ids"].append(item.id)
 
     columns = []
     for status, title in COLUMNS:
-        cards = sorted((c for (s, _), c in groups.items() if s == status), key=lambda c: c["since"] or now)
+        cards = sorted((c for key, c in groups.items() if key[0] == status), key=lambda c: c["since"] or now)
         for card in cards:
             card["minutes"] = _minutes(card["since"], now)
             card["level"] = "late" if card["minutes"] >= config["late"] else "warn" if card["minutes"] >= config["warn"] else "ok"

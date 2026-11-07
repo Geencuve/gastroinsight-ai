@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Visión IA | GastroInsight AI{% endblock %}
 
@@ -75,7 +75,7 @@
                 `<div class="thumb-chips"><span class="thumb-chip">${d.live ? "● En vivo" : esc(d.status)}</span><span class="thumb-chip">IEO ${d.ieo ?? "—"}</span></div>`;
             const people = d.scene_people ?? d.people;
             card.querySelector("footer").innerHTML =
-                `<div><strong>${esc(d.name)}</strong><small>${d.is_entrance ? "Entrada" : "Mesa " + esc(d.table)} · ${esc(d.zone || "Sin zona")}</small></div>` +
+                `<div><strong>${esc(d.name)}</strong><small>${d.is_checkout ? "Caja" : d.is_entrance ? "Entrada" : "Mesa " + esc(d.table)} · ${esc(d.zone || "Sin zona")}</small></div>` +
                 `<small>${people != null ? Math.round(people) + " pers." : "—"}</small>`;
         }
 

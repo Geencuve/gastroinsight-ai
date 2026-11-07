@@ -12,4 +12,5 @@ urlpatterns = [
     path("personal/<int:user_id>/qr/", views_management.staff_qr, name="staff_qr"),
     path("mesas/nueva/", views_management.table_create, name="table_create"),
     path("camaras/nueva/", views_management.camera_create, name="camera_create"),
+    path("camaras/detectar/", views_management.camera_discover, name="camera_discover"),
 ]

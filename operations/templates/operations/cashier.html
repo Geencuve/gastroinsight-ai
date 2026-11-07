@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load gi_format %}
 
 {% block title %}Caja | GastroInsight AI{% endblock %}
@@ -10,6 +10,17 @@
         <p class="muted">Mesas por cobrar con su termómetro de experiencia, calculado por mesa con tiempos y métricas agregadas.</p>
     </div>
 </section>
+{% if checkout_camera %}
+    <section class="card checkout-live{% if checkout_live %} level-{{ checkout_live.level }}{% endif %}">
+        <div><strong>🎥 Cliente en caja ahora</strong><small>Último minuto frente a la caja · agregado, sin identificar a nadie</small></div>
+        {% if checkout_live %}
+            <span class="checkout-ieo">{{ checkout_live.ieo|default_if_none:"—" }}</span>
+            <div><small>IBE {{ checkout_live.ibe|default_if_none:"—" }} · atención {{ checkout_live.attention_pct|default_if_none:"—" }}% · {{ checkout_live.faces }} rostro(s)</small></div>
+        {% else %}
+            <span class="muted">Sin lecturas recientes. Inicia el análisis de la cámara de caja.</span>
+        {% endif %}
+    </section>
+{% endif %}
 <div class="cashier-grid">
     {% for item in items %}
         <article class="card cashier-card thermo-{{ item.thermo.level }}">
@@ -25,10 +36,24 @@
             <div class="cashier-orders">
                 {% for o in item.orders %}<a class="btn btn-small btn-primary" href="{% url 'sales:order_detail' o.id %}">Cobrar pedido #{{ o.id }} · {{ o.total|clp }}</a>{% endfor %}
             </div>
-            <a class="btn btn-small" href="{% url 'floor:session_qr' item.session.id %}">QR de opinión</a>
+            <p class="muted">El código de evaluación se imprime en la boleta al pagar.</p>
         </article>
     {% empty %}
         <p class="muted">No hay mesas por cobrar en este momento.</p>
     {% endfor %}
 </div>
+{% if recent %}
+    <section class="card recent-paid">
+        <h2>🧾 Pagados en la última hora</h2>
+        {% for o, reading in recent %}
+            <div class="setting-row">
+                <div>
+                    <strong>Mesa {{ o.service_session.table.code }} · Pedido #{{ o.id }}</strong>
+                    <small>{{ o.paid_at|date:"H:i" }} · {{ o.total }}{% if reading and reading.ieo is not None %} · 💵 IEO en caja al pagar: {{ reading.ieo }}{% endif %}</small>
+                </div>
+                <a class="btn btn-small btn-primary" href="{% url 'cashier:receipt' o.id %}">🧾 Boleta con QR</a>
+            </div>
+        {% endfor %}
+    </section>
+{% endif %}
 {% endblock %}

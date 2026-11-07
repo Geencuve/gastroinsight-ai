@@ -34,7 +34,7 @@
                 <tbody>
                     {% for c in cameras %}
                         <tr>
-                            <td>{{ c.camera.name }}{% if c.camera.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}{% if c.synthetic %} <span class="tag-synthetic">sintético</span>{% endif %}</td>
+                            <td>{{ c.camera.name }}{% if c.camera.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}{% if c.camera.is_checkout %} <span class="tag-synthetic">caja</span>{% endif %}{% if c.synthetic %} <span class="tag-synthetic">sintético</span>{% endif %}</td>
                             <td>{{ c.table }}</td>
                             <td>{% if c.live %}<span class="live-dot"></span>{% endif %}{{ c.status }}</td>
                             <td>{{ c.readings }}</td>

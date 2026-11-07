@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -24,4 +24,4 @@ class InterfaceHelpTests(TestCase):
         profile.role = Profile.Role.PLATFORM_ADMIN
         profile.save()
         self.client.force_login(user)
-        self.assertContains(self.client.get("/"), "js/guide.js' %}" if False else "js/guide.js?v=6")
+        self.assertRegex(self.client.get("/").content.decode(), r"js/guide\.js\?v=\d+")

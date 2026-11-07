@@ -1,4 +1,4 @@
-﻿from django import forms
+from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
@@ -114,9 +114,9 @@ class TableForm(forms.ModelForm):
 class CameraForm(forms.ModelForm):
     class Meta:
         model = Camera
-        fields = ["name", "venue", "source_type", "source", "table", "zone_name", "is_entrance", "is_active"]
+        fields = ["name", "venue", "source_type", "source", "table", "zone_name", "is_entrance", "is_checkout", "is_active"]
         labels = {"name": "Nombre", "venue": "Local", "source_type": "Tipo de fuente", "source": "Fuente (0 = webcam)",
-                  "table": "Mesa", "zone_name": "Zona", "is_entrance": "Cámara de entrada", "is_active": "Activa"}
+                  "table": "Mesa", "zone_name": "Zona", "is_entrance": "Cámara de entrada", "is_checkout": "Cámara de caja", "is_active": "Activa"}
 
     def __init__(self, *args, venues=None, **kwargs):
         super().__init__(*args, **kwargs)

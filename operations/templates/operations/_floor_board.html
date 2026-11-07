@@ -25,7 +25,7 @@
                                 <form method="post" action="{% url 'floor:toggle_bill' c.session.id %}">{% csrf_token %}
                                     <button class="btn btn-small" type="submit">{% if c.session.bill_requested_at %}Quitar cuenta{% else %}🧾 Pidió la cuenta{% endif %}</button>
                                 </form>
-                                <a class="btn btn-small" href="{% url 'floor:session_qr' c.session.id %}">QR</a>
+                                {% if c.state == "por_cerrar" %}<a class="btn btn-small" href="{% url 'floor:session_qr' c.session.id %}">🧾 Boleta / QR</a>{% endif %}
                                 {% if c.state == "por_cerrar" %}
                                     <form method="post" action="{% url 'operations:session_close' c.session.id %}">{% csrf_token %}
                                         <button class="btn btn-small btn-primary" type="submit">Cerrar mesa</button>

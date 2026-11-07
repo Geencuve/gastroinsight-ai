@@ -408,6 +408,7 @@ class Notification(models.Model):
         WAITING = "waiting", "Mesa sin atención"
         READY = "ready", "Platos listos"
         BILL = "bill", "Cuenta solicitada"
+        CHECKOUT = "checkout", "Experiencia en caja"
 
     venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="notifications", verbose_name="Local")
     table = models.ForeignKey("operations.RestaurantTable", on_delete=models.SET_NULL, null=True, blank=True,

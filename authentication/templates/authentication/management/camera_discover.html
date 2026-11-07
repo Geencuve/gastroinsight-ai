@@ -1,0 +1,63 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Detectar cámaras | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🔍 Detectar y asignar cámaras</h1>
+        <p class="muted">Busca las cámaras conectadas a este equipo o prueba una cámara de red, y asígnala a una mesa, a la entrada o a la caja.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'management:home' %}">← Centro de gestión</a>
+</section>
+
+<div class="mgmt-split discover-grid">
+    <section class="card mgmt-scroll">
+        <h2>📷 Cámaras conectadas a este equipo</h2>
+        <p class="muted">Se prueba cada dispositivo de video sin guardar imágenes. Una cámara en uso por un análisis no responde hasta que termine.</p>
+        <a class="btn btn-primary" href="?buscar=1">🔍 Buscar cámaras</a>
+        {% if busy %}<p class="muted">En uso por un análisis: {% for c in busy %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+        {% if searched %}
+            {% for d in devices %}
+                <article class="discover-item">
+                    <div class="discover-head">
+                        <strong>{{ d.label }}</strong>
+                        <span class="role-badge">{{ d.resolution }}</span>
+                        {% if d.working %}<span class="tag-synthetic">responde</span>{% else %}<span class="table-alert">sin imagen</span>{% endif %}
+                    </div>
+                    {% if d.registered %}
+                        <p class="muted">Ya registrada como «{{ d.registered.name }}»{% if d.registered.table %} · mesa {{ d.registered.table.code }}{% endif %}{% if d.registered.is_entrance %} · entrada{% endif %}{% if d.registered.is_checkout %} · caja{% endif %}.</p>
+                    {% else %}
+                        {% include "authentication/management/_camera_assign.html" with source=d.source suggested=d.label %}
+                    {% endif %}
+                </article>
+            {% empty %}
+                <p class="muted">No se encontraron cámaras. Revisa que estén conectadas y que ningún otro programa las esté usando.</p>
+            {% endfor %}
+        {% endif %}
+    </section>
+
+    <section class="card mgmt-scroll">
+        <h2>🌐 Cámara de red (IP)</h2>
+        <form method="post" class="mgmt-form">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="probar">
+            <label for="cam-url">Dirección de la cámara</label>
+            <input id="cam-url" type="text" name="url" placeholder="rtsp://usuario:clave@192.168.1.50:554/stream1" required>
+            <small class="muted">Solo se aceptan direcciones rtsp, http o https. La prueba espera como máximo 4 segundos.</small>
+            <button class="btn btn-primary" type="submit">Probar conexión</button>
+        </form>
+        {% if tested %}
+            <article class="discover-item">
+                <div class="discover-head">
+                    <strong>Resultado</strong><span class="role-badge">{{ tested.resolution }}</span>
+                    {% if tested.working %}<span class="tag-synthetic">responde</span>{% else %}<span class="table-alert">no responde</span>{% endif %}
+                </div>
+                {% if tested.registered %}<p class="muted">Ya registrada como «{{ tested.registered.name }}».</p>
+                {% elif tested.working %}{% include "authentication/management/_camera_assign.html" with source=tested.source suggested="Cámara IP" %}{% endif %}
+            </article>
+        {% endif %}
+        <p class="muted discover-note">ℹ️ Una cámara solo se analiza si el local tiene una política de privacidad habilitada y una autorización vigente, con aviso visible al público.</p>
+    </section>
+</div>
+{% endblock %}
