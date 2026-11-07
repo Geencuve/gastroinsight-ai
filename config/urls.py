@@ -22,6 +22,8 @@ urlpatterns = [
     path("opinion/", include("operations.feedback_urls", namespace="feedback")),
     path("sala/", include("operations.floor_urls")),
     path("caja/", include("operations.cashier_urls")),
+    path("notificaciones/", include("operations.alerts_urls")),
+    path("garzon/", include("operations.waiter_urls")),
     path("supervisor/", include("operations.supervisor_urls")),
     path("cocina/", include(("sales.kds_urls", "kds"), namespace="kitchen")),
     path("barra/", include(("sales.kds_urls", "kds"), namespace="bar")),

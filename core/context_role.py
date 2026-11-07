@@ -1,4 +1,4 @@
-﻿from authentication.permissions import get_or_create_profile
+from authentication.permissions import get_or_create_profile
 from authentication.roles import allowed_prefixes, home_for
 
 
@@ -9,5 +9,10 @@ def role_scope(request):
     from assistant_chat.role_scope import chips_for
 
     profile = get_or_create_profile(request.user)
+    from django.urls import reverse
+
+    from operations.services.notifications import kinds_for
+
     return {"gi_role_scope": allowed_prefixes(profile), "gi_role_home": home_for(profile),
-            "gi_role_label": profile.get_role_display(), "gi_sazon_chips": chips_for(profile)}
+            "gi_role_label": profile.get_role_display(), "gi_sazon_chips": chips_for(profile),
+            "gi_alerts_url": reverse("alerts:feed") if kinds_for(profile) else ""}

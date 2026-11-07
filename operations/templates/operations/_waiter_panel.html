@@ -1,0 +1,31 @@
+﻿<div class="waiter-grid">
+    <section class="waiter-alerts">
+        {% for a in alerts %}
+            <article class="alert-card level-{{ a.level }}">
+                <span class="alert-icon">{{ a.icon }}</span>
+                <div class="alert-body">
+                    <strong>{{ a.title }}</strong>
+                    <small>{{ a.message }} · hace {{ a.minutes }} min</small>
+                </div>
+                <form method="post" action="{{ a.ack_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Voy</button></form>
+            </article>
+        {% empty %}
+            <div class="waiter-empty">✅ Todo en orden. Te avisaremos cuando una mesa te necesite.</div>
+        {% endfor %}
+        {% if recent %}
+            <p class="waiter-recent">Atendidas recientemente: {% for n in recent %}{{ n.title }}{% if n.acknowledged_by %} ({{ n.acknowledged_by.first_name|default:n.acknowledged_by.username }}){% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+        {% endif %}
+    </section>
+    <section class="waiter-tables">
+        <div class="floor-summary">{% for label, css, count in counts %}{% if count %}<span class="floor-chip state-{{ css }}"><i></i>{{ label }} <strong>{{ count }}</strong></span>{% endif %}{% endfor %}<span class="floor-chip">⏳ Esperando mesa <strong>{{ waitlist|length }}</strong></span></div>
+        <div class="mini-tables">
+            {% for c in cards %}
+                <a class="mini-table state-{{ c.css }}" href="{% url 'floor:map' %}" title="{{ c.state_label }}">
+                    <strong>{{ c.table.code }}</strong>
+                    <small>{{ c.state_label }}</small>
+                    {% if c.alerts %}<span class="mini-badge">{{ c.alerts|length }}</span>{% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+</div>

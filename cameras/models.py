@@ -61,6 +61,10 @@ class Camera(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    is_entrance = models.BooleanField(default=False, verbose_name="Cámara de entrada",
+                                      help_text="Cuenta a las personas que ingresan al local (YOLO26).")
+
     class Meta:
         ordering = ["venue__name", "name"]
         verbose_name = "Cámara"

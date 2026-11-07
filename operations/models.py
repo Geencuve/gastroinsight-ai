@@ -395,3 +395,39 @@ class InfrastructureReport(models.Model):
 
     def __str__(self):
         return f"{self.get_area_display()}: {self.description}"
+
+
+class Notification(models.Model):
+    """Alerta para el equipo del local: atención, disconformidad, aprobación, ingresos y servicio."""
+
+    class Kind(models.TextChoices):
+        ATTENTION = "attention", "Busca atención"
+        DISCOMFORT = "discomfort", "Señal de disconformidad"
+        APPROVAL = "approval", "Señal de aprobación"
+        ARRIVAL = "arrival", "Ingreso de comensales"
+        WAITING = "waiting", "Mesa sin atención"
+        READY = "ready", "Platos listos"
+        BILL = "bill", "Cuenta solicitada"
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="notifications", verbose_name="Local")
+    table = models.ForeignKey("operations.RestaurantTable", on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name="notifications", verbose_name="Mesa")
+    kind = models.CharField(max_length=20, choices=Kind.choices, verbose_name="Tipo")
+    level = models.CharField(max_length=10, default="info",
+                             choices=[("info", "Información"), ("success", "Positiva"), ("warning", "Atención"), ("danger", "Urgente")],
+                             verbose_name="Nivel")
+    title = models.CharField(max_length=120, verbose_name="Título")
+    message = models.CharField(max_length=255, blank=True, verbose_name="Detalle")
+    dedupe_key = models.CharField(max_length=120, db_index=True, verbose_name="Clave de duplicado")
+    created_at = models.DateTimeField(default=timezone.now, db_index=True, verbose_name="Fecha")
+    acknowledged_at = models.DateTimeField(null=True, blank=True, verbose_name="Atendida")
+    acknowledged_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                        verbose_name="Atendida por")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Notificación"
+        verbose_name_plural = "Notificaciones"
+
+    def __str__(self):
+        return self.title

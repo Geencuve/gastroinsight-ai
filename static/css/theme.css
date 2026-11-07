@@ -778,3 +778,46 @@ html[data-theme] .legal-disclaimer { margin-top: 2rem; padding-top: 1rem; border
 .acc-compare div span { display: block; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .acc-compare strong { font-family: "Space Grotesk", sans-serif; font-size: 1.6rem; color: var(--text-strong); }
 @media (max-width: 980px) { .supervisor-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Avisos flotantes y vista del garzón ---------- */
+.toast-stack { position: fixed; top: 4.6rem; right: 1rem; z-index: 2500; display: flex; flex-direction: column; gap: 0.5rem; width: min(380px, calc(100vw - 2rem)); }
+.toast { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.8rem 0.9rem; border-radius: 14px; background: var(--surface);
+         border: 1px solid var(--border); border-left: 5px solid var(--lvl, var(--info)); box-shadow: var(--shadow); animation: toast-in 0.25s ease; }
+.toast.is-leaving { opacity: 0; transform: translateX(20px); transition: all 0.25s ease; }
+.toast-icon { font-size: 1.4rem; line-height: 1; }
+.toast-body { flex: 1; min-width: 0; }
+.toast-body strong { display: block; color: var(--text-strong); font-size: 0.92rem; }
+.toast-body small { color: var(--muted); font-size: 0.8rem; }
+.toast-actions { display: flex; align-items: center; gap: 0.3rem; }
+.toast-close { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 0.9rem; }
+.level-danger { --lvl: var(--danger); } .level-warning { --lvl: var(--warning); } .level-info { --lvl: var(--info); } .level-success { --lvl: var(--success); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.notif-bell { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; text-decoration: none; font-size: 1.05rem; }
+.notif-bell:hover { background: var(--surface-2); }
+.notif-bell span { position: absolute; top: 1px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #ffffff; font-size: 0.68rem; font-weight: 700; display: grid; place-items: center; }
+.waiter-app { display: flex; flex-direction: column; gap: 0.8rem; height: calc(100vh - 7.5rem); min-height: 480px; }
+.waiter-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.waiter-head h1 { margin: 0; }
+.waiter-head p { margin: 0.15rem 0 0; }
+#waiter-panel { flex: 1; min-height: 0; }
+.waiter-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1rem; height: 100%; }
+.waiter-alerts, .waiter-tables { min-height: 0; overflow-y: auto; padding: 0.8rem; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
+.alert-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem; margin-bottom: 0.6rem; border-radius: 14px; background: var(--surface-2); border-left: 5px solid var(--lvl, var(--info)); }
+.alert-card .alert-icon { font-size: 1.6rem; }
+.alert-body { flex: 1; min-width: 0; }
+.alert-body strong { display: block; color: var(--text-strong); }
+.alert-body small { color: var(--muted); }
+.alert-card form { margin: 0; }
+.alert-card .btn { min-width: 72px; min-height: 44px; }
+.waiter-empty { padding: 2rem 1rem; text-align: center; color: var(--muted); }
+.waiter-recent { margin: 0.6rem 0 0; font-size: 0.78rem; color: var(--muted); }
+.mini-tables { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 0.5rem; }
+.mini-table { position: relative; display: flex; flex-direction: column; gap: 0.15rem; padding: 0.6rem; border-radius: 12px; background: var(--surface-2);
+              border: 1px solid var(--border); border-top: 4px solid var(--state); text-decoration: none; color: var(--text); }
+.mini-table small { font-size: 0.7rem; color: var(--muted); }
+.mini-badge { position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 999px; background: var(--danger); color: #ffffff; font-size: 0.7rem; font-weight: 700; display: grid; place-items: center; }
+@media (max-width: 760px) {
+    .waiter-app { height: auto; }
+    .waiter-grid { grid-template-columns: 1fr; height: auto; }
+    .waiter-alerts, .waiter-tables { overflow: visible; }
+}

@@ -1,4 +1,4 @@
-﻿import time
+import time
 from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
@@ -92,7 +92,7 @@ class FloorAndCashierTests(TestCase):
         self.assertContains(self.client.get("/caja/"), "Experiencia en riesgo")
 
     def test_mesero_y_caja_llegan_a_su_seccion(self):
-        for role, home in ((Profile.Role.WAITER, "/sala/"), (Profile.Role.CASHIER, "/caja/")):
+        for role, home in ((Profile.Role.WAITER, "/garzon/"), (Profile.Role.CASHIER, "/caja/")):
             user = User.objects.create_user(f"u_{role}", password="Test12345!")
             profile, _ = Profile.objects.get_or_create(user=user)
             profile.role = role

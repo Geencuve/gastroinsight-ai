@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=15">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=16">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -40,7 +40,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body data-alerts-url="{{ gi_alerts_url|default:'' }}">
     <header class="site-header">
         <div class="brand">
             <a href="{% url 'core:home' %}">GastroInsight AI</a>
@@ -53,6 +53,7 @@
                     <div class="nav-menu">
                         <a href="{% url 'operations:session_list' %}">Atención de mesas</a>
                         <a href="{% url 'sales:order_list' %}">Pedidos y ventas</a>
+                        <a href="{% url 'waiter:home' %}">🔔 Mis alertas</a>
                         <a href="{% url 'floor:map' %}">🗺️ Mapa de sala</a>
                         <a href="{% url 'cashier:home' %}">💵 Caja</a>
                         <a href="{% url 'kitchen:home' %}">👨‍🍳 Cocina</a>
@@ -93,6 +94,7 @@
                     </div>
                 </details>
                 <a href="{% url 'assistant_chat:staff_chat' %}">✨ {{ assistant_name }}</a>
+                {% if gi_alerts_url %}<a class="notif-bell" href="{% url 'waiter:home' %}" title="Mis alertas" aria-label="Mis alertas">🔔<span id="notif-count" hidden></span></a>{% endif %}
                 <details class="nav-group user-menu">
                     <summary aria-label="Menú de usuario">
                         <span class="user-avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
@@ -230,6 +232,7 @@
     </script>
     <script src="{% static 'js/main.js' %}?v=9"></script>
     <script src="{% static 'js/guide.js' %}?v=5"></script>
+    {% if gi_alerts_url %}<script src="{% static 'js/alerts.js' %}?v=1"></script>{% endif %}
     {% block extra_js %}{% endblock %}
 {% if gi_role_scope %}{{ gi_role_scope|json_script:"gi-role-scope" }}
     <script>

@@ -93,3 +93,11 @@ class EnvironmentReadingAdmin(admin.ModelAdmin):
 class InfrastructureReportAdmin(admin.ModelAdmin):
     list_display = ("area", "description", "venue", "status", "created_at")
     list_filter = ("area", "status")
+
+from .models import Notification  # noqa: E402
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("title", "kind", "level", "venue", "created_at", "acknowledged_by")
+    list_filter = ("kind", "level")

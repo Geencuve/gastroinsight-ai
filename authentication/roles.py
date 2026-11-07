@@ -12,22 +12,22 @@ MANAGERS = {PLATFORM_ADMIN, VENUE_ADMIN}
 FULL_OPERATION = MANAGERS | {SUPERVISOR, OPERATOR}
 
 # Secciones comunes a todo el personal
-COMMON_PREFIXES = ["/auth/", "/legal/", "/assistant/staff/", "/static/", "/media/", "/primer-uso/"]
+COMMON_PREFIXES = ["/auth/", "/legal/", "/assistant/staff/", "/static/", "/media/", "/primer-uso/", "/notificaciones/"]
 
 # Roles restringidos: rutas que pueden abrir. Los roles que no aparecen aquí no se restringen
 # (administradores, operador y visualizador mantienen los permisos de sus propias vistas).
 ROLE_PREFIXES = {
-    WAITER: ["/operations/sessions/", "/sales/", "/operations/evaluations/", "/opinion/", "/menus/", "/sala/"],
+    WAITER: ["/garzon/", "/operations/sessions/", "/sales/", "/operations/evaluations/", "/opinion/", "/menus/", "/sala/"],
     KITCHEN: ["/cocina/", "/menus/"],
     BAR: ["/barra/", "/menus/"],
     CASHIER: ["/caja/", "/sala/", "/sales/", "/operations/sessions/", "/operations/evaluations/", "/opinion/"],
     SUPERVISOR: ["/operations/", "/sales/", "/opinion/", "/menus/", "/ai/monitor/", "/ai/sessions/", "/cameras/",
                  "/analytics/", "/reports/", "/promociones/", "/monitoring/incidents/",
-                 "/sala/", "/cocina/", "/barra/", "/caja/", "/supervisor/"],
+                 "/sala/", "/cocina/", "/barra/", "/caja/", "/supervisor/", "/garzon/"],
 }
 
 # Página de inicio de cada rol restringido (se completa en las fases B y C)
-ROLE_HOME = {WAITER: "/sala/", KITCHEN: "/cocina/", BAR: "/barra/", CASHIER: "/caja/", SUPERVISOR: "/supervisor/"}
+ROLE_HOME = {WAITER: "/garzon/", KITCHEN: "/cocina/", BAR: "/barra/", CASHIER: "/caja/", SUPERVISOR: "/supervisor/"}
 
 # Lista que muestra Mi perfil: (etiqueta, roles que la tienen)
 PROFILE_CAPABILITIES = [
