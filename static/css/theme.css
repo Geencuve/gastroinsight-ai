@@ -1085,3 +1085,54 @@ html[data-theme] .table-responsive { overflow-x: auto; -webkit-overflow-scrollin
 @media (max-width: 420px) {
     html[data-theme] .kpi-grid, html[data-theme] .thumb-grid, html[data-theme] .filter-bar { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   I1 · Barra lateral rediseñada (normal y compacta)
+   ========================================================= */
+html[data-theme] .app-sidebar { padding: 0.55rem 0.55rem 0.65rem !important; }
+.side-scroll { scrollbar-width: none; }
+.side-scroll::-webkit-scrollbar { width: 0; }
+.app-sidebar:hover .side-scroll { scrollbar-width: thin; }
+html[data-theme] .side-link { position: relative; gap: 0.6rem; padding: 0.32rem 0.45rem !important; min-height: 36px; border-radius: 11px; }
+html[data-theme] .side-link > span {
+    width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 9px;
+    font-size: 0.95rem; line-height: 1; background: var(--surface-2);
+}
+html[data-theme] .side-link:hover > span { background: var(--surface-3); }
+html[data-theme] .side-link.is-active { background: var(--accent-soft); color: var(--accent); }
+html[data-theme] .side-link.is-active > span { background: var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+html[data-theme] .side-link.is-active::before {
+    content: ""; position: absolute; left: -0.55rem; top: 7px; bottom: 7px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent);
+}
+html[data-theme] .side-title { margin: 0.35rem 0.45rem 0.15rem; font-size: 0.64rem; letter-spacing: 0.1em; opacity: 0.85; }
+html[data-theme] .side-mini-toggle { width: 28px; height: 28px; font-size: 1rem; font-weight: 700; line-height: 1; }
+
+/* Modo compacto */
+body.sidebar-mini { --side-w: 72px; }
+body.sidebar-mini .app-sidebar { align-items: center !important; padding: 0.55rem 0 0.65rem !important; }
+body.sidebar-mini .side-scroll { width: 100%; align-items: center; }
+body.sidebar-mini .side-section { width: 100%; align-items: center; margin-top: 0.45rem; padding-top: 0.45rem; border-top: 1px solid var(--border); }
+body.sidebar-mini .side-section .side-title { display: none !important; }
+body.sidebar-mini .side-link { width: 44px; height: 42px; min-height: 42px; padding: 0 !important; justify-content: center; font-size: 0 !important; }
+body.sidebar-mini .side-link > span { width: 30px; height: 30px; font-size: 1.02rem; background: transparent; }
+body.sidebar-mini .side-link:hover > span { background: var(--surface-2); }
+body.sidebar-mini .side-link.is-active::before { left: -14px; }
+body.sidebar-mini .side-badge { position: absolute; top: 2px; right: 2px; margin: 0; min-width: 16px; height: 16px; font-size: 0.6rem; }
+body.sidebar-mini .side-mini-toggle { align-self: center; margin-bottom: 0.4rem; }
+body.sidebar-mini .side-user { width: 100%; display: flex; justify-content: center; padding-top: 0.5rem; }
+body.sidebar-mini .side-user > summary { width: 44px !important; height: 44px; padding: 0 !important; justify-content: center !important; border-radius: 12px; }
+body.sidebar-mini .side-user .user-avatar { width: 34px; height: 34px; font-size: 0.9rem; flex: none; }
+body.sidebar-mini .side-user .nav-menu-up { left: 0.4rem !important; }
+body.sidebar-mini .app-sidebar > .theme-toggle { position: static !important; width: 36px; height: 36px; margin: 0.45rem auto 0 !important; }
+
+/* Panel de advertencias de seguridad */
+html[data-theme] .security-panel { border-left: 4px solid var(--danger); }
+html[data-theme] .security-panel h2 { margin-top: 0; }
+html[data-theme] .security-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+html[data-theme] .security-item:last-child { border-bottom: 0; }
+html[data-theme] .security-item small { display: block; color: var(--muted); }
+
+/* Página incrustada: nunca mostrar el botón de Sazón, los avisos ni la barra lateral duplicados */
+body.embed-mode .assistant-widget, body.embed-mode .aw-toggle, body.embed-mode .toast-stack,
+body.embed-mode .app-sidebar, body.embed-mode .sidebar-toggle, body.embed-mode .site-footer { display: none !important; }
+body.embed-mode main { margin: 0.6rem !important; max-width: none !important; }

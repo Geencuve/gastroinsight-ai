@@ -1,0 +1,12 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Acceso bloqueado | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="card auth-card" style="text-align: center;">
+    <div style="font-size: 2.4rem;">🛡️</div>
+    <h1>Demasiados intentos</h1>
+    <p>Por seguridad, el acceso quedó bloqueado durante <strong>{{ minutes }} minutos</strong> después de varios intentos fallidos.</p>
+    <p class="muted">Si olvidaste tu contraseña, pide a tu supervisor que la restablezca desde el Centro de gestión.</p>
+</section>
+{% endblock %}

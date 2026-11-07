@@ -76,3 +76,86 @@ class RoleScopeMiddleware:
                 return render(request, "core/forbidden_role.html",
                               {"role": profile.get_role_display(), "home": home_for(profile)}, status=403)
         return self.get_response(request)
+
+
+# ---------------- Seguridad (I1) ----------------
+LOGIN_PATHS = ("/auth/login/", "/gestion/acceso/")
+USER_MAX_FAILS, IP_MAX_FAILS, LOCK_SECONDS = 5, 20, 15 * 60
+
+
+def _bump(cache, key, timeout):
+    if not cache.add(key, 1, timeout):
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, timeout)
+
+
+class LoginThrottleMiddleware:
+    """Bloquea 15 minutos tras 5 intentos fallidos por usuario o 20 por equipo (defensa ante bots)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method != "POST" or request.path not in LOGIN_PATHS:
+            return self.get_response(request)
+        from django.core.cache import cache
+        from django.shortcuts import render
+
+        ip = request.META.get("REMOTE_ADDR", "")
+        username = (request.POST.get("username") or "").strip().lower()[:150]
+        user_key, ip_key = f"gi-login-user-{username}", f"gi-login-ip-{ip}"
+        if (cache.get(user_key) or 0) >= USER_MAX_FAILS or (cache.get(ip_key) or 0) >= IP_MAX_FAILS:
+            try:
+                from monitoring.models import AuditLog
+                from monitoring.services.audit import log_action
+
+                log_action(request, action=AuditLog.Action.LOGIN, module="authentication",
+                           description=f"Acceso bloqueado por intentos fallidos (usuario «{username}», IP {ip}).")
+            except Exception:  # noqa: BLE001 — el bloqueo debe aplicarse aunque falle el registro
+                pass
+            return render(request, "core/login_locked.html", {"minutes": LOCK_SECONDS // 60}, status=429)
+        response = self.get_response(request)
+        if response.status_code == 200:
+            _bump(cache, user_key, LOCK_SECONDS)
+            _bump(cache, ip_key, LOCK_SECONDS)
+        elif response.status_code in (301, 302):
+            cache.delete(user_key)
+        return response
+
+
+class AssistantThrottleMiddleware:
+    """Sazón: máximo 30 consultas por minuto por usuario y 600 caracteres por mensaje."""
+
+    LIMIT, WINDOW, MAX_CHARS = 30, 60, 600
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method == "POST" and request.path.startswith("/assistant/") and request.user.is_authenticated:
+            from django.core.cache import cache
+            from django.http import JsonResponse
+
+            message = request.POST.get("message", "")
+            if len(message) > self.MAX_CHARS:
+                return JsonResponse({"error": f"La consulta supera los {self.MAX_CHARS} caracteres."}, status=400)
+            key = f"gi-sazon-{request.user.pk}"
+            _bump(cache, key, self.WINDOW)
+            if (cache.get(key) or 0) > self.LIMIT:
+                return JsonResponse({"error": "Demasiadas consultas seguidas. Espera un minuto e inténtalo de nuevo."},
+                                    status=429)
+        return self.get_response(request)
+
+
+class SecurityHeadersMiddleware:
+    """Cabeceras adicionales: las páginas no pueden pedir cámara, micrófono ni ubicación al navegador."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
+        return response

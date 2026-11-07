@@ -1,7 +1,10 @@
 /* GastroInsight AI · Barra lateral, página activa, pestañas y ajuste a la ventana. */
 (function () {
     "use strict";
-    const embedded = document.body.dataset.embed === "1";
+    // Incrustada en una pestaña (Visión IA): por la marca ?embed=1 o porque está dentro de otra página,
+    // aunque una redirección del servidor haya quitado la marca de la dirección.
+    const embedded = document.body.dataset.embed === "1" || window.self !== window.top;
+    if (embedded) document.body.dataset.embed = "1";
     const sidebar = embedded ? null : document.querySelector(".app-sidebar");
     const header = sidebar ? sidebar.parentElement : null;
     if (embedded) {
@@ -131,7 +134,7 @@
     mini.title = "Contraer o expandir el menú";
     mini.setAttribute("aria-label", "Contraer o expandir el menú");
     sidebar.prepend(mini);
-    const apply = (on) => { document.body.classList.toggle("sidebar-mini", on); mini.textContent = on ? "⇥" : "⇤"; };
+    const apply = (on) => { document.body.classList.toggle("sidebar-mini", on); mini.textContent = on ? "»" : "«"; };
     let saved = false;
     try { saved = localStorage.getItem(MINI) === "1"; } catch (e) { saved = false; }
     apply(saved);

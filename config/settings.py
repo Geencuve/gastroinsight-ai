@@ -51,6 +51,9 @@ MIDDLEWARE = [
     'core.middleware.FirstRunMiddleware',
     'core.middleware.LegalAcceptanceMiddleware',
     'core.middleware.RoleScopeMiddleware',
+    'core.middleware.LoginThrottleMiddleware',
+    'core.middleware.AssistantThrottleMiddleware',
+    'core.middleware.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -173,3 +176,17 @@ if DEBUG:
                 ALLOWED_HOSTS.append(_sock.getsockname()[0])
     except OSError:
         pass
+
+# ---------------- Seguridad (I1) ----------------
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 60 * 60 * 12
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+USE_HTTPS = config("USE_HTTPS", default=False, cast=bool)
+if USE_HTTPS:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

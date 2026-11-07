@@ -10,6 +10,15 @@
     </div>
 </section>
 
+{% if security_warnings %}
+    <section class="card security-panel">
+        <h2>🛡️ Advertencias de seguridad</h2>
+        {% for level, title, detail in security_warnings %}
+            <div class="security-item"><span>{% if level == "danger" %}🔴{% elif level == "warning" %}🟠{% else %}🔵{% endif %}</span>
+                <div><strong>{{ title }}</strong><small>{{ detail }}</small></div></div>
+        {% endfor %}
+    </section>
+{% endif %}
 <div class="kpi-grid kpi-compact">
     <article class="kpi"><span class="kpi-label">Personal activo</span><strong>{{ kpis.staff }}</strong><small>Cuentas que puedes administrar</small></article>
     <article class="kpi"><span class="kpi-label">Mesas</span><strong>{{ kpis.tables }}</strong><small>{{ kpis.zones }} zona(s)</small></article>
