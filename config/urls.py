@@ -22,6 +22,7 @@ urlpatterns = [
     path("opinion/", include("operations.feedback_urls", namespace="feedback")),
     path("sala/", include("operations.floor_urls")),
     path("caja/", include("operations.cashier_urls")),
+    path("supervisor/", include("operations.supervisor_urls")),
     path("cocina/", include(("sales.kds_urls", "kds"), namespace="kitchen")),
     path("barra/", include(("sales.kds_urls", "kds"), namespace="bar")),
 ]

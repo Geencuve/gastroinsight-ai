@@ -338,3 +338,60 @@ class WaitlistEntry(models.Model):
     def waiting_minutes(self):
         end = self.seated_at or timezone.now()
         return max(0, round((end - self.arrived_at).total_seconds() / 60))
+
+
+class EnvironmentReading(models.Model):
+    """Condiciones ambientales registradas por zona (manual; preparado para sensores)."""
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="environment_readings",
+                              verbose_name="Local")
+    zone = models.CharField(max_length=80, default="Salón principal", verbose_name="Zona")
+    lighting = models.PositiveSmallIntegerField(null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)],
+                                                verbose_name="Iluminación (1 muy baja · 5 muy buena)")
+    noise = models.PositiveSmallIntegerField(null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)],
+                                             verbose_name="Ruido (1 muy bajo · 5 muy alto)")
+    temperature_c = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True,
+                                        verbose_name="Temperatura (°C)")
+    notes = models.CharField(max_length=200, blank=True, verbose_name="Notas")
+    recorded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    verbose_name="Registrado por")
+    recorded_at = models.DateTimeField(default=timezone.now, verbose_name="Fecha")
+
+    class Meta:
+        ordering = ["-recorded_at"]
+        verbose_name = "Condición ambiental"
+        verbose_name_plural = "Condiciones ambientales"
+
+    def __str__(self):
+        return f"{self.zone} — {self.recorded_at:%d-%m %H:%M}"
+
+
+class InfrastructureReport(models.Model):
+    """Incidencia de infraestructura o servicios primarios (baños, terraza, limpieza...)."""
+
+    class Area(models.TextChoices):
+        RESTROOMS = "restrooms", "Baños"
+        TERRACE = "terrace", "Terraza"
+        CLEANING = "cleaning", "Limpieza"
+        CLIMATE = "climate", "Climatización"
+        FURNITURE = "furniture", "Mobiliario"
+        OTHER = "other", "Otro"
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="infrastructure_reports",
+                              verbose_name="Local")
+    area = models.CharField(max_length=20, choices=Area.choices, verbose_name="Área")
+    description = models.CharField(max_length=255, verbose_name="Descripción")
+    status = models.CharField(max_length=10, default="open", choices=[("open", "Abierta"), ("resolved", "Resuelta")],
+                              verbose_name="Estado")
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    verbose_name="Reportado por")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha")
+    resolved_at = models.DateTimeField(null=True, blank=True, verbose_name="Resuelta")
+
+    class Meta:
+        ordering = ["status", "-created_at"]
+        verbose_name = "Reporte de infraestructura"
+        verbose_name_plural = "Reportes de infraestructura"
+
+    def __str__(self):
+        return f"{self.get_area_display()}: {self.description}"

@@ -767,3 +767,14 @@ html[data-theme] .legal-disclaimer { margin-top: 2rem; padding-top: 1rem; border
 .delta-up { color: var(--success); font-weight: 700; }
 .delta-down { color: var(--danger); font-weight: 700; }
 @media (max-width: 980px) { .kds-columns { grid-template-columns: 1fr; } }
+
+/* ---------- Panel del supervisor ---------- */
+.supervisor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
+.supervisor-grid .card { margin: 0; }
+.supervisor-form { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem; }
+.supervisor-form input[type="text"] { flex: 1 1 160px; }
+.supervisor-form input[type="number"], .supervisor-form select { flex: 0 0 auto; width: auto; }
+.acc-compare { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; margin: 0.4rem 0 0.8rem; }
+.acc-compare div span { display: block; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.acc-compare strong { font-family: "Space Grotesk", sans-serif; font-size: 1.6rem; color: var(--text-strong); }
+@media (max-width: 980px) { .supervisor-grid { grid-template-columns: 1fr; } }

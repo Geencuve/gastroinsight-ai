@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=14">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=15">
     <style>
         .main-nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .nav-group { position: relative; }
@@ -65,6 +65,7 @@
                 <details class="nav-group">
                     <summary>Visión IA</summary>
                     <div class="nav-menu">
+                        <a href="{% url 'supervisor:home' %}">🧭 Panel del supervisor</a>
                         <a href="{% url 'ai_vision:monitor' %}">📡 Monitor en vivo</a>
                         {% if user.is_staff %}<a href="{% url 'ai_vision:training' %}">🧪 Datos para entrenamiento</a>{% endif %}
                         <a href="{% url 'ai_vision:session_list' %}">Sesiones de análisis</a>
@@ -230,7 +231,7 @@
         })();
     </script>
     <script src="{% static 'js/main.js' %}?v=9"></script>
-    <script src="{% static 'js/guide.js' %}?v=4"></script>
+    <script src="{% static 'js/guide.js' %}?v=5"></script>
     {% block extra_js %}{% endblock %}
 {% if gi_role_scope %}{{ gi_role_scope|json_script:"gi-role-scope" }}
     <script>

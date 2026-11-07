@@ -1,4 +1,4 @@
-﻿import random
+import random
 import time
 from decimal import Decimal
 
@@ -84,6 +84,7 @@ class Command(BaseCommand):
                         emotion_distribution=distribution, processing_time_ms=rng.randint(30, 60),
                         table=camera.table, service_session=service,
                         occupancy=dec(s["occupancy"], 2), presence_ratio=dec(rng.uniform(0.85, 1.0)),
+                        persons_detected=dec(s["occupancy"] + rng.choice([0, 0, 1]), 2), tables_detected=Decimal("1"),
                         activity_level=dec(clamp(rng.gauss(22, 7), 3, 100), 2),
                         valence=dec(s["valence"]), attention_seeking=dec(s["attention"]),
                         experience_index=Decimal(str(index)) if index is not None else None,

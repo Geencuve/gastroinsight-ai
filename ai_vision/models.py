@@ -183,6 +183,12 @@ class DetectionEvent(models.Model):
         verbose_name="Sesión de atención asociada",
     )
 
+
+    persons_detected = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True,
+                                           verbose_name="Personas detectadas (YOLO26)")
+    tables_detected = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True,
+                                          verbose_name="Mesas detectadas (YOLO26)")
+
     class Meta:
         ordering = ["-detected_at"]
         verbose_name = "Evento de detección"

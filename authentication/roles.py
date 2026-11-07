@@ -27,7 +27,7 @@ ROLE_PREFIXES = {
 }
 
 # Página de inicio de cada rol restringido (se completa en las fases B y C)
-ROLE_HOME = {WAITER: "/sala/", KITCHEN: "/cocina/", BAR: "/barra/", CASHIER: "/caja/", SUPERVISOR: "/"}
+ROLE_HOME = {WAITER: "/sala/", KITCHEN: "/cocina/", BAR: "/barra/", CASHIER: "/caja/", SUPERVISOR: "/supervisor/"}
 
 # Lista que muestra Mi perfil: (etiqueta, roles que la tienen)
 PROFILE_CAPABILITIES = [

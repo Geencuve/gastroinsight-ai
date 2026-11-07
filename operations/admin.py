@@ -80,3 +80,16 @@ from .models import WaitlistEntry  # noqa: E402
 class WaitlistEntryAdmin(admin.ModelAdmin):
     list_display = ("party_name", "guests", "venue", "arrived_at", "seated_at", "cancelled")
     list_filter = ("venue", "cancelled")
+
+from .models import EnvironmentReading, InfrastructureReport  # noqa: E402
+
+
+@admin.register(EnvironmentReading)
+class EnvironmentReadingAdmin(admin.ModelAdmin):
+    list_display = ("zone", "venue", "lighting", "noise", "temperature_c", "recorded_at")
+
+
+@admin.register(InfrastructureReport)
+class InfrastructureReportAdmin(admin.ModelAdmin):
+    list_display = ("area", "description", "venue", "status", "created_at")
+    list_filter = ("area", "status")

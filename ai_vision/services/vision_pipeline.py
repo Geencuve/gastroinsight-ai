@@ -14,6 +14,8 @@ from pathlib import Path
 from statistics import median
 from time import perf_counter
 
+import time
+
 import cv2
 import numpy as np
 from django.conf import settings
@@ -89,6 +91,21 @@ class VisionPipeline:
         calibrations = load_active_calibrations()
         self.calibration = calibrations["expression"]
         self.looking_away_yaw = calibrations["attention_threshold"] or LOOKING_AWAY_YAW
+        # Detector de mesas y personas (YOLO26) en un hilo aparte, cada 2 s, sin frenar el análisis.
+        self.scene_detector, self._scene_future, self._scene_last, self.scene_every = None, None, 0.0, 2.0
+        from django.conf import settings as dj_settings
+
+        if getattr(dj_settings, "SCENE_DETECTION", True):
+            try:
+                from ai_vision.services.scene_detector import SceneDetector, SceneModelNotAvailable
+
+                self.scene_detector = SceneDetector()
+            except (SceneModelNotAvailable, cv2.error):
+                self.scene_detector = None
+        if self.scene_detector is not None:
+            from concurrent.futures import ThreadPoolExecutor
+
+            self._scene_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="escena")
 
     def _activity(self, gray_small):
         thumb = cv2.GaussianBlur(cv2.resize(gray_small, (64, 48), interpolation=cv2.INTER_AREA), (3, 3), 0)
@@ -98,7 +115,29 @@ class VisionPipeline:
         self._previous_thumb = thumb
         return activity
 
-    def analyze(self, frame, classify=True):
+    def analyze(self, frame, *args, **kwargs):
+        """Análisis por fotograma; cada 2 s agrega el conteo de mesas y personas de YOLO26 (en paralelo)."""
+        result = self._analyze_core(frame, *args, **kwargs)
+        if self.scene_detector is not None:
+            future = self._scene_future
+            if future is not None and future.done():
+                self._scene_future = None
+                try:
+                    detections, elapsed = future.result()
+                    result["scene"] = {
+                        "persons": sum(1 for d in detections if d["class"] == "person"),
+                        "tables": sum(1 for d in detections if d["class"] == "dining_table"),
+                        "ms": round(elapsed, 1),
+                    }
+                except (cv2.error, RuntimeError, ValueError):
+                    self.scene_detector = None
+            if (self.scene_detector is not None and self._scene_future is None
+                    and time.monotonic() - self._scene_last >= self.scene_every):
+                self._scene_last = time.monotonic()
+                self._scene_future = self._scene_executor.submit(self.scene_detector.detect, frame.copy())
+        return result
+
+    def _analyze_core(self, frame, classify=True):
         """Analiza un fotograma BGR. Si classify=False solo detecta (sin FER+)."""
         start = perf_counter()
         height, width = frame.shape[:2]
@@ -173,6 +212,8 @@ class EventWindow:
         self.valences = []
         self.faces_seen = 0
         self.faces_away = 0
+        self.scene_persons = []
+        self.scene_tables = []
         self.emotions = Counter()
         self.emotion_confidences = defaultdict(list)
         self.detector_scores = []
@@ -188,6 +229,9 @@ class EventWindow:
         if result.get("activity") is not None:
             self.activity.append(result["activity"])
         self.times.append(result["processing_time_ms"])
+        if result.get("scene"):
+            self.scene_persons.append(result["scene"]["persons"])
+            self.scene_tables.append(result["scene"]["tables"])
         for face in result["faces"]:
             self.detector_scores.append(face["detector_score"])
             self.faces_seen += 1
@@ -218,4 +262,6 @@ class EventWindow:
             "activity_level": float(np.mean(self.activity)) if self.activity else None,
             "valence": float(np.mean(self.valences)) if self.valences else None,
             "attention_seeking": self.faces_away / self.faces_seen if self.faces_seen else None,
+            "persons_detected": float(np.median(self.scene_persons)) if self.scene_persons else None,
+            "tables_detected": float(np.median(self.scene_tables)) if self.scene_tables else None,
         }
