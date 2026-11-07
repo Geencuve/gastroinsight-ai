@@ -1,4 +1,4 @@
-﻿{% load gi_format %}
+{% load gi_format %}
 <div class="floor-summary">
     {% for label, css, count in counts %}<span class="floor-chip state-{{ css }}"><i></i>{{ label }} <strong>{{ count }}</strong></span>{% endfor %}
     <span class="floor-chip">⏳ Esperando mesa <strong>{{ waitlist|length }}</strong></span>
@@ -18,6 +18,9 @@
                             {% if c.live and c.live.ieo is not None %}<p class="table-meta">IEO <strong>{{ c.live.ieo|floatformat:0 }}</strong></p>{% endif %}
                             {% for alert in c.alerts %}<p class="table-alert">⚠️ {{ alert }}</p>{% endfor %}
                             <div class="table-actions">
+                                {% if c.ready_count %}<form method="post" action="{% url 'floor:deliver_ready' c.session.id %}">{% csrf_token %}
+                                    <button class="btn btn-small btn-primary" type="submit">🍽️ Entregar listos ({{ c.ready_count }})</button>
+                                </form>{% endif %}
                                 <a class="btn btn-small" href="{% url 'sales:order_create' %}">＋ Pedido</a>
                                 <form method="post" action="{% url 'floor:toggle_bill' c.session.id %}">{% csrf_token %}
                                     <button class="btn btn-small" type="submit">{% if c.session.bill_requested_at %}Quitar cuenta{% else %}🧾 Pidió la cuenta{% endif %}</button>

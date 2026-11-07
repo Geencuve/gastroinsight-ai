@@ -1,0 +1,52 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ config.title }} | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>{{ config.icon }} {{ config.title }}: comandas</h1>
+        <p class="muted">Ordenadas por tiempo desde la confirmación. Amarillo desde {{ config.warn }} min y rojo desde {{ config.late }} min. Se actualiza cada 8 segundos.</p>
+    </div>
+</section>
+
+<div id="kds-board" data-url="{{ board_url }}">{% include "sales/_kds_board.html" %}</div>
+
+<section class="card">
+    <h2>Aceptación de {{ config.noun }} (últimos 7 días)</h2>
+    <p class="muted">Asociación agregada por mesa: balance de expresiones (IBE) en los 15 minutos posteriores a la entrega comparado con los 15 anteriores, junto con la valoración de los clientes. No mide el sabor de forma individual.</p>
+    <div class="table-responsive">
+        <table>
+            <thead><tr><th>{% if station == "barra" %}Bebida{% else %}Plato{% endif %}</th><th>Unidades</th><th>Preparación media</th><th>Valoración</th><th>IBE al recibirlo</th><th>Variación del IBE</th></tr></thead>
+            <tbody>
+                {% for row in acceptance %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.units }}</td>
+                        <td>{% if row.prep_min is not None %}{{ row.prep_min|floatformat:0 }} min{% else %}—{% endif %}</td>
+                        <td>{% if row.csat is not None %}{{ row.csat|floatformat:1 }} ★ ({{ row.csat_n }}){% else %}—{% endif %}</td>
+                        <td>{% if row.ibe_after is not None %}{{ row.ibe_after|floatformat:2 }}{% else %}—{% endif %}</td>
+                        <td>{% if row.ibe_delta is not None %}<span class="{% if row.ibe_delta >= 0 %}delta-up{% else %}delta-down{% endif %}">{% if row.ibe_delta >= 0 %}▲{% else %}▼{% endif %} {{ row.ibe_delta|floatformat:2 }}</span> <small class="muted">({{ row.ibe_n }})</small>{% else %}—{% endif %}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="muted">Aún no hay despachos en los últimos 7 días.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const board = document.getElementById("kds-board");
+        setInterval(async () => {
+            const active = document.activeElement;
+            if (active && active !== document.body && board.contains(active)) return;
+            try {
+                const response = await fetch(board.dataset.url, { credentials: "same-origin" });
+                if (response.ok) board.innerHTML = await response.text();
+            } catch (error) { /* se reintenta en el siguiente ciclo */ }
+        }, 8000);
+    })();
+</script>
+{% endblock %}

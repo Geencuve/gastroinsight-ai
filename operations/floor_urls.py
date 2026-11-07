@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 
 from . import views_floor
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path("espera/<int:entry_id>/cancelar/", views_floor.waitlist_cancel, name="waitlist_cancel"),
     path("atencion/<int:session_id>/cuenta/", views_floor.toggle_bill, name="toggle_bill"),
     path("atencion/<int:session_id>/qr/", views_floor.session_qr, name="session_qr"),
+    path("atencion/<int:session_id>/entregar/", views_floor.deliver_ready, name="deliver_ready"),
 ]

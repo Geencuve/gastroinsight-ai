@@ -747,3 +747,23 @@ html[data-theme] .legal-disclaimer { margin-top: 2rem; padding-top: 1rem; border
 .qr-box { display: inline-block; padding: 1rem; margin: 0.5rem 0; background: #ffffff; border-radius: 16px; }
 .qr-box svg { width: min(320px, 70vw); height: auto; }
 @media (max-width: 980px) { .floor-layout { grid-template-columns: 1fr; } .waitlist { position: static; } }
+
+/* ---------- Comandas de cocina y barra ---------- */
+.kds-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.kds-column { min-height: 200px; padding: 0.9rem; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
+.kds-column h2 { display: flex; justify-content: space-between; margin: 0 0 0.7rem; font-size: 0.95rem; }
+.kds-column h2 span { padding: 0 0.55rem; border-radius: 999px; background: var(--surface-2); }
+.kds-ticket { margin-bottom: 0.6rem; padding: 0.75rem 0.85rem; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); border-top: 4px solid var(--success); }
+.kds-ticket.level-warn { border-top-color: var(--warning); }
+.kds-ticket.level-late { border-top-color: var(--danger); }
+.kds-ticket header { display: flex; justify-content: space-between; }
+.kds-time { font-family: "Space Grotesk", sans-serif; font-weight: 700; }
+.level-warn .kds-time { color: var(--warning); }
+.level-late .kds-time { color: var(--danger); }
+.kds-order { margin: 0.1rem 0 0.4rem; color: var(--muted); font-size: 0.8rem; }
+.kds-ticket ul { margin: 0 0 0.6rem; padding-left: 1rem; }
+.kds-notes { font-size: 0.82rem; }
+.kds-ticket form { margin: 0; }
+.delta-up { color: var(--success); font-weight: 700; }
+.delta-down { color: var(--danger); font-weight: 700; }
+@media (max-width: 980px) { .kds-columns { grid-template-columns: 1fr; } }

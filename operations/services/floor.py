@@ -1,4 +1,4 @@
-﻿"""Estado de la sala: mesas por estado, lista de espera y termómetro de experiencia por mesa."""
+"""Estado de la sala: mesas por estado, lista de espera y termómetro de experiencia por mesa."""
 from collections import defaultdict
 
 from django.db.models import Avg, Max
@@ -46,6 +46,9 @@ def build_floor(venues):
     for order in Order.objects.filter(service_session__in=list(sessions.values())):
         orders[order.service_session_id].append(order)
     live = {card["table"]: card for card in build_live_state(venues)["cards"]}
+    from sales.services.kitchen import ready_counts
+
+    ready = ready_counts(list(sessions.values()))
 
     zones, counts = defaultdict(list), {key: 0 for key in STATES}
     for table in tables:
@@ -67,6 +70,7 @@ def build_floor(venues):
                 "bill_min": minutes_between(session.bill_requested_at, now),
                 "pending_count": len(pending),
                 "pending_total": sum((o.total or 0) for o in pending),
+                "ready_count": ready[session.id],
             })
             if state == "esperando_pedido" and card["seated_min"] >= 10:
                 card["alerts"].append(f"Esperando pedido hace {card['seated_min']} min")
@@ -74,6 +78,8 @@ def build_floor(venues):
                 card["alerts"].append(f"Pidió la cuenta hace {card['bill_min']} min")
             if state == "por_cerrar":
                 card["alerts"].append("Pagada: cerrar la mesa")
+            if card["ready_count"]:
+                card["alerts"].insert(0, f"{card['ready_count']} plato(s) listos para servir")
             if card["live"]:
                 card["alerts"] += [r for r in card["live"]["reasons"] if not r.startswith("Sin atención")]
         label, css = STATES[state]

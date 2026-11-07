@@ -15,6 +15,8 @@
         "/operations/evaluations/create/": "Registra la valoración de un cliente.",
         "/opinion/qr/": "Imprime un código QR por mesa para que los clientes califiquen sin crear una cuenta.",
         "/operations/tables/": "Mesas del local: código, capacidad y zona.",
+        "/cocina/": "Comandas de cocina por tiempo de espera, con aceptación de cada plato.",
+        "/barra/": "Fila de bebidas con temporizadores de despacho y su aceptación.",
         "/sala/": "Mapa de sala: estado de cada mesa por colores, lista de espera y alertas de atención.",
         "/caja/": "Caja: mesas por cobrar con su termómetro de experiencia y una sugerencia para el cierre.",
         "/ai/entrenamiento/": "Sube imágenes etiquetadas con consentimiento para medir la precisión del modelo (matriz de confusión) y calibrarlo.",

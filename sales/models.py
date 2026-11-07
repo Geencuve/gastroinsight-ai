@@ -326,6 +326,15 @@ class OrderItem(models.Model):
         verbose_name="Fecha de registro",
     )
 
+
+    prep_status = models.CharField(
+        max_length=12, default="pending", verbose_name="Estado de preparación",
+        choices=[("pending", "Pendiente"), ("preparing", "En preparación"), ("ready", "Listo"), ("delivered", "Entregado")],
+    )
+    prep_started_at = models.DateTimeField(null=True, blank=True, verbose_name="Inicio de preparación")
+    ready_at = models.DateTimeField(null=True, blank=True, verbose_name="Listo para servir")
+    delivered_at = models.DateTimeField(null=True, blank=True, verbose_name="Entregado")
+
     class Meta:
         verbose_name = "Ítem de pedido"
         verbose_name_plural = "Ítems de pedido"

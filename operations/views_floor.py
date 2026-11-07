@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 import segno
 from django import forms
@@ -200,3 +200,15 @@ def cashier(request):
                       "thermo": thermometer(session, now)})
     items.sort(key=lambda item: (item["session"].bill_requested_at is None, -(item["minutes"] or 0)))
     return render(request, "operations/cashier.html", {"items": items})
+
+
+@login_required
+@require_POST
+def deliver_ready(request, session_id):
+    _require_operator(request)
+    from sales.services.kitchen import deliver_ready as mark_delivered
+
+    session = get_object_or_404(ServiceSession, pk=session_id, table__venue__in=_venues(request))
+    count = mark_delivered(session)
+    messages.success(request, f"{count} plato(s) entregados en la mesa {session.table.code}.")
+    return redirect("floor:map")
