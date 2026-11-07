@@ -1,5 +1,8 @@
-﻿{% load gi_format %}
+{% load gi_format %}
 <aside class="assistant-side">
+    {% if side_restricted %}
+        <section class="side-card"><h3>Tu rol</h3><p><strong>{{ side_role }}</strong></p><p class="muted">Sazón responde con la información de tu sección. Pregúntale «¿qué puedes hacer?».</p></section>
+    {% else %}
     <section class="side-card">
         <h3>Hoy</h3>
         <div class="side-kpis">
@@ -21,6 +24,7 @@
                 </div>
             {% endfor %}
         </section>
+    {% endif %}
     {% endif %}
     <section class="side-card">
         <h3>Herramientas de mejora</h3>

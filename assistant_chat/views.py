@@ -16,6 +16,7 @@ from .catalog import (
 )
 from .forms import ChatMessageForm
 from .models import ChatConversation, ChatMessage
+from .role_scope import filter_suggestions
 from .sidebar import assistant_sidebar
 from .services import (
     build_customer_response,
@@ -152,7 +153,7 @@ def staff_chat(request):
         {
             "form": form,
             "venues": venues,
-            "suggestions": suggestions,
+            "suggestions": filter_suggestions(request.user, suggestions),
             **assistant_sidebar(request.user),
         },
     )
@@ -179,7 +180,7 @@ def staff_conversation(request, conversation_id):
         "assistant_chat/staff_conversation.html",
         {
             "conversation": conversation,
-            "suggestions": suggestions,
+            "suggestions": filter_suggestions(request.user, suggestions),
             **assistant_sidebar(request.user),
         },
     )

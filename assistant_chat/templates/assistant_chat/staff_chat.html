@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ assistant_name }} | GastroInsight AI{% endblock %}
 
@@ -14,6 +14,9 @@
                 <span class="aw-avatar lg" aria-hidden="true"></span>
                 <h2>Hola, {{ user.first_name|default:user.username }}. Soy {{ assistant_name }}.</h2>
                 <p class="muted">Pregúntame por ventas, platos, clientes o mesas, o pídeme ideas para vender más.</p>
+                {% if gi_role_scope %}
+                    <div class="chat-chips" style="justify-content: center; margin-top: 1.2rem;">{% for s in suggestions %}<button type="button" class="chip" data-prompt="{{ s.prompt }}">{{ s.label }}</button>{% endfor %}</div>
+                {% else %}
                 <div class="prompt-grid">
                     <div class="prompt-group">
                         <h3>💰 Ventas</h3>
@@ -40,6 +43,7 @@
                         <button type="button" data-prompt="¿Los clientes están más contentos cuando atendemos rápido?">Expresiones y espera</button>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
         {% url 'assistant_chat:staff_chat' as action_url %}

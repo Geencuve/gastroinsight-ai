@@ -9,6 +9,9 @@ CUSTOMER_SUGGESTIONS = [
 
 STAFF_SUGGESTIONS = [
     {"label": "📡 Mesas en vivo", "prompt": "¿Cómo están las mesas ahora?", "intent": "live_status"},
+    {"label": "🗺️ Estado de la sala", "prompt": "¿Cuál es el estado de las mesas?", "intent": "floor_status"},
+    {"label": "📷 Cámaras", "prompt": "¿Cómo están las mediciones por cámara?", "intent": "camera_metrics"},
+    {"label": "🛠️ Infraestructura", "prompt": "¿Cómo está la infraestructura?", "intent": "infrastructure"},
     {"label": "📊 Resumen de hoy", "prompt": "Dame el resumen de hoy", "intent": "daily_summary"},
     {"label": "💰 Ventas de la semana", "prompt": "¿Cuánto vendimos esta semana?", "intent": "sales_summary"},
     {"label": "📣 ¿Qué promociono?", "prompt": "¿Qué debería promocionar? Dame ideas de marketing", "intent": "advice"},

@@ -160,9 +160,7 @@
                         <span class="aw-avatar lg" aria-hidden="true"></span>
                         <p>Hola, soy <strong>{{ assistant_name }}</strong>. ¿Qué quieres saber de tu local?</p>
                         <div class="aw-chips">
-                            <button type="button" class="chip" data-aw-prompt="¿Cómo están las mesas ahora?">📡 Mesas ahora</button>
-                            <button type="button" class="chip" data-aw-prompt="¿Cuánto vendimos hoy?">💰 Ventas de hoy</button>
-                            <button type="button" class="chip" data-aw-prompt="¿Qué debería promocionar?">📣 Qué promociono</button>
+                            {% for chip in gi_sazon_chips %}<button type="button" class="chip" data-aw-prompt="{{ chip.prompt }}">{{ chip.label }}</button>{% endfor %}
                         </div>
                     </div>
                 </div>

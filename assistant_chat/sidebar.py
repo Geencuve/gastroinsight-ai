@@ -7,10 +7,16 @@ from django.utils import timezone
 from ai_vision.services.live import build_live_state
 from analytics.views import get_accessible_venues
 from authentication.permissions import get_or_create_profile
+from authentication.roles import SUPERVISOR, allowed_prefixes, is_path_allowed
 from core.services.insights import build_home_summary, build_insights
 from sales.models import Order, OrderItem
 
 TOOLS = [
+    ("🗺️", "Mapa de sala", "floor:map", "Estados de mesa y lista de espera"),
+    ("👨‍🍳", "Cocina", "kitchen:home", "Comandas por tiempo de espera"),
+    ("🍹", "Barra", "bar:home", "Bebidas pendientes"),
+    ("💵", "Caja", "cashier:home", "Termómetro y cobros"),
+    ("🧭", "Supervisor", "supervisor:home", "Operación, cámaras e infraestructura"),
     ("📡", "Monitor en vivo", "ai_vision:monitor", "IEO y alertas por mesa"),
     ("🎨", "Promociones", "core:promo_generator", "Piezas para redes en segundos"),
     ("📈", "Correlación", "analytics:correlation", "Tiempo, expresiones y CSAT"),
@@ -21,7 +27,15 @@ TOOLS = [
 
 
 def assistant_sidebar(user):
-    venues = get_accessible_venues(get_or_create_profile(user))
+    profile = get_or_create_profile(user)
+    venues = get_accessible_venues(profile)
+    prefixes = allowed_prefixes(profile)
+    tools = [{"icon": i, "label": l, "url": reverse(u), "hint": h} for i, l, u, h in TOOLS]
+    if prefixes is not None:
+        tools = [tool for tool in tools if is_path_allowed(tool["url"], prefixes)]
+        if profile.role != SUPERVISOR:
+            return {"side_restricted": True, "side_tools": tools, "side_role": profile.get_role_display()}
+
     insights = build_insights(venues)
     top_dish = (
         OrderItem.objects.filter(
@@ -35,5 +49,5 @@ def assistant_sidebar(user):
         "side_ideas": (insights["ventas"] + insights["marketing"])[:2],
         "side_alerts": insights["now"][:3],
         "side_top_dish": top_dish["dish_name"] if top_dish else None,
-        "side_tools": [{"icon": i, "label": l, "url": reverse(u), "hint": h} for i, l, u, h in TOOLS],
+        "side_tools": tools,
     }

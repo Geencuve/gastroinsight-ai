@@ -39,6 +39,16 @@ UNSAFE_PHRASES = (
 STAFF_RULES = [
     ("help", ("que puedes hacer", "ayuda", "como funcionas", "que sabes hacer")),
     ("live_status", ("en vivo", "tiempo real", "como estan las mesas", "mesas ahora", "monitor")),
+    ("ready_dishes", ("listos para servir", "platos listos", "por entregar", "para servir")),
+    ("kitchen_queue", ("comanda", "cocina", "por preparar", "en preparacion")),
+    ("bar_queue", ("barra", "bebidas pendientes", "tragos pendientes", "cocteles pendientes")),
+    ("floor_status", ("estado de la sala", "estado de las mesas", "mapa de sala", "mesas libres", "lista de espera",
+                      "esperando mesa")),
+    ("cashier_status", ("termometro", "caja", "mesa que paga", "cobrar la mesa")),
+    ("camera_metrics", ("medicion", "mediciones", "camaras ahora", "como estan las camaras", "como esta la camara",
+                        "lecturas", "yolo")),
+    ("infrastructure", ("infraestructura", "bano", "limpieza", "terraza", "temperatura", "ruido", "iluminacion",
+                        "condiciones ambientales")),
     ("advice", ("recomienda", "recomendacion", "consejo", "que hago", "que deberia", "como mejoro",
                 "como mejorar", "vender mas", "aumentar ventas", "marketing", "promocion", "promocionar",
                 "ideas", "oportunidad", "sugerencia", "estrategia")),
@@ -607,8 +617,15 @@ def build_staff_response(user, message):
         return ("No puedo revelar credenciales, configuraciones internas ni ejecutar acciones destructivas. "
                 "Puedo ayudarte con indicadores y recomendaciones de tus locales.", intent, {})
 
-    if intent not in ("advice", "top_dishes", "low_dishes", "help", "pending_orders", "weekday_sales", "live_status"):
-        dish = find_dish(venues, message)
+    from .role_scope import intent_allowed, resolve_intent_for_role
+
+    intent, denied = resolve_intent_for_role(profile, intent)
+    if denied:
+        return denied, "out_of_scope", {"links": []}
+
+    if intent not in ("advice", "top_dishes", "low_dishes", "help", "pending_orders", "weekday_sales", "live_status", "ready_dishes", "kitchen_queue", "bar_queue", "floor_status",
+                      "cashier_status", "camera_metrics", "infrastructure", "role_help"):
+        dish = find_dish(venues, message) if intent_allowed(profile, "dish_detail") else None
         if dish:
             text, meta = answer_dish(venues, dish, message)
             return text, "dish_detail", meta
@@ -616,6 +633,14 @@ def build_staff_response(user, message):
     handlers = {
         "help": lambda: answer_help(),
         "live_status": lambda: answer_live(venues),
+        "kitchen_queue": lambda: answers_v2.answer_station(venues, "cocina"),
+        "bar_queue": lambda: answers_v2.answer_station(venues, "barra"),
+        "ready_dishes": lambda: answers_v2.answer_ready(venues),
+        "floor_status": lambda: answers_v2.answer_floor(venues),
+        "cashier_status": lambda: answers_v2.answer_cashier(venues),
+        "camera_metrics": lambda: answers_v2.answer_cameras(venues),
+        "infrastructure": lambda: answers_v2.answer_infrastructure(venues),
+        "role_help": lambda: answers_v2.answer_role_help(profile),
         "advice": lambda: answer_advice(venues, message),
         "sales_summary": lambda: answer_sales(venues, message),
         "average_ticket": lambda: answer_ticket(venues, message),
@@ -791,3 +816,5 @@ def build_customer_response(venue, message):
             "ubicación y cómo dejar tu opinión. También puedes preguntarme por un plato, por ejemplo: "
             "¿cuánto cuesta el pisco sour?", "customer_help",
             {"links": [_link("Ver carta con fotos", "menus:public", venue.id)]})
+
+from . import answers_v2  # noqa: E402,F401  (respuestas por rol)
