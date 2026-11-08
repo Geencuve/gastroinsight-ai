@@ -134,6 +134,19 @@
         ["✏️", n("done") + n("warn") + n("bad"), "Cambios", "crear, editar o borrar"],
         ["⬇️", n("export"), "Exportaciones", "en pantalla"],
     ].map(([icon, value, label, note]) => `<div class="mini-kpi"><span class="mini-kpi-icon">${icon}</span><strong>${value}</strong><span>${label}</span><small>${note}</small></div>`).join("");
+    // «Exportar CSV» pasa del encabezado a un mosaico de acción junto al resumen
+    const exportLink = [...document.querySelectorAll("main a")].find((a) => /exportar/i.test(a.textContent) && !a.closest(".orders-summary"));
+    if (exportLink) {
+        const tile = document.createElement("a");
+        tile.className = "mini-kpi mini-kpi-action";
+        tile.href = exportLink.href;
+        tile.title = "Descarga los registros con los filtros aplicados";
+        tile.innerHTML = '<span class="mini-kpi-icon">⬇️</span><strong>Exportar</strong><span>CSV con los filtros</span>';
+        summary.appendChild(tile);
+        const holder = exportLink.parentElement;
+        exportLink.remove();
+        if (holder && !holder.children.length && !holder.textContent.trim()) holder.remove();
+    }
     panel.prepend(summary);
     if (!data.length) {
         const empty = document.createElement("tr");

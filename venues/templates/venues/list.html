@@ -3,22 +3,77 @@
 {% block title %}Locales | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Locales registrados</h1>
+<section class="page-header">
+    <div>
+        <h1>🏠 Locales</h1>
+        <p class="muted">Cada local con su configuración: abre la ficha para ver y ajustar todo en un solo lugar.</p>
+    </div>
+</section>
 
-    {% if venues %}
-        <ul>
-            {% for venue in venues %}
-                <li>
-                    <strong>{{ venue.name }}</strong>
-                    {% if venue.address %}
-                        — {{ venue.address }}
-                    {% endif %}
-                </li>
+<section class="card page-panel venues-panel">
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">🏠</span><strong>{{ totals.venues }}</strong><span>Locales activos</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🪑</span><strong>{{ totals.tables }}</strong><span>Mesas</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ totals.cameras }}</strong><span>Cámaras activas</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">👥</span><strong>{{ totals.staff }}</strong><span>Personal</span></div>
+        {% if can_create %}<button type="button" class="mini-kpi mini-kpi-action" data-open-dialog="dlg-venue"><span class="mini-kpi-icon">＋</span><strong>Agregar</strong><span>Local</span></button>{% endif %}
+    </div>
+
+    {% if rows %}
+        <div class="venue-grid">
+            {% for r in rows %}
+                <a class="venue-card" href="{% url 'venues:detail' r.venue.id %}">
+                    <header>
+                        <span class="venue-icon">🏠</span>
+                        <div><strong>{{ r.venue.name }}</strong><small>{{ r.venue.address|default:"Sin dirección" }}</small></div>
+                        <span class="priv-score" style="--pct: {{ r.s.steps_pct }}" title="Primeros pasos completados">{{ r.s.steps_pct }}%</span>
+                    </header>
+                    <div class="venue-stats">
+                        <span><b>{{ r.s.tables }}</b>mesas</span>
+                        <span><b>{{ r.s.cameras }}</b>cámaras</span>
+                        <span><b>{{ r.s.staff }}</b>personas</span>
+                        <span><b>{{ r.s.dishes }}</b>platos</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="inc-pill {% if r.s.privacy.ok %}inc-done{% else %}inc-warn{% endif %}">🔒 Privacidad {{ r.s.privacy.pct }}%</span>
+                        {% if r.s.unassigned %}<span class="inc-pill inc-warn">📷 {{ r.s.unassigned }} sin asignar</span>{% endif %}
+                    </div>
+                    <span class="venue-open">Abrir ficha →</span>
+                </a>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>Aún no hay locales registrados.</p>
+        <div class="mgmt-empty">Aún no hay locales.{% if can_create %} Crea el primero con «＋ Agregar local».{% endif %}</div>
+    {% endif %}
+
+    {% if inactive %}
+        <details class="mgmt-help">
+            <summary>💤 Locales inactivos ({{ inactive|length }})</summary>
+            <div class="venue-grid">
+                {% for r in inactive %}
+                    <a class="venue-card is-off" href="{% url 'venues:detail' r.venue.id %}">
+                        <header><span class="venue-icon">💤</span><div><strong>{{ r.venue.name }}</strong><small>{{ r.venue.address|default:"Sin dirección" }}</small></div></header>
+                        <span class="venue-open">Abrir ficha →</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </details>
     {% endif %}
 </section>
+
+{% if form %}
+<dialog class="gi-modal mgmt-dialog" id="dlg-venue">
+    <div class="gi-modal-bar"><strong>＋ Agregar local</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'venues:create' %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "authentication/management/_field.html" with field=form.name %}
+            {% include "authentication/management/_field.html" with field=form.address %}
+            {% include "authentication/management/_field.html" with field=form.description %}
+            <p class="mgmt-tip">🚀 Después te llevamos a la ficha del local con los primeros pasos: mesas, personal, carta, cámara y privacidad.</p>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear local</button></div>
+        </form>
+    </div>
+</dialog>
+{% endif %}
 {% endblock %}

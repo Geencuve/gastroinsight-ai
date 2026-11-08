@@ -3243,3 +3243,34 @@ html[data-theme] .audit-info { background: var(--info-soft); color: var(--info);
 html[data-theme] .audit-logout { background: var(--surface-3); color: var(--muted); }
 html[data-theme] .audit-export { background: color-mix(in srgb, var(--accent-2) 14%, transparent); color: var(--accent-2); }
 html[data-theme] .audit-panel table { font-size: 0.84rem; }
+
+/* =========================================================
+   Locales v2: tarjetas, ficha y accesos a la configuración
+   ========================================================= */
+html[data-theme] .venues-panel .orders-summary { margin-bottom: 1rem; }
+html[data-theme] .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.8rem; }
+html[data-theme] .venue-card { display: flex; flex-direction: column; gap: 0.7rem; padding: 0.95rem 1rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); text-decoration: none; transition: transform 0.15s ease, border-color 0.15s ease; }
+html[data-theme] .venue-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+html[data-theme] .venue-card.is-off { opacity: 0.6; }
+html[data-theme] .venue-card header { display: flex; align-items: center; gap: 0.7rem; }
+html[data-theme] .venue-card header > div { flex: 1; min-width: 0; }
+html[data-theme] .venue-card header strong { display: block; color: var(--text-strong); }
+html[data-theme] .venue-card header small { font-size: 0.78rem; color: var(--muted); }
+html[data-theme] .venue-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 1.3rem; }
+html[data-theme] .venue-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
+html[data-theme] .venue-stats span { display: flex; flex-direction: column; align-items: center; padding: 0.4rem 0.2rem; border-radius: 10px; background: var(--surface); font-size: 0.72rem; color: var(--muted); }
+html[data-theme] .venue-stats b { font: 700 1.05rem "Space Grotesk", sans-serif; color: var(--text-strong); }
+html[data-theme] .venue-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+html[data-theme] .venue-open { align-self: flex-end; font-size: 0.8rem; font-weight: 700; color: var(--accent); }
+html[data-theme] .venue-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1rem; padding: 0.85rem 1rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .venue-steps strong { display: block; color: var(--text-strong); }
+html[data-theme] .venue-steps small { font-size: 0.78rem; color: var(--muted); }
+html[data-theme] .venue-config { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
+html[data-theme] .venue-config a { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.95rem 0.7rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; transition: transform 0.15s ease, border-color 0.15s ease; }
+html[data-theme] .venue-config a:hover { transform: translateY(-2px); border-color: var(--accent); }
+html[data-theme] .venue-config a.is-warn { border-top: 3px solid var(--warning); }
+html[data-theme] .venue-config span { font-size: 1.5rem; }
+html[data-theme] .venue-config strong { color: var(--text-strong); }
+html[data-theme] .venue-config small { font-size: 0.76rem; color: var(--muted); }
+html[data-theme] .venue-toggle { display: flex; justify-content: center; margin-top: 0.8rem; }
+html[data-theme] .venue-toggle .btn { border-radius: 999px; }

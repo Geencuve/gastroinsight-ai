@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ venue.name }} | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>🏠 {{ venue.name }}</h1>
+        <p class="muted">{{ venue.address|default:"Sin dirección" }}{% if venue.description %} · {{ venue.description }}{% endif %}{% if not venue.is_active %} · <strong>inactivo</strong>{% endif %}</p>
+    </div>
+    <div class="menu-header-actions">
+        <a class="btn btn-secondary" href="{% url 'venues:list' %}">← Locales</a>
+        {% if can_manage %}<button type="button" class="btn btn-primary" data-open-dialog="dlg-venue-edit">✏️ Editar datos</button>{% endif %}
+    </div>
+</section>
+
+<section class="card page-panel venues-panel">
+    <div class="venue-steps">
+        <span class="priv-score" style="--pct: {{ s.steps_pct }}">{{ s.steps_pct }}%</span>
+        <div><strong>🚀 Primeros pasos: {{ s.steps_done }} de {{ s.steps|length }}</strong><small>Lo mínimo para que el local funcione completo.</small></div>
+        <div class="priv-mini-checks">{% for st in s.steps %}<span class="{% if st.ok %}is-ok{% else %}is-bad{% endif %}">{% if st.ok %}✅{% else %}⬜{% endif %} {{ st.label }}</span>{% endfor %}</div>
+    </div>
+
+    <h2 class="priv-title">⚙️ Configuración del local</h2>
+    <div class="venue-config">
+        <a href="{% url 'management:home' %}" data-goto-tab="0"><span>👥</span><strong>Personal</strong><small>{{ s.staff }} persona{{ s.staff|pluralize:"s" }} con acceso</small></a>
+        <a href="{% url 'management:home' %}" data-goto-tab="1"><span>🪑</span><strong>Mesas y zonas</strong><small>{{ s.tables }} mesa{{ s.tables|pluralize:"s" }} · {{ s.zones }} zona{{ s.zones|pluralize:"s" }}</small></a>
+        <a href="{% url 'management:home' %}" data-goto-tab="2" class="{% if s.unassigned %}is-warn{% endif %}"><span>📷</span><strong>Cámaras</strong><small>{{ s.cameras }} activa{{ s.cameras|pluralize:"s" }}{% if s.unassigned %} · {{ s.unassigned }} sin asignar{% endif %}</small></a>
+        <a href="{% url 'management:home' %}" data-goto-tab="3"><span>🔔</span><strong>Alertas</strong><small>Impaciencia {{ s.impatience_pct }} % durante {{ s.impatience_minutes }} min</small></a>
+        <a href="{% url 'management:home' %}" data-goto-tab="4"><span>🔌</span><strong>Integraciones</strong><small>{{ s.keys }} clave{{ s.keys|pluralize:"s" }} activa{{ s.keys|pluralize:"s" }}</small></a>
+        <a href="{% if s.first_menu %}{% url 'menus:detail' s.first_menu.id %}{% else %}{% url 'menus:list' %}{% endif %}"><span>📖</span><strong>Carta y fotos</strong><small>{{ s.menus }} carta{{ s.menus|pluralize:"s" }} · {{ s.dishes }} plato{{ s.dishes|pluralize:"s" }}</small></a>
+        <a href="{% url 'feedback:qr' %}"><span>📱</span><strong>Códigos QR</strong><small>{{ s.tables }} código{{ s.tables|pluralize:"s" }} para imprimir</small></a>
+        <a href="{% if can_manage %}{% url 'privacy:policy_edit' venue.id %}{% else %}{% url 'privacy:policy_list' %}{% endif %}" class="{% if not s.privacy.ok %}is-warn{% endif %}"><span>🔒</span><strong>Privacidad</strong><small>{{ s.privacy.pct }} % de cumplimiento</small></a>
+        <a href="{% url 'menus:public' venue.id %}" target="_blank"><span>👁</span><strong>Carta pública</strong><small>Lo que ven los clientes ↗</small></a>
+    </div>
+    <p class="mgmt-intro">Personal, mesas, cámaras, alertas e integraciones se configuran en el Centro de gestión: cada acceso abre la pestaña correspondiente.</p>
+
+    {% if can_toggle %}
+        <form method="post" action="{% url 'venues:toggle' venue.id %}" class="venue-toggle"
+              onsubmit="return confirm('{% if venue.is_active %}¿Desactivar «{{ venue.name|escapejs }}»? Su personal dejará de ver sus datos, pero nada se borra.{% else %}¿Volver a activar «{{ venue.name|escapejs }}»?{% endif %}');">
+            {% csrf_token %}
+            <button class="btn btn-small" type="submit">{% if venue.is_active %}💤 Desactivar local{% else %}✅ Activar local{% endif %}</button>
+        </form>
+    {% endif %}
+</section>
+
+{% if form %}
+<dialog class="gi-modal mgmt-dialog" id="dlg-venue-edit">
+    <div class="gi-modal-bar"><strong>✏️ Editar «{{ venue.name }}»</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'venues:edit' venue.id %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "authentication/management/_field.html" with field=form.name %}
+            {% include "authentication/management/_field.html" with field=form.address %}
+            {% include "authentication/management/_field.html" with field=form.description %}
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">💾 Guardar</button></div>
+        </form>
+    </div>
+</dialog>
+{% endif %}
+
+<script>
+document.querySelectorAll("[data-goto-tab]").forEach((link) => link.addEventListener("click", () => {
+    try { sessionStorage.setItem("gi-tab-/gestion/-gestion", link.dataset.gotoTab); } catch (e) { /* sin almacenamiento */ }
+}));
+</script>
+{% endblock %}
