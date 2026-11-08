@@ -3,72 +3,66 @@
 {% block title %}Privacidad | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Privacidad y tratamiento de datos</h1>
-
-    <p>
-        Gestiona las políticas de procesamiento visual autorizado,
-        retención de eventos agregados y autorizaciones asociadas a cada local.
-    </p>
+<section class="page-header">
+    <div>
+        <h1>🔒 Privacidad y tratamiento de datos</h1>
+        <p class="muted">Qué ley se aplica, cómo la cumple la plataforma y el estado de cada local.</p>
+    </div>
 </section>
 
-<br>
+<section class="card page-panel priv-panel">
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">🏠</span><strong>{{ summary.venues }}</strong><span>Locales</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">✅</span><strong>{{ summary.ok }}</strong><span>Cumplen todo</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">⚠️</span><strong>{{ summary.review }}</strong><span>Por revisar</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ summary.visual }}</strong><span>Con análisis visual</span><small>autorizado</small></div>
+    </div>
 
-<section class="card">
+    <h2 class="priv-title">⚖️ Marco que se aplica</h2>
+    <div class="priv-laws">
+        <article class="priv-law is-current">
+            <span class="priv-tag">Vigente</span>
+            <strong>{{ law.current }}</strong>
+            <p>{{ law.current_name }}</p>
+        </article>
+        <article class="priv-law">
+            <span class="priv-tag is-next">Próxima · {{ law.next_date }}</span>
+            <strong>{{ law.next }}</strong>
+            <p>{{ law.next_name }}</p>
+            <small>{{ law.next_note }}</small>
+        </article>
+    </div>
+
+    <details class="mgmt-help">
+        <summary>📋 Cómo cumple la plataforma cada principio ({{ principles|length }})</summary>
+        <div class="priv-principles">
+            {% for icon, name, how in principles %}
+                <article><span>{{ icon }}</span><strong>{{ name }}</strong><p>{{ how }}</p></article>
+            {% endfor %}
+        </div>
+    </details>
+
+    <h2 class="priv-title">🏠 Estado por local</h2>
     {% if venue_rows %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Local</th>
-                    <th>Política</th>
-                    <th>Procesamiento visual</th>
-                    <th>Autorización vigente</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in venue_rows %}
-                    <tr>
-                        <td>{{ row.venue.name }}</td>
-
-                        <td>
-                            {% if row.policy %}
-                                Versión {{ row.policy.version }}
-                            {% else %}
-                                Sin política registrada
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if row.policy and row.policy.processing_enabled %}
-                                Habilitado
-                            {% else %}
-                                Deshabilitado
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if row.is_authorized %}
-                                Sí
-                            {% else %}
-                                No
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <a
-                                class="btn btn-primary"
-                                href="{% url 'privacy:policy_edit' row.venue.id %}"
-                            >
-                                Configurar
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="priv-venues">
+            {% for row in venue_rows %}
+                <article class="priv-venue{% if row.check.ok %} is-ok{% endif %}">
+                    <header>
+                        <div><strong>{{ row.venue.name }}</strong>
+                            <small>{% if row.policy %}Política v{{ row.policy.version }}{% else %}Sin política{% endif %} · Análisis visual {% if row.check.authorized %}activo y autorizado{% elif row.check.enabled %}activo sin autorización{% else %}apagado{% endif %}</small></div>
+                        <span class="priv-score" style="--pct: {{ row.check.pct }}">{{ row.check.pct }}%</span>
+                    </header>
+                    <ul class="priv-checks">
+                        {% for item in row.check.items %}
+                            <li class="{% if item.ok %}is-ok{% else %}is-bad{% endif %}"><span>{% if item.ok %}✅{% else %}⚠️{% endif %}</span><div>{{ item.label }}<small>{{ item.hint }}</small></div></li>
+                        {% endfor %}
+                    </ul>
+                    {% if row.can_manage %}<a class="btn btn-primary btn-small" href="{% url 'privacy:policy_edit' row.venue.id %}">⚙️ Configurar política</a>{% endif %}
+                </article>
+            {% endfor %}
+        </div>
     {% else %}
-        <p>No hay locales disponibles.</p>
+        <div class="mgmt-empty">No hay locales disponibles.</div>
     {% endif %}
 </section>
 {% endblock %}

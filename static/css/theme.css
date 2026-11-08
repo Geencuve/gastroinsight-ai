@@ -3169,3 +3169,49 @@ html[data-theme] .inc-info, html[data-theme] .inc-review { background: var(--inf
 html[data-theme] .inc-done { background: var(--success-soft); color: var(--success); }
 html[data-theme] td.inc-title { font-weight: 600; color: var(--text-strong); }
 html[data-theme] .inc-panel .status-chip[hidden] { display: none; }
+
+/* =========================================================
+   Privacidad v2: marco legal, cumplimiento por local y formulario por secciones
+   ========================================================= */
+html[data-theme] .priv-panel .orders-summary { margin-bottom: 1rem; }
+html[data-theme] .priv-title { text-align: center; font-size: 1rem; margin: 1.1rem 0 0.7rem; }
+html[data-theme] .priv-laws { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.7rem; }
+html[data-theme] .priv-law { padding: 0.9rem 1rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .priv-law.is-current { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); }
+html[data-theme] .priv-law strong { display: block; margin: 0.4rem 0 0.2rem; font-size: 1.05rem; color: var(--text-strong); }
+html[data-theme] .priv-law p { margin: 0; font-size: 0.84rem; }
+html[data-theme] .priv-law small { display: block; margin-top: 0.4rem; font-size: 0.74rem; color: var(--muted); }
+html[data-theme] .priv-tag { display: inline-block; padding: 0.12rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: var(--success-soft); color: var(--success); }
+html[data-theme] .priv-tag.is-next { background: var(--info-soft); color: var(--info); }
+html[data-theme] .priv-principles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.6rem; }
+html[data-theme] .priv-principles article { padding: 0.7rem 0.8rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+html[data-theme] .priv-principles span { font-size: 1.2rem; }
+html[data-theme] .priv-principles strong { display: block; margin: 0.15rem 0; color: var(--text-strong); font-size: 0.88rem; }
+html[data-theme] .priv-principles p { margin: 0; font-size: 0.78rem; color: var(--muted); }
+html[data-theme] .priv-venues { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 0.8rem; }
+html[data-theme] .priv-venue { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.9rem 1rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); border-top: 3px solid var(--warning); }
+html[data-theme] .priv-venue.is-ok { border-top-color: var(--success); }
+html[data-theme] .priv-venue header { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+html[data-theme] .priv-venue header strong { display: block; color: var(--text-strong); }
+html[data-theme] .priv-venue header small { font-size: 0.76rem; color: var(--muted); }
+html[data-theme] .priv-venue .btn { align-self: flex-start; border-radius: 999px; }
+html[data-theme] .priv-score {
+    flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; font: 800 0.86rem "Space Grotesk", sans-serif; color: var(--text-strong);
+    background: radial-gradient(closest-side, var(--surface-2) 74%, transparent 76% 100%), conic-gradient(var(--accent) calc(var(--pct) * 1%), var(--border-strong) 0);
+}
+html[data-theme] .priv-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+html[data-theme] .priv-checks li { display: flex; gap: 0.5rem; font-size: 0.84rem; }
+html[data-theme] .priv-checks li small { display: block; font-size: 0.74rem; color: var(--muted); }
+html[data-theme] .priv-checks li.is-bad { color: var(--warning); }
+html[data-theme] .priv-status { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1rem; padding: 0.85rem 1rem; margin-bottom: 1rem; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .priv-status strong { display: block; color: var(--text-strong); }
+html[data-theme] .priv-status small { font-size: 0.78rem; color: var(--muted); }
+html[data-theme] .priv-mini-checks { display: flex; flex-wrap: wrap; gap: 0.35rem; flex-basis: 100%; }
+html[data-theme] .priv-mini-checks span { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.74rem; font-weight: 600; background: var(--success-soft); color: var(--success); cursor: help; }
+html[data-theme] .priv-mini-checks span.is-bad { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .priv-form { max-width: 820px; margin: 0 auto 1.2rem; }
+html[data-theme] .priv-principle { margin-left: auto; padding: 0.1rem 0.55rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 0.72rem; font-weight: 700; }
+html[data-theme] .priv-form legend { width: 100%; }
+html[data-theme] .priv-locked .mgmt-switch { opacity: 0.75; cursor: not-allowed; border-style: dashed; }
+html[data-theme] .priv-warn { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
+html[data-theme] .priv-auth-bar { justify-content: space-between; max-width: 1100px; margin: 0.4rem auto 0.3rem; }

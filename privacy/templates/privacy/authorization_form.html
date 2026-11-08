@@ -3,46 +3,18 @@
 {% block title %}Nueva autorización | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card auth-card">
-    <a href="{% url 'privacy:policy_edit' venue.id %}">
-        ← Volver a la política
-    </a>
-
-    <h1>Registrar autorización de procesamiento</h1>
-
-    <p>
-        <strong>Local:</strong> {{ venue.name }}
-    </p>
-
-    <p>
-        Esta autorización respalda el uso de una fuente visual bajo
-        la finalidad definida por la política de privacidad.
-    </p>
-
-    <form method="post">
+<section class="page-header">
+    <div>
+        <h1>📝 Registrar autorización</h1>
+        <p class="muted">{{ venue.name }} · respalda el uso de las cámaras bajo la finalidad de la política.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'privacy:policy_edit' venue.id %}">← Volver a la política</a>
+</section>
+<section class="card page-panel priv-panel staff-edit">
+    <form method="post" class="mgmt-form">
         {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
-                {{ field }}
-
-                {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
-                {% endif %}
-
-                {% for error in field.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-
-        <button class="btn btn-primary" type="submit">
-            Registrar autorización
-        </button>
+        {% for field in form %}{% include "authentication/management/_field.html" with field=field %}{% endfor %}
+        <div class="mgmt-dialog-actions"><button class="btn btn-primary" type="submit">✓ Registrar autorización</button></div>
     </form>
 </section>
 {% endblock %}

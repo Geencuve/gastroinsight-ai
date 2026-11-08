@@ -3,96 +3,94 @@
 {% block title %}Política de privacidad | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card auth-card">
-    <a href="{% url 'privacy:policy_list' %}">
-        ← Volver a privacidad
-    </a>
-
-    <h1>Política de privacidad</h1>
-
-    <p>
-        <strong>Local:</strong> {{ venue.name }}
-    </p>
-
-    <p>
-        El sistema debe procesar solo eventos agregados y no almacenar
-        imágenes originales, identidades ni perfiles biométricos.
-    </p>
-
-    <form method="post">
-        {% csrf_token %}
-
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-
-                {{ field }}
-
-                {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
-                {% endif %}
-
-                {% for error in field.errors %}
-                    <p class="form-error">{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-
-        <button class="btn btn-primary" type="submit">
-            Guardar política
-        </button>
-    </form>
+<section class="page-header">
+    <div>
+        <h1>🔒 Política de privacidad</h1>
+        <p class="muted">{{ venue.name }} · versión {{ policy.version }}{% if policy.updated_by %} · actualizada por {{ policy.updated_by.username }} el {{ policy.updated_at|date:"d-m-Y H:i" }}{% endif %}</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'privacy:policy_list' %}">← Privacidad</a>
 </section>
 
-<br>
+<section class="card page-panel priv-panel">
+    <div class="priv-status">
+        <span class="priv-score" style="--pct: {{ check.pct }}">{{ check.pct }}%</span>
+        <div><strong>{% if check.ok %}Este local cumple los {{ check.total }} puntos{% else %}Cumple {{ check.done }} de {{ check.total }} puntos{% endif %}</strong>
+            <small>Según la {{ law.current }} vigente y preparada para la {{ law.next }}.</small></div>
+        <div class="priv-mini-checks">{% for item in check.items %}<span class="{% if item.ok %}is-ok{% else %}is-bad{% endif %}" title="{{ item.hint }}">{% if item.ok %}✅{% else %}⚠️{% endif %} {{ item.label }}</span>{% endfor %}</div>
+    </div>
 
-<section class="card">
-    <h2>Autorizaciones de procesamiento</h2>
+    <form method="post" class="mgmt-form mgmt-form-steps priv-form">
+        {% csrf_token %}
+        {% for e in form.non_field_errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+        <fieldset>
+            <legend><b>1</b> Para qué se procesa <span class="priv-principle">🎯 Licitud y finalidad</span></legend>
+            <div class="mgmt-row2">
+                {% include "authentication/management/_field.html" with field=form.version hint="Súbela cuando cambies la finalidad o los plazos." %}
+                <div></div>
+            </div>
+            {% include "authentication/management/_field.html" with field=form.purpose hint="Escribe en lenguaje simple para qué se usa el análisis visual. Ej.: medir la ocupación y la experiencia por mesa sin identificar personas." %}
+        </fieldset>
+        <fieldset>
+            <legend><b>2</b> Qué se guarda y por cuánto tiempo <span class="priv-principle">📉 Minimización y plazo</span></legend>
+            <div class="mgmt-row2">
+                {% include "authentication/management/_field.html" with field=form.retain_aggregated_events_days hint="Lecturas numéricas por mesa. Recomendado: 30 días." %}
+                {% include "authentication/management/_field.html" with field=form.retain_incidents_days hint="Registro de fallas técnicas. Recomendado: 90 días." %}
+            </div>
+            <div class="priv-locked">
+                {% include "authentication/management/_field.html" with field=form.store_original_images label="Guardar imágenes originales" hint="🔒 Bloqueado en apagado: la plataforma nunca guarda fotos ni video, solo números agregados." %}
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend><b>3</b> Activar el análisis visual <span class="priv-principle">🛡️ Responsabilidad</span></legend>
+            {% include "authentication/management/_field.html" with field=form.processing_enabled hint="Las cámaras del local se analizan solo si esto está activo y hay una autorización vigente." %}
+            {% if not check.valid_auth %}<p class="mgmt-tip priv-warn">⚠️ Aún no hay una autorización vigente: regístrala abajo para que el análisis funcione.</p>{% endif %}
+        </fieldset>
+        <div class="mgmt-dialog-actions"><button class="btn btn-primary" type="submit">💾 Guardar política</button></div>
+    </form>
 
-    <a
-        class="btn btn-primary"
-        href="{% url 'privacy:authorization_create' venue.id %}"
-    >
-        Registrar autorización
-    </a>
-
-    <br><br>
-
+    <div class="mgmt-toolbar priv-auth-bar">
+        <h2 class="mgmt-sub-title">📝 Autorizaciones de procesamiento</h2>
+        <button type="button" class="btn btn-primary mgmt-add" data-open-dialog="dlg-auth">＋ Registrar autorización</button>
+    </div>
+    <p class="mgmt-intro">Respaldo formal del uso de las cámaras: quién lo autorizó, qué cubre y hasta cuándo.</p>
     {% if authorizations %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Fuente / alcance</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Aceptada</th>
-                    <th>Vencimiento</th>
-                    <th>Registrada por</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for authorization in authorizations %}
-                    <tr>
-                        <td>{{ authorization.source_description }}</td>
-                        <td>{{ authorization.authorization_type }}</td>
-                        <td>{{ authorization.get_status_display }}</td>
-                        <td>
-                            {{ authorization.accepted_at|date:"d-m-Y H:i" }}
-                        </td>
-                        <td>
-                            {{ authorization.expires_at|date:"d-m-Y H:i"|default:"Sin vencimiento" }}
-                        </td>
-                        <td>
-                            {{ authorization.accepted_by.username|default:"—" }}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive mgmt-table">
+            <table>
+                <thead><tr><th>Cubre</th><th>Tipo</th><th>Estado</th><th>Aceptada</th><th>Vence</th><th>Registrada por</th></tr></thead>
+                <tbody>
+                    {% for a in authorizations %}
+                        <tr>
+                            <td><strong>{{ a.source_description }}</strong>{% if a.notes %}<br><small class="muted">{{ a.notes }}</small>{% endif %}</td>
+                            <td>{{ a.authorization_type }}</td>
+                            <td>{% if a.is_valid %}<span class="inc-pill inc-done">✅ Vigente</span>{% elif a.expires_at %}<span class="inc-pill inc-bad">⌛ {{ a.get_status_display }} · vencida</span>{% else %}<span class="inc-pill inc-warn">{{ a.get_status_display }}</span>{% endif %}</td>
+                            <td>{{ a.accepted_at|date:"d-m-Y H:i" }}</td>
+                            <td>{{ a.expires_at|date:"d-m-Y H:i"|default:"Sin vencimiento" }}</td>
+                            <td>{{ a.accepted_by.username|default:"—" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No hay autorizaciones registradas.</p>
+        <div class="mgmt-empty">No hay autorizaciones registradas. Usa «＋ Registrar autorización».</div>
     {% endif %}
 </section>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-auth">
+    <div class="gi-modal-bar"><strong>＋ Registrar autorización</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'privacy:authorization_create' venue.id %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "authentication/management/_field.html" with field=auth_form.source_description %}
+            <div class="mgmt-row2">
+                {% include "authentication/management/_field.html" with field=auth_form.authorization_type %}
+                {% include "authentication/management/_field.html" with field=auth_form.status %}
+            </div>
+            {% include "authentication/management/_field.html" with field=auth_form.expires_at hint="Déjalo vacío si no vence." %}
+            {% include "authentication/management/_field.html" with field=auth_form.notes %}
+            <p class="mgmt-tip">📢 Recuerda mantener un aviso visible al público en el local.</p>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Registrar</button></div>
+        </form>
+    </div>
+</dialog>
 {% endblock %}
