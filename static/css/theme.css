@@ -1835,3 +1835,13 @@ html[data-theme] .gi-modal-body > p, html[data-theme] .gi-modal-body .card > p:f
 html[data-theme] .gi-modal-body form { width: 100%; max-width: 520px; margin: 0 auto; }
 html[data-theme] .gi-modal-body form label { text-align: left; }
 html[data-theme] .gi-modal-body form .btn-primary[type="submit"], html[data-theme] .gi-modal-body form button[type="submit"]:only-of-type { width: 100%; }
+
+/* Control de sonido en la esquina superior derecha del panel de alertas */
+html[data-theme] .home-bell-panel header { display: flex !important; justify-content: space-between; align-items: center !important; gap: 0.6rem; }
+html[data-theme] .bell-head-text { display: flex; align-items: baseline; gap: 0.5rem; }
+html[data-theme] .bell-sound {
+    width: 36px; height: 36px; flex: none; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-2);
+    font-size: 1.05rem; cursor: pointer; display: grid; place-items: center;
+}
+html[data-theme] .bell-sound:hover { border-color: var(--accent); }
+html[data-theme] .bell-sound[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }

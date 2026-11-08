@@ -9,7 +9,7 @@
             <h1>🔔 Mis alertas</h1>
             <p class="muted">Mesas que necesitan tu atención, ordenadas por urgencia.</p>
         </div>
-        <div class="waiter-actions">{% if can_pair %}<a class="btn btn-secondary btn-small" href="{% url 'waiter:pair' %}">📱 Conectar celular</a>{% endif %}<button type="button" class="btn btn-secondary btn-small" id="sound-toggle">🔈 Sonido</button></div>
+        <div class="waiter-actions">{% if can_pair %}<a class="btn btn-secondary btn-small" href="{% url 'waiter:pair' %}">📱 Conectar celular</a>{% endif %}</div>
     </header>
     <div id="waiter-panel" data-url="{% url 'waiter:panel' %}">{% include "operations/_waiter_panel.html" %}</div>
 </div>

@@ -1,4 +1,4 @@
-﻿/* GastroInsight AI · Campana de alertas global y botón de tema en la esquina superior derecha. */
+/* GastroInsight AI · Campana de alertas global y botón de tema en la esquina superior derecha. */
 (function () {
     "use strict";
     if (document.body.dataset.embed === "1" || !document.querySelector(".app-sidebar")) return;
@@ -16,11 +16,37 @@
         const bell = document.createElement("div");
         bell.className = "home-bell";
         bell.innerHTML = `<button type="button" class="home-bell-btn" aria-expanded="false" aria-label="Alertas"><span class="bell-glyph">🔔</span><span class="home-bell-count" hidden></span></button>
-            <div class="home-bell-panel" hidden><header><strong>Alertas</strong><small class="home-bell-sub"></small></header><div class="home-bell-list"></div></div>`;
+            <div class="home-bell-panel" hidden><header><div class="bell-head-text"><strong>Alertas</strong><small class="home-bell-sub"></small></div><button type="button" class="bell-sound" aria-pressed="false"></button></header><div class="home-bell-list"></div></div>`;
         bar.appendChild(bell);
         const button = bell.querySelector(".home-bell-btn");
         const panel = bell.querySelector(".home-bell-panel");
         const list = bell.querySelector(".home-bell-list");
+        const SOUND = "gi-alert-sound";
+        const sound = bell.querySelector(".bell-sound");
+        const soundOn = () => { try { return localStorage.getItem(SOUND) === "on"; } catch (e) { return false; } };
+        const paintSound = () => {
+            const on = soundOn();
+            sound.textContent = on ? "🔊" : "🔇";
+            sound.title = on ? "Sonido activado: toca para silenciar" : "Sonido desactivado: toca para activarlo";
+            sound.setAttribute("aria-label", sound.title);
+            sound.setAttribute("aria-pressed", String(on));
+        };
+        sound.addEventListener("click", (event) => {
+            event.stopPropagation();
+            try { localStorage.setItem(SOUND, soundOn() ? "off" : "on"); } catch (e) { /* sin almacenamiento */ }
+            paintSound();
+            if (!soundOn()) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.frequency.value = 660;
+                gain.gain.value = 0.08;
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.18);
+            } catch (e) { /* sin audio */ }
+        });
+        paintSound();
         const live = new Map();
 
         function card(item, isLive) {
