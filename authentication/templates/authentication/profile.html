@@ -3,37 +3,36 @@
 {% block title %}Mi perfil | GastroInsight AI{% endblock %}
 
 {% block content %}
-<div class="profile-layout">
-    <aside class="profile-card">
-        <div class="profile-avatar">{{ initial }}</div>
+<section class="page-header prof-header">
+    <div>
+        <div class="prof-avatar mgmt-avatar role-{{ role_key }}">{{ initial }}</div>
         <h1>{{ user.get_full_name|default:user.username }}</h1>
-        <p class="muted">@{{ user.username }}</p>
-        <span class="role-badge role-{{ role_key }}">{{ profile.get_role_display }}</span>
+        <p class="muted">@{{ user.username }} · <span class="role-badge role-{{ role_key }}">{{ profile.get_role_display }}</span></p>
+    </div>
+</section>
 
-        <dl class="profile-facts">
-            <div><dt>Correo</dt><dd>{{ user.email|default:"Sin registrar" }}</dd></div>
-            <div><dt>Teléfono</dt><dd>{{ profile.phone|default:"Sin registrar" }}</dd></div>
-            <div><dt>Miembro desde</dt><dd>{{ user.date_joined|date:"d \d\e F \d\e Y" }}</dd></div>
-            <div><dt>Último acceso</dt><dd>{{ user.last_login|date:"d-m-Y H:i"|default:"—" }}</dd></div>
-        </dl>
+<section class="card page-panel prof-panel" data-profile>
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">🏪</span><strong>{% if all_venues %}Todos{% else %}{{ venues|length }}{% endif %}</strong><span>Locales</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">✅</span><strong data-prof-allowed>—</strong><span>Permisos de tu rol</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🕑</span><strong>{{ user.last_login|date:"d-m H:i"|default:"—" }}</strong><span>Último acceso</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📅</span><strong>{{ user.date_joined|date:"d-m-Y" }}</strong><span>Miembro desde</span></div>
+    </div>
 
-        <nav class="profile-nav">
-            <a href="#locales">🏪 Locales y permisos</a>
-            <a href="#configuracion">⚙️ Configuración de cuenta</a>
-            <a href="#seguridad">🔒 Seguridad</a>
-            <a href="#preferencias">🎨 Preferencias</a>
-            <a href="#actividad">🕑 Mi actividad</a>
-        </nav>
+    <nav class="status-chips prof-chips" aria-label="Secciones del perfil">
+        <a class="status-chip" href="#locales">🏪 Locales y permisos</a>
+        <a class="status-chip" href="#configuracion">⚙️ Mis datos</a>
+        <a class="status-chip" href="#seguridad">🔒 Seguridad</a>
+        <a class="status-chip" href="#preferencias">🎨 Preferencias</a>
+        <a class="status-chip" href="#actividad">🕑 Actividad</a>
+        <button type="button" class="status-chip" data-prof-all="1">▾ Abrir todo</button>
+        <button type="button" class="status-chip" data-prof-all="0">▴ Cerrar todo</button>
+    </nav>
 
-        <form method="post" action="{% url 'authentication:logout' %}">
-            {% csrf_token %}
-            <button class="btn btn-danger profile-logout" type="submit">↩ Cerrar sesión</button>
-        </form>
-    </aside>
-
-    <div class="profile-main">
-        <section class="card" id="locales">
-            <h2>Mis locales y permisos</h2>
+    <details class="prof-section" id="locales" data-prof>
+        <summary><span class="prof-icon">🏪</span><span class="prof-title"><strong>Mis locales y permisos</strong>
+            <small>{% if all_venues %}Todos los locales{% else %}{{ venues|length }} local{{ venues|length|pluralize:"es" }}{% endif %} · <b data-prof-perms></b></small></span></summary>
+        <div class="prof-body">
             <div class="venue-chips">
                 {% if all_venues %}<span class="venue-chip">🌐 Todos los locales de la plataforma</span>{% endif %}
                 {% for venue in venues %}
@@ -42,22 +41,23 @@
                     <p class="muted">Aún no tienes locales asignados. Un administrador debe asignártelos.</p>
                 {% endfor %}
             </div>
-            <ul class="capability-list">
+            <ul class="capability-list prof-caps">
                 {% for item in capabilities %}
-                    <li class="{% if item.allowed %}is-allowed{% else %}is-denied{% endif %}">
-                        <span>{% if item.allowed %}✓{% else %}✕{% endif %}</span>{{ item.label }}
-                    </li>
+                    <li class="{% if item.allowed %}is-allowed{% else %}is-denied{% endif %}"><span>{% if item.allowed %}✓{% else %}✕{% endif %}</span>{{ item.label }}</li>
                 {% endfor %}
             </ul>
-        </section>
+        </div>
+    </details>
 
-        <section class="card" id="configuracion">
-            <h2>Configuración de cuenta</h2>
+    <details class="prof-section" id="configuracion" data-prof>
+        <summary><span class="prof-icon">⚙️</span><span class="prof-title"><strong>Configuración de cuenta</strong>
+            <small>{{ user.email|default:"Sin correo registrado" }}{% if profile.phone %} · {{ profile.phone }}{% endif %}</small></span></summary>
+        <div class="prof-body">
             <p class="muted">Estos datos se muestran en tu perfil y en el registro de auditoría.</p>
-            <form method="post" class="profile-form">
+            <form method="post" class="mgmt-form profile-form">
                 {% csrf_token %}
                 {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors|join:" " }}</div>{% endif %}
-                <div class="profile-grid">
+                <div class="prof-grid">
                     {% for field in form %}
                         <div class="form-group">
                             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -68,15 +68,18 @@
                     <div class="form-group">
                         <label>Usuario</label>
                         <input type="text" value="{{ user.username }}" disabled>
-                        <small>El nombre de usuario no se puede cambiar.</small>
+                        <small class="muted">El nombre de usuario no se puede cambiar.</small>
                     </div>
                 </div>
-                <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                <div class="mgmt-dialog-actions"><button class="btn btn-primary" type="submit">💾 Guardar cambios</button></div>
             </form>
-        </section>
+        </div>
+    </details>
 
-        <section class="card" id="seguridad">
-            <h2>Seguridad</h2>
+    <details class="prof-section" id="seguridad" data-prof>
+        <summary><span class="prof-icon">🔒</span><span class="prof-title"><strong>Seguridad</strong>
+            <small>Contraseña y sesión · último acceso {{ user.last_login|date:"d-m-Y H:i"|default:"—" }}</small></span></summary>
+        <div class="prof-body">
             <div class="setting-row">
                 <div><strong>Contraseña</strong><small>Usa al menos 8 caracteres y cámbiala si la compartiste.</small></div>
                 <a class="btn btn-secondary" href="{% url 'authentication:password_change' %}">🔑 Cambiar contraseña</a>
@@ -85,7 +88,7 @@
                 <div><strong>Sesión actual</strong><small>Último acceso: {{ user.last_login|date:"d-m-Y H:i"|default:"—" }}</small></div>
                 <form method="post" action="{% url 'authentication:logout' %}">
                     {% csrf_token %}
-                    <button class="btn btn-danger" type="submit">Cerrar sesión</button>
+                    <button class="btn btn-danger" type="submit">↩ Cerrar sesión</button>
                 </form>
             </div>
             {% if user.is_staff %}
@@ -94,10 +97,13 @@
                     <a class="btn btn-secondary" href="/admin/">🛠️ Abrir administración</a>
                 </div>
             {% endif %}
-        </section>
+        </div>
+    </details>
 
-        <section class="card" id="preferencias">
-            <h2>Preferencias</h2>
+    <details class="prof-section" id="preferencias" data-prof>
+        <summary><span class="prof-icon">🎨</span><span class="prof-title"><strong>Preferencias</strong>
+            <small>Tema, leyendas de ayuda, tour guiado y asistente</small></span></summary>
+        <div class="prof-body">
             <div class="setting-row">
                 <div><strong>Tema de la interfaz</strong><small>Se guarda en este navegador y también aplica al panel de administración.</small></div>
                 <div class="segmented">
@@ -120,38 +126,70 @@
                 <div><strong>Asistente de gestión</strong><small>Tu copiloto para consultas, métricas e ideas.</small></div>
                 <a class="btn btn-secondary" href="{% url 'assistant_chat:staff_chat' %}">✨ Abrir {{ assistant_name }}</a>
             </div>
-        </section>
+        </div>
+    </details>
 
-        <section class="card" id="actividad">
-            <h2>Mi actividad reciente</h2>
+    <details class="prof-section" id="actividad" data-prof>
+        <summary><span class="prof-icon">🕑</span><span class="prof-title"><strong>Mi actividad reciente</strong>
+            <small>{{ activity|length }} acci{{ activity|length|pluralize:"ón,ones" }} recientes</small></span></summary>
+        <div class="prof-body">
             {% if activity %}
-                <ul class="activity-list">
+                <ul class="activity-list prof-activity">
                     {% for item in activity %}
-                        <li>
-                            <span class="activity-tag">{{ item.action }}</span>
-                            <span class="activity-text">{{ item.description }}</span>
-                            <small>{{ item.when|date:"d-m-Y H:i" }}</small>
-                        </li>
+                        <li><span class="inc-pill audit-info">{{ item.action }}</span><span class="activity-text">{{ item.description }}</span><small>{{ item.when|date:"d-m-Y H:i" }}</small></li>
                     {% endfor %}
                 </ul>
             {% else %}
                 <p class="muted">Aún no hay acciones registradas para tu cuenta.</p>
             {% endif %}
-        </section>
-    </div>
-</div>
+        </div>
+    </details>
+
+    <form method="post" action="{% url 'authentication:logout' %}" class="prof-logout">
+        {% csrf_token %}
+        <button class="btn btn-danger profile-logout" type="submit">↩ Cerrar sesión</button>
+    </form>
+</section>
 
 <script>
-    (function () {
-        const buttons = document.querySelectorAll("[data-theme-choice]");
-        const mark = () => buttons.forEach((b) => b.classList.toggle("is-active", b.dataset.themeChoice === document.documentElement.getAttribute("data-theme")));
-        buttons.forEach((button) => button.addEventListener("click", () => {
-            if (document.documentElement.getAttribute("data-theme") !== button.dataset.themeChoice) {
-                document.getElementById("theme-toggle").click();
-            }
-            mark();
-        }));
+(function () {
+    // Tema (igual que antes)
+    const buttons = document.querySelectorAll("[data-theme-choice]");
+    const mark = () => buttons.forEach((b) => b.classList.toggle("is-active", b.dataset.themeChoice === document.documentElement.getAttribute("data-theme")));
+    buttons.forEach((button) => button.addEventListener("click", () => {
+        if (document.documentElement.getAttribute("data-theme") !== button.dataset.themeChoice) {
+            const toggle = document.getElementById("theme-toggle");
+            if (toggle) toggle.click();
+        }
         mark();
-    })();
+    }));
+    mark();
+
+    // Permisos del rol en el resumen
+    const caps = document.querySelectorAll(".prof-caps li");
+    const allowed = document.querySelectorAll(".prof-caps li.is-allowed").length;
+    document.querySelector("[data-prof-allowed]").textContent = `${allowed}/${caps.length}`;
+    document.querySelector("[data-prof-perms]").textContent = `${allowed} de ${caps.length} permisos`;
+
+    // Secciones plegables que se recuerdan
+    const KEY = "gi-profile-open";
+    const sections = [...document.querySelectorAll("[data-prof]")];
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { saved = null; }
+    const store = () => { try { localStorage.setItem(KEY, JSON.stringify(sections.filter((s) => s.open).map((s) => s.id))); } catch (e) { /* sin almacenamiento */ } };
+    sections.forEach((s, i) => { s.open = saved ? saved.includes(s.id) : i === 0; });
+    sections.forEach((s) => { if (s.querySelector(".field-error, .form-error, .alert-error")) s.open = true; });
+    const openHash = () => {
+        const target = location.hash && document.getElementById(location.hash.slice(1));
+        if (target && target.matches("[data-prof]")) { target.open = true; target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    };
+    openHash();
+    window.addEventListener("hashchange", openHash);
+    sections.forEach((s) => s.addEventListener("toggle", store));
+    document.querySelectorAll("[data-prof-all]").forEach((b) => b.addEventListener("click", () => {
+        sections.forEach((s) => { s.open = b.dataset.profAll === "1"; });
+        store();
+    }));
+})();
 </script>
 {% endblock %}

@@ -3274,3 +3274,56 @@ html[data-theme] .venue-config strong { color: var(--text-strong); }
 html[data-theme] .venue-config small { font-size: 0.76rem; color: var(--muted); }
 html[data-theme] .venue-toggle { display: flex; justify-content: center; margin-top: 0.8rem; }
 html[data-theme] .venue-toggle .btn { border-radius: 999px; }
+
+/* =========================================================
+   Mi perfil v2: secciones plegables y diseño para celular
+   ========================================================= */
+html[data-theme] .prof-header > div { display: flex; flex-direction: column; align-items: center; }
+html[data-theme] .prof-avatar { width: 64px !important; height: 64px !important; font-size: 1.6rem !important; margin-bottom: 0.4rem; box-shadow: 0 8px 24px rgba(34, 211, 238, 0.25); }
+html[data-theme] .prof-header h1 { margin: 0; }
+html[data-theme] .prof-panel { max-width: 980px; margin: 0 auto; }
+html[data-theme] .prof-panel .orders-summary { margin-bottom: 0.8rem; }
+html[data-theme] .prof-chips { justify-content: center; margin-bottom: 1rem; }
+html[data-theme] .prof-chips a { text-decoration: none; }
+html[data-theme] .prof-section { margin-bottom: 0.6rem; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-2); overflow: hidden; scroll-margin-top: 1rem; }
+html[data-theme] .prof-section > summary { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; cursor: pointer; list-style: none; }
+html[data-theme] .prof-section > summary::-webkit-details-marker { display: none; }
+html[data-theme] .prof-section > summary::after { content: "▾"; margin-left: auto; color: var(--muted); transition: transform 0.15s ease; }
+html[data-theme] .prof-section[open] > summary::after { transform: rotate(180deg); }
+html[data-theme] .prof-section[open] > summary { border-bottom: 1px solid var(--border); }
+html[data-theme] .prof-section > summary:hover { background: var(--surface-3); }
+html[data-theme] .prof-icon { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 1.1rem; }
+html[data-theme] .prof-title { min-width: 0; }
+html[data-theme] .prof-title strong { display: block; color: var(--text-strong); }
+html[data-theme] .prof-title small { display: block; font-size: 0.78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme] .prof-title b { font-weight: 600; }
+html[data-theme] .prof-body { padding: 0.9rem 1rem 1rem; background: var(--surface); }
+html[data-theme] .prof-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 0.8rem; }
+html[data-theme] .prof-grid input, html[data-theme] .prof-grid select { width: 100%; box-sizing: border-box; }
+html[data-theme] .prof-caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.35rem 0.8rem; margin-top: 0.8rem; }
+html[data-theme] .prof-panel .setting-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+html[data-theme] .prof-panel .setting-row:last-child { border-bottom: 0; }
+html[data-theme] .prof-panel .setting-row > div:first-child { flex: 1 1 260px; }
+html[data-theme] .prof-panel .setting-row small { display: block; color: var(--muted); font-size: 0.8rem; }
+html[data-theme] .prof-panel .setting-row .btn, html[data-theme] .prof-panel .segmented button { border-radius: 999px; }
+html[data-theme] .prof-activity li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem; }
+html[data-theme] .prof-activity li:last-child { border-bottom: 0; }
+html[data-theme] .prof-activity small { color: var(--muted); white-space: nowrap; }
+html[data-theme] .prof-logout { display: flex; justify-content: center; margin-top: 0.8rem; }
+html[data-theme] .prof-logout .btn { border-radius: 999px; }
+html[data-theme] .prof-help summary { cursor: pointer; font-size: 0.78rem; color: var(--accent); margin-top: 0.3rem; }
+html[data-theme] .prof-help ul { margin: 0.3rem 0 0; padding-left: 1.1rem; font-size: 0.78rem; }
+html[data-theme] .prof-done { display: flex; justify-content: center; }
+@media (max-width: 760px) {
+    html[data-theme] .prof-grid { grid-template-columns: 1fr; }
+    html[data-theme] .prof-panel { padding: 0.8rem !important; }
+    html[data-theme] .prof-panel .orders-summary { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    html[data-theme] .prof-chips { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-bottom: 0.3rem; }
+    html[data-theme] .prof-chips .status-chip { flex: none; }
+    html[data-theme] .prof-panel .setting-row { flex-direction: column; align-items: stretch; }
+    html[data-theme] .prof-panel .setting-row .btn, html[data-theme] .prof-panel .setting-row form, html[data-theme] .prof-panel .setting-row form .btn { width: 100%; }
+    html[data-theme] .prof-panel .segmented { display: flex; }
+    html[data-theme] .prof-panel .segmented button { flex: 1; }
+    html[data-theme] .prof-activity li { grid-template-columns: 1fr; gap: 0.2rem; }
+    html[data-theme] .prof-panel .mgmt-dialog-actions .btn, html[data-theme] .prof-logout .btn { width: 100%; }
+}
