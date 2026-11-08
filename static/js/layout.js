@@ -305,3 +305,35 @@
     document.body.classList.add("no-topbar");
     document.documentElement.style.setProperty("--app-header", "0px");
 })();
+
+/* GastroInsight AI · Botones del encabezado en una fila e íconos en los indicadores (todas las pantallas). */
+(function () {
+    "use strict";
+    if (document.body.dataset.embed === "1" && !document.querySelector("main .page-header")) return;
+    document.querySelectorAll("main .page-header").forEach((header) => {
+        if (header.querySelector(":scope > .page-actions")) return;
+        const loose = [...header.children].filter((el) => el.matches("a.btn, button.btn, form, .btn-group"));
+        if (loose.length < 1) return;
+        const row = document.createElement("div");
+        row.className = "page-actions";
+        loose[0].before(row);
+        loose.forEach((el) => row.appendChild(el));
+    });
+    if (location.pathname === "/") return;
+    const ICONS = [
+        [/comensal|cliente|persona/i, "👥"], [/mesa/i, "🪑"], [/personal|turno|garz/i, "🧑‍🍳"], [/c[aá]mara/i, "🎥"],
+        [/venta|vendido|ingreso|monto|total/i, "💰"], [/ticket/i, "🧾"], [/pedido/i, "🧾"], [/ieo|experiencia/i, "📊"],
+        [/evaluaci|satisf|nota|csat/i, "⭐"], [/tiempo|espera|minuto/i, "⏱️"], [/alerta|incidenc/i, "🔔"], [/sesi/i, "🎬"],
+        [/evento|lectura|detecci/i, "📡"], [/plato/i, "🍽️"],
+    ];
+    document.querySelectorAll("main .kpi").forEach((kpi) => {
+        if (kpi.querySelector(".kpi-icon")) return;
+        const label = (kpi.querySelector(".kpi-label") || kpi).textContent;
+        const match = ICONS.find(([pattern]) => pattern.test(label));
+        if (!match) return;
+        const icon = document.createElement("span");
+        icon.className = "kpi-icon";
+        icon.textContent = match[1];
+        kpi.prepend(icon);
+    });
+})();

@@ -2153,3 +2153,173 @@ html[data-theme] .journey-sessions .mini-table small { color: var(--muted); font
 /* Journey de cada atención: mosaicos centrados y del mismo ancho */
 html[data-theme] .journey-sessions { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
 html[data-theme] .journey-sessions .mini-table { width: 140px; flex: none; box-sizing: border-box; }
+
+/* =========================================================
+   Pestañas con recuadro (supervisor, centro de gestión) y coeficientes en mosaicos
+   ========================================================= */
+html[data-theme] main .page-actions { display: flex !important; flex-direction: row !important; flex-wrap: wrap; justify-content: center; gap: 0.45rem; }
+html[data-theme] main .page-actions .btn { border-radius: 999px; padding-left: 1rem; padding-right: 1rem; }
+html[data-theme] main [data-tabs]:not([data-tabs="ideas"]):not([data-tabs="vision"]) {
+    padding: 1rem 1.2rem 1.2rem; border-radius: 20px; background: var(--surface); border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+html[data-theme] main [data-tabs]:not([data-tabs="ideas"]):not([data-tabs="vision"]) .tab-bar { margin-bottom: 1rem; }
+html[data-theme] main [data-tabs]:not([data-tabs="ideas"]):not([data-tabs="vision"]) .tab-panel .card {
+    background: var(--surface-2) !important; box-shadow: none !important;
+}
+html[data-theme] main [data-tabs] .tab-panel .card .thumb-card, html[data-theme] main [data-tabs] .tab-panel .card .table-card { background: var(--surface) !important; }
+
+html[data-theme] .corr-stats, html[data-theme] .card .stat-row { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin: 0.4rem 0 0.9rem; }
+html[data-theme] .corr-stats > div, html[data-theme] .card .stat-row > div {
+    min-width: 110px; padding: 0.7rem 0.9rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); text-align: center;
+}
+
+/* Panel del supervisor: resumen del journey y de la correlación */
+html[data-theme] .sup-summary { margin-top: 1.1rem; }
+html[data-theme] .sup-summary > h2 { text-align: center; }
+html[data-theme] .sup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+html[data-theme] .sup-card {
+    display: flex; flex-direction: column; align-items: center; gap: 0.7rem; padding: 1rem; border-radius: 16px;
+    background: var(--surface-2); border: 1px solid var(--border); text-align: center;
+}
+html[data-theme] .sup-card header { display: flex; align-items: center; gap: 0.45rem; }
+html[data-theme] .sup-card header span { font-size: 1.3rem; }
+html[data-theme] .sup-card h3 { margin: 0; font-size: 1rem; }
+html[data-theme] .sup-body { width: 100%; flex: 1; }
+html[data-theme] .sup-body .orders-summary { margin: 0; }
+html[data-theme] .sup-body .mini-kpi { background: var(--surface); }
+html[data-theme] .sup-action { margin: 0.7rem 0 0; font-size: 0.86rem; }
+html[data-theme] .sup-card > .btn { border-radius: 999px; }
+@media (max-width: 980px) { html[data-theme] .sup-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   Sazón: botón enviar centrado, alertas urgentes, preguntas por pantalla y avisos
+   ========================================================= */
+html[data-theme] .composer { display: flex !important; align-items: center !important; gap: 0.5rem; }
+html[data-theme] .composer textarea { align-self: center; margin: 0 !important; }
+html[data-theme] .composer .composer-send { align-self: center !important; margin: 0 !important; flex: none; display: grid; place-items: center; }
+
+html[data-theme] .sazon-urgent {
+    margin: 0 auto 0.8rem; max-width: 420px; padding: 0.8rem 0.95rem; border-radius: 14px; text-align: left;
+    background: color-mix(in srgb, var(--danger) 13%, var(--surface)); border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border));
+}
+html[data-theme] .sazon-urgent strong { display: block; color: var(--danger); font-size: 0.92rem; margin-bottom: 0.3rem; }
+html[data-theme] .sazon-urgent ul { margin: 0 0 0.55rem; padding-left: 1.1rem; font-size: 0.84rem; color: var(--text); }
+html[data-theme] .sazon-ctx { width: 100%; margin-bottom: 0.4rem; text-align: center; }
+html[data-theme] .sazon-ctx-title { margin: 0.2rem 0 0.4rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+html[data-theme] .sazon-ctx-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+html[data-theme] .sazon-ctx-chips .chip { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+
+html[data-theme] .aw-toggle { position: fixed; }
+html[data-theme] .sazon-badge {
+    position: absolute; top: -6px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+    background: var(--danger); color: #ffffff; font-size: 0.7rem; font-weight: 800; display: grid; place-items: center;
+}
+html[data-theme] .sazon-badge[hidden] { display: none; }
+html[data-theme] .sazon-nudge {
+    position: fixed; right: 1.2rem; bottom: 5.2rem; z-index: 1300; display: flex; align-items: center; gap: 0.3rem; max-width: 300px;
+    padding: 0.35rem 0.4rem 0.35rem 0.9rem; border-radius: 16px 16px 4px 16px; background: var(--surface);
+    border: 1px solid var(--border); box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22); animation: flyout-in 0.25s ease;
+}
+html[data-theme] .sazon-nudge-text { border: 0; background: transparent; color: var(--text-strong); font: 600 0.86rem "Inter", sans-serif; text-align: left; cursor: pointer; }
+html[data-theme] .sazon-nudge-close { width: 26px; height: 26px; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--muted); cursor: pointer; }
+html[data-theme] .sazon-ask { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important; }
+
+html[data-theme] .sazon-orb-mini {
+    display: inline-block; width: 22px; height: 22px; border-radius: 50%; vertical-align: -4px; margin-right: 0.3rem;
+    background: radial-gradient(circle at 32% 30%, #a5f3fc, #22d3ee 35%, #8b5cf6 80%); box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
+}
+html[data-theme] .sazon-tip-ask { align-self: center; margin-top: 0.3rem; border-radius: 999px; }
+
+/* =========================================================
+   Sazón: botón flotante dentro de la pantalla, fila de preguntas y botón ⓘ
+   ========================================================= */
+html[data-theme] .aw-toggle { position: relative !important; }
+html[data-theme] #assistant-widget { position: fixed !important; right: 1.2rem !important; bottom: 1.2rem !important; left: auto !important; top: auto !important; z-index: 1250; }
+html[data-theme] #assistant-widget-panel { max-height: calc(100vh - 6.5rem) !important; width: min(400px, calc(100vw - 2.4rem)) !important; }
+html[data-theme] .sazon-nudge { right: 1.2rem !important; bottom: 5rem !important; max-width: min(300px, calc(100vw - 2.4rem)); }
+body.on-sazon-page #assistant-widget, body.on-sazon-page .sazon-nudge { display: none !important; }
+@media (max-width: 760px) { html[data-theme] #assistant-widget { right: 0.8rem !important; bottom: 0.8rem !important; } }
+
+html[data-theme] .sazon-strip-wrap { position: relative; display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
+html[data-theme] .sazon-strip { flex: 1; min-width: 0; overflow-x: auto !important; scrollbar-width: none; scroll-behavior: smooth; }
+html[data-theme] .sazon-strip::-webkit-scrollbar { display: none; }
+html[data-theme] .sazon-strip-wrap.fade-right .sazon-strip { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+html[data-theme] .sazon-strip-wrap.fade-left .sazon-strip { -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%); mask-image: linear-gradient(90deg, transparent, #000 15%); }
+html[data-theme] .sazon-strip-wrap.fade-left.fade-right .sazon-strip { -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+html[data-theme] .sazon-strip-arrow {
+    flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-strong); font-size: 1.2rem; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+html[data-theme] .sazon-strip-arrow:hover { border-color: var(--accent); color: var(--accent); }
+html[data-theme] .sazon-strip-arrow[hidden] { visibility: hidden; display: grid; }
+
+html[data-theme] .has-sazon-info { position: relative; padding-right: 2.2rem !important; }
+html[data-theme] .sazon-info-btn {
+    position: absolute; top: 0.55rem; right: 0.55rem; width: 20px; height: 20px; border-radius: 50%; padding: 0;
+    border: 1px solid var(--border); background: var(--surface); color: var(--accent); font: italic 700 0.72rem Georgia, serif;
+    cursor: pointer; display: grid; place-items: center; opacity: 0.8;
+}
+html[data-theme] .sazon-info-btn:hover { opacity: 1; border-color: var(--accent); }
+html[data-theme] .sazon-info-pop {
+    position: absolute; top: 2rem; right: 0.4rem; z-index: 20; width: min(320px, 80vw); padding: 0.75rem 0.85rem; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--border); box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25); text-align: left;
+}
+html[data-theme] .sazon-info-pop[hidden] { display: none; }
+html[data-theme] .sazon-info-pop strong { display: block; font-size: 0.84rem; color: var(--text-strong); margin-bottom: 0.3rem; }
+html[data-theme] .sazon-info-pop p { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--text); }
+html[data-theme] .sazon-info-pop small { display: block; font-size: 0.74rem; color: var(--muted); }
+
+/* =========================================================
+   Burbuja de Sazón agrandada con sugerencias y herramientas plegables
+   ========================================================= */
+html[data-theme] .sazon-nudge.is-expanded {
+    flex-direction: column; align-items: stretch; gap: 0.6rem; width: min(370px, calc(100vw - 2.4rem)); max-width: none !important;
+    max-height: min(72vh, 620px); overflow-y: auto; padding: 0.85rem 0.9rem; border-radius: 18px; animation: sn-grow 0.22s ease;
+}
+@keyframes sn-grow { from { opacity: 0.6; transform: scale(0.92); transform-origin: bottom right; } to { opacity: 1; transform: none; } }
+html[data-theme] .sn-head { display: flex; align-items: center; gap: 0.45rem; }
+html[data-theme] .sn-head strong { flex: 1; font-size: 0.98rem; color: var(--text-strong); }
+html[data-theme] .sn-body { display: grid; gap: 0.75rem; }
+html[data-theme] .sn-title { margin: 0 0 0.35rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+html[data-theme] .sn-idea { padding: 0.6rem 0.7rem; margin-bottom: 0.4rem; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .sn-idea strong { display: block; font-size: 0.86rem; color: var(--text-strong); }
+html[data-theme] .sn-idea p { margin: 0.25rem 0; font-size: 0.8rem; color: var(--text); }
+html[data-theme] .sn-idea a { font-size: 0.78rem; font-weight: 600; }
+html[data-theme] .sn-urgent { padding: 0.6rem 0.7rem; border-radius: 12px; background: color-mix(in srgb, var(--danger) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border)); }
+html[data-theme] .sn-urgent ul { margin: 0 0 0.45rem; padding-left: 1.1rem; font-size: 0.82rem; }
+html[data-theme] .sn-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+html[data-theme] .sn-foot { display: flex; justify-content: center; }
+
+html[data-theme] .sazon-tools-fold > summary {
+    display: flex; align-items: center; gap: 0.45rem; padding: 0.65rem 0.8rem; border-radius: 12px; cursor: pointer; list-style: none;
+    background: var(--surface-2); border: 1px solid var(--border); font-size: 0.88rem;
+}
+html[data-theme] .sazon-tools-fold > summary::-webkit-details-marker { display: none; }
+html[data-theme] .sazon-tools-fold > summary::after { content: "▸"; margin-left: auto; color: var(--accent); transition: transform 0.2s ease; }
+html[data-theme] .sazon-tools-fold[open] > summary::after { transform: rotate(90deg); }
+html[data-theme] .sazon-tools-fold > summary:hover { border-color: var(--accent); }
+html[data-theme] .stf-count { min-width: 22px; padding: 0 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 0.75rem; font-weight: 700; text-align: center; }
+html[data-theme] .sazon-tools-fold[open] > summary { margin-bottom: 0.6rem; }
+
+/* =========================================================
+   Herramientas como caja de aplicaciones y resumen de pantalla de Sazón
+   ========================================================= */
+html[data-theme] .stf-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
+html[data-theme] .stf-grid .stf-app {
+    display: flex !important; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.35rem;
+    padding: 0.65rem 0.3rem !important; border-radius: 14px; text-align: center; text-decoration: none;
+    background: var(--surface-2); border: 1px solid var(--border); transition: transform 0.15s ease, border-color 0.15s ease;
+}
+html[data-theme] .stf-grid .stf-app:hover { transform: translateY(-2px); border-color: var(--accent); }
+html[data-theme] .stf-grid .stf-app > :first-child { width: 40px !important; height: 40px !important; border-radius: 12px; display: grid; place-items: center; font-size: 1.3rem; margin: 0 !important; }
+html[data-theme] .stf-grid .stf-app strong, html[data-theme] .stf-grid .stf-app b { font-size: 0.76rem; line-height: 1.2; color: var(--text-strong); }
+html[data-theme] .stf-grid .stf-app small, html[data-theme] .stf-grid .stf-app p { display: none !important; }
+html[data-theme] .stf-grid .stf-app > div { display: flex; flex-direction: column; align-items: center; }
+
+html[data-theme] .sn-brief { padding: 0.7rem 0.75rem; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+html[data-theme] .sn-help { margin: 0 0 0.55rem; font-size: 0.82rem; color: var(--text); }
+html[data-theme] .sn-figures { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem; }
+html[data-theme] .sn-figures li { display: flex; flex-direction: column; padding: 0.45rem 0.55rem; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+html[data-theme] .sn-figures span { font-size: 0.7rem; color: var(--muted); }
+html[data-theme] .sn-figures strong { font: 800 1rem "Space Grotesk", sans-serif; color: var(--text-strong); }
