@@ -3158,3 +3158,14 @@ html[data-theme] .qr-panel .qr-try a { color: #0891b2; font-weight: 700; text-de
 html[data-theme] .qr-include { position: absolute; top: 0.5rem; left: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: #ecfeff; color: #0e7490; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
 html[data-theme] .qr-include input { accent-color: #0891b2; margin: 0; }
 html[data-theme] .qr-card.is-excluded .qr-include { background: #f3f4f6; color: #6b7280; }
+
+/* =========================================================
+   Incidencias v2: severidad y estado como píldoras
+   ========================================================= */
+html[data-theme] .inc-pill { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.74rem; font-weight: 700; white-space: nowrap; }
+html[data-theme] .inc-bad { background: var(--danger-soft); color: var(--danger); }
+html[data-theme] .inc-warn, html[data-theme] .inc-open { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .inc-info, html[data-theme] .inc-review { background: var(--info-soft); color: var(--info); }
+html[data-theme] .inc-done { background: var(--success-soft); color: var(--success); }
+html[data-theme] td.inc-title { font-weight: 600; color: var(--text-strong); }
+html[data-theme] .inc-panel .status-chip[hidden] { display: none; }
