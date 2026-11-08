@@ -125,7 +125,7 @@ def session_qr(request, session_id):
     url = request.build_absolute_uri(reverse("feedback:session_form", args=[session_token(session)]))
     svg = segno.make(url, error="m").svg_inline(omitsize=True, scale=8, dark="#111111", light="#ffffff")
     return render(request, "operations/session_qr.html", {
-        "session": session, "table": session.table, "url": url, "qr_svg": mark_safe(svg),
+        "session": session, "table": session.table, "url": url, "qr_svg": mark_safe(svg),  # nosec B308 B703 - SVG del QR generado por el propio sistema, sin datos del usuario
         "expires_at": timezone.now() + timedelta(seconds=FEEDBACK_MAX_AGE),
     })
 

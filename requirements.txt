@@ -2,7 +2,7 @@
 # Entorno completo y exacto: requirements.lock
 
 Django==5.2.18
-djangorestframework==3.16.1
+djangorestframework==3.18.3
 numpy==1.26.4
 onnxruntime==1.31.1
 opencv-contrib-python==4.10.0.84

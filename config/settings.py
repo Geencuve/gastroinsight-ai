@@ -190,6 +190,9 @@ if USE_HTTPS:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    # HSTS prudente (1 hora): súbelo cuando el dominio HTTPS sea definitivo
+    SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=3600, cast=int)
 
 # Registro público de cuentas: desactivado en el producto (las crea el administrador del local).
 ALLOW_SELF_REGISTRATION = config("ALLOW_SELF_REGISTRATION", default=False, cast=bool)

@@ -136,5 +136,5 @@ def table_qr_codes(request):
     for table in RestaurantTable.objects.filter(venue__in=venues, is_active=True).select_related("venue").order_by("venue__name", "code"):
         url = request.build_absolute_uri(reverse("feedback:form", args=[table_token(table)]))
         svg = segno.make(url, error="m").svg_inline(omitsize=True, scale=4, border=2, dark="#05070b", light="#ffffff")
-        cards.append({"table": table, "url": url, "svg": mark_safe(svg)})
+        cards.append({"table": table, "url": url, "svg": mark_safe(svg)})  # nosec B308 B703 - SVG del QR generado por el propio sistema, sin datos del usuario
     return render(request, "operations/feedback_qr.html", {"cards": cards})

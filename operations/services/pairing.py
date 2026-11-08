@@ -83,6 +83,6 @@ def pair_context(request, user):
     url = root + reverse("waiter:pair_login", args=[make_token(user)])
     return {
         "target": user, "url": url, "local_network": local, "lan_ip": lan_ip(),
-        "qr_svg": mark_safe(segno.make(url, error="m").svg_inline(omitsize=True, scale=7, dark="#111111", light="#ffffff")),
+        "qr_svg": mark_safe(segno.make(url, error="m").svg_inline(omitsize=True, scale=7, dark="#111111", light="#ffffff")),  # nosec B308 B703 - SVG del QR generado por el propio sistema, sin datos del usuario
         "expires_at": timezone.now() + timedelta(seconds=PAIR_TTL),
     }
