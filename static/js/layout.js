@@ -38,7 +38,7 @@
     function syncHeader() {
         if (!header) return;
         const height = Math.round(header.getBoundingClientRect().height);
-        document.documentElement.style.setProperty("--app-header", `${height > 30 && height < 160 ? height : 64}px`);
+        document.documentElement.style.setProperty("--app-header", `${height < 160 ? height : 64}px`);
     }
 
     if (sidebar) {
@@ -170,7 +170,7 @@
     brand.className = "side-brand";
     brand.title = "GastroInsight AI · Inicio";
     brand.setAttribute("aria-label", "GastroInsight AI, ir al inicio");
-    brand.innerHTML = '<span class="side-brand-g">G</span>';
+    brand.innerHTML = '<span class="side-brand-g">G</span><span class="side-brand-text">GastroInsight AI</span>';
     sidebar.prepend(brand);
     const headerHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--app-header")) || 64;
     const update = () => document.body.classList.toggle("header-collapsed", window.scrollY > headerHeight() - 8);
@@ -293,4 +293,15 @@
         event.preventDefault();
         toggle.click();
     });
+})();
+
+/* GastroInsight AI · Sin franja superior: el logo vive en la barra lateral. */
+(function () {
+    "use strict";
+    const sidebar = document.querySelector(".app-sidebar");
+    if (!sidebar || document.body.dataset.embed === "1") return;
+    const header = document.querySelector(".header-centered") || document.querySelector(".site-header");
+    if (header && !header.contains(sidebar)) header.classList.add("app-header-hidden");
+    document.body.classList.add("no-topbar");
+    document.documentElement.style.setProperty("--app-header", "0px");
 })();
