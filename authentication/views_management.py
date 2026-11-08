@@ -68,6 +68,9 @@ def home(request):
         "users": users, "tables": tables, "cameras": cameras, "zones": zones,
         "service_roles": ["waiter", "cashier", "kitchen", "bar", "operator"],
         "alert_forms": _alert_forms(venues),
+        "api_keys": __import__("operations.models", fromlist=["x"]).ApiKey.objects.filter(venue__in=venues).select_related("venue", "created_by"),
+        "api_base": request.build_absolute_uri("/api/v1/"),
+        "venues_list": venues,
         "security_warnings": __import__("core.security_checks", fromlist=["x"]).security_warnings(),
         "staff_form": StaffCreateForm(actor=actor, venues=venues), "table_form": TableForm(venues=venues),
         "camera_form": CameraForm(venues=venues),
@@ -234,4 +237,39 @@ def alert_settings_save(request, venue_id):
         messages.success(request, f"Umbrales de alerta de {venue.name} guardados.")
     else:
         messages.error(request, "Revisa los valores de los umbrales. " + _errors(form))
+    return redirect("management:home")
+
+
+@login_required
+@require_POST
+def api_key_create(request):
+    from operations.api import new_key
+    from operations.models import ApiKey
+
+    _, venues = _actor(request)
+    venue = venues.filter(pk=request.POST.get("venue")).first()
+    name = (request.POST.get("name") or "").strip()[:80] or "Integración"
+    if venue is None:
+        messages.error(request, "Elige el local de la clave.")
+        return redirect("management:home")
+    raw, prefix, digest = new_key()
+    key = ApiKey.objects.create(venue=venue, name=name, prefix=prefix, key_hash=digest, created_by=request.user)
+    log_action(request, action=AuditLog.Action.CREATE, module="operations", venue=venue, object_type="ApiKey",
+               object_id=str(key.pk), description=f"Creó la clave de API «{name}» ({prefix}…).")
+    messages.success(request, f"Clave creada para «{name}». Cópiala ahora, no se volverá a mostrar: {raw}")
+    return redirect("management:home")
+
+
+@login_required
+@require_POST
+def api_key_revoke(request, key_id):
+    from operations.models import ApiKey
+
+    _, venues = _actor(request)
+    key = get_object_or_404(ApiKey, pk=key_id, venue__in=venues)
+    key.is_active = False
+    key.save(update_fields=["is_active"])
+    log_action(request, action=AuditLog.Action.UPDATE, module="operations", venue=key.venue, object_type="ApiKey",
+               object_id=str(key.pk), description=f"Revocó la clave de API «{key.name}» ({key.prefix}…).")
+    messages.success(request, f"Clave «{key.name}» revocada.")
     return redirect("management:home")

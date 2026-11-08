@@ -101,3 +101,14 @@ from .models import Notification  # noqa: E402
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ("title", "kind", "level", "venue", "created_at", "acknowledged_by")
     list_filter = ("kind", "level")
+
+from .models import ApiKey, ExternalSale  # noqa: E402
+
+
+@admin.register(ApiKey)
+class ApiKeyAdmin(admin.ModelAdmin):
+    list_display = ("name", "venue", "prefix", "is_active", "last_used_at")
+    readonly_fields = ("key_hash", "prefix")
+
+
+admin.site.register(ExternalSale)

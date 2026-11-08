@@ -455,3 +455,42 @@ class AlertSettings(models.Model):
 
     def __str__(self):
         return f"Alertas de {self.venue}"
+
+
+class ApiKey(models.Model):
+    """Clave de integración de un local. Solo se guarda su huella SHA-256: la clave se muestra una vez."""
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="api_keys", verbose_name="Local")
+    name = models.CharField(max_length=80, verbose_name="Nombre")
+    prefix = models.CharField(max_length=12, verbose_name="Inicio de la clave")
+    key_hash = models.CharField(max_length=64, unique=True, verbose_name="Huella SHA-256")
+    is_active = models.BooleanField(default=True, verbose_name="Activa")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="api_keys", verbose_name="Creada por")
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True, verbose_name="Último uso")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Clave de API"
+        verbose_name_plural = "Claves de API"
+
+    def __str__(self):
+        return f"{self.name} ({self.prefix}…)"
+
+
+class ExternalSale(models.Model):
+    """Venta recibida desde el sistema de caja del local (evita registrar dos veces el mismo pedido)."""
+
+    venue = models.ForeignKey("venues.Venue", on_delete=models.CASCADE, related_name="external_sales", verbose_name="Local")
+    external_id = models.CharField(max_length=100, verbose_name="Identificador externo")
+    order = models.ForeignKey("sales.Order", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Pedido")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Venta importada"
+        verbose_name_plural = "Ventas importadas"
+        constraints = [models.UniqueConstraint(fields=["venue", "external_id"], name="unique_external_sale_per_venue")]
+
+    def __str__(self):
+        return f"{self.venue} · {self.external_id}"

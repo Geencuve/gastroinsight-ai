@@ -31,6 +31,7 @@
         <button type="button" data-tab-button role="tab">🪑 Mesas y zonas</button>
         <button type="button" data-tab-button role="tab">📷 Cámaras</button>
         <button type="button" data-tab-button role="tab">🔔 Alertas</button>
+        <button type="button" data-tab-button role="tab">🔌 Integraciones</button>
     </div>
 
     <div class="tab-panel mgmt-split" data-tab-panel>
@@ -145,6 +146,46 @@
                     <button class="btn btn-primary btn-small" type="submit">Guardar umbrales</button>
                 </form>
             {% endfor %}
+        </section>
+    </div>
+
+    <div class="tab-panel mgmt-split" data-tab-panel>
+        <section class="card mgmt-scroll">
+            <h2>🔌 Claves de API</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Nombre</th><th>Local</th><th>Clave</th><th>Último uso</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                        {% for k in api_keys %}
+                            <tr><td><strong>{{ k.name }}</strong><br><small class="muted">por {{ k.created_by.username|default:"—" }}</small></td>
+                                <td>{{ k.venue.name }}</td><td><code>{{ k.prefix }}…</code></td><td>{{ k.last_used_at|date:"d-m H:i"|default:"Nunca" }}</td>
+                                <td>{% if k.is_active %}<span class="tag-synthetic">activa</span>{% else %}<span class="muted">revocada</span>{% endif %}</td>
+                                <td>{% if k.is_active %}<form method="post" action="{% url 'management:api_key_revoke' k.id %}">{% csrf_token %}<button class="btn btn-small" type="submit">Revocar</button></form>{% endif %}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="muted">Aún no hay claves de integración.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <h3>Ejemplos</h3>
+            <pre class="api-example">curl -H "Authorization: Bearer gi_…" {{ api_base }}estado/
+
+curl -X POST {{ api_base }}telemetria/ -H "Authorization: Bearer gi_…" -H "Content-Type: application/json" \
+     -d '{"camara": 1, "rostros": 2, "ibe": -0.2, "atencion": 0.6}'
+
+curl -X POST {{ api_base }}ventas/ -H "Authorization: Bearer gi_…" -H "Content-Type: application/json" \
+     -d '{"pedido_externo": "POS-1001", "mesa": "M01", "medio_pago": "débito",
+          "items": [{"plato": "Lomo vetado con papas rústicas", "cantidad": 2}]}'</pre>
+        </section>
+        <section class="card mgmt-scroll">
+            <h2>Nueva clave</h2>
+            <form method="post" action="{% url 'management:api_key_create' %}" class="mgmt-form">
+                {% csrf_token %}
+                <label for="api-name">Nombre</label><input id="api-name" name="name" maxlength="80" placeholder="Ej. Caja principal o Nodo cámara terraza" required>
+                <label for="api-venue">Local</label><select id="api-venue" name="venue">{% for v in venues_list %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}</select>
+                <button class="btn btn-primary" type="submit">Crear clave</button>
+            </form>
+            <p class="muted">🔒 La clave se muestra una sola vez; solo se guarda su huella SHA-256. Cada clave accede únicamente a su local. La API recibe números, nunca imágenes.</p>
         </section>
     </div>
 </div>
