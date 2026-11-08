@@ -20,17 +20,19 @@
 
     <h2 class="priv-title">⚖️ Marco que se aplica</h2>
     <div class="priv-laws">
-        <article class="priv-law is-current">
+        <a class="priv-law is-current" href="{{ law.current_url }}" target="_blank" rel="noopener" title="Abrir el texto oficial en LeyChile (BCN)">
             <span class="priv-tag">Vigente</span>
             <strong>{{ law.current }}</strong>
             <p>{{ law.current_name }}</p>
-        </article>
-        <article class="priv-law">
+            <span class="priv-link">📜 Ver texto oficial en LeyChile ↗</span>
+        </a>
+        <a class="priv-law" href="{{ law.next_url }}" target="_blank" rel="noopener" title="Abrir el texto oficial en LeyChile (BCN)">
             <span class="priv-tag is-next">Próxima · {{ law.next_date }}</span>
             <strong>{{ law.next }}</strong>
             <p>{{ law.next_name }}</p>
             <small>{{ law.next_note }}</small>
-        </article>
+            <span class="priv-link">📜 Ver texto oficial en LeyChile ↗</span>
+        </a>
     </div>
 
     <details class="mgmt-help">

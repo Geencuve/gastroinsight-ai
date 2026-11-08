@@ -15,7 +15,7 @@
     <div class="priv-status">
         <span class="priv-score" style="--pct: {{ check.pct }}">{{ check.pct }}%</span>
         <div><strong>{% if check.ok %}Este local cumple los {{ check.total }} puntos{% else %}Cumple {{ check.done }} de {{ check.total }} puntos{% endif %}</strong>
-            <small>Según la {{ law.current }} vigente y preparada para la {{ law.next }}.</small></div>
+            <small>Según la <a href="{{ law.current_url }}" target="_blank" rel="noopener">{{ law.current }} ↗</a> vigente y preparada para la <a href="{{ law.next_url }}" target="_blank" rel="noopener">{{ law.next }} ↗</a>.</small></div>
         <div class="priv-mini-checks">{% for item in check.items %}<span class="{% if item.ok %}is-ok{% else %}is-bad{% endif %}" title="{{ item.hint }}">{% if item.ok %}✅{% else %}⚠️{% endif %} {{ item.label }}</span>{% endfor %}</div>
     </div>
 

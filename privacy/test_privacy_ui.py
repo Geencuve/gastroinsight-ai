@@ -31,3 +31,8 @@ class PrivacyUiTests(TestCase):
         policy = PrivacyPolicy.objects.get(venue=self.venue)
         self.assertEqual(policy.version, "1.1")
         self.assertFalse(policy.store_original_images)
+    def test_leyes_enlazan_texto_oficial(self):
+        response = self.client.get("/privacy/")
+        self.assertContains(response, "https://www.bcn.cl/leychile/navegar?idLey=19628")
+        self.assertContains(response, "https://www.bcn.cl/leychile/navegar?idLey=21719")
+        self.assertContains(self.client.get(f"/privacy/policy/{self.venue.id}/"), "idLey=19628")

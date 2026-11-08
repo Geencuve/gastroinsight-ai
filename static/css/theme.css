@@ -3215,3 +3215,9 @@ html[data-theme] .priv-form legend { width: 100%; }
 html[data-theme] .priv-locked .mgmt-switch { opacity: 0.75; cursor: not-allowed; border-style: dashed; }
 html[data-theme] .priv-warn { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
 html[data-theme] .priv-auth-bar { justify-content: space-between; max-width: 1100px; margin: 0.4rem auto 0.3rem; }
+
+/* Leyes como enlaces al texto oficial */
+html[data-theme] a.priv-law { display: block; color: var(--text); text-decoration: none; transition: transform 0.15s ease, border-color 0.15s ease; }
+html[data-theme] a.priv-law:hover { transform: translateY(-2px); border-color: var(--accent); }
+html[data-theme] .priv-link { display: inline-block; margin-top: 0.55rem; font-size: 0.78rem; font-weight: 700; color: var(--accent); }
+html[data-theme] .priv-status small a { color: var(--accent); font-weight: 700; text-decoration: none; }

@@ -6,6 +6,8 @@ from django.conf import settings
 
 LAW = {
     "current": "Ley N° 19.628",
+    "current_url": "https://www.bcn.cl/leychile/navegar?idLey=19628",
+    "next_url": "https://www.bcn.cl/leychile/navegar?idLey=21719",
     "current_name": "Sobre protección de la vida privada (datos personales).",
     "next": "Ley N° 21.719",
     "next_name": "Regula la protección y el tratamiento de los datos personales y crea la Agencia de Protección de Datos Personales. "
