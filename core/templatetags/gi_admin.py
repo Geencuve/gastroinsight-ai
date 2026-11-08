@@ -40,7 +40,8 @@ SECTIONS = [
 @register.simple_tag
 def gi_icon(name, size=18):
     path = ICON_PATHS.get(name, ICON_PATHS["grid"])
-    return mark_safe(
+    size = int(size)  # evita inyectar texto por el parámetro
+    return mark_safe(  # nosec B308 B703 - SVG fijo del sistema; el tamaño se fuerza a número
         f'<svg viewBox="0 0 24 24" width="{size}" height="{size}" fill="none" stroke="currentColor" '
         f'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{path}</svg>'
     )

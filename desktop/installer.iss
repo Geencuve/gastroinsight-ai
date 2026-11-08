@@ -1,5 +1,5 @@
-#define AppName "GastroInsight AI"
-#define AppVersion "1.0.2"
+﻿#define AppName "GastroInsight AI"
+#define AppVersion "2.0.0"
 
 [Setup]
 AppId={{8F3B2C1A-5D4E-4F6A-9B7C-1E2D3F4A5B6C}
@@ -23,12 +23,15 @@ WizardStyle=modern
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
+Name: "redlocal"; Description: "Crear acceso «red del local» para que los celulares del personal se conecten por WiFi"; GroupDescription: "Red:"
 Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; GroupDescription: "Accesos directos:"
 
 [Files]
 Source: "..\dist\GastroInsightAI\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
+Name: "{group}\GastroInsight AI (red del local)"; Filename: "{app}\GastroInsightAI.exe"; Parameters: "--red"; Tasks: redlocal
+Name: "{autodesktop}\GastroInsight AI (red del local)"; Filename: "{app}\GastroInsightAI.exe"; Parameters: "--red"; Tasks: redlocal
 Name: "{group}\GastroInsight AI"; Filename: "{app}\GastroInsightAI.exe"
 Name: "{autodesktop}\GastroInsight AI"; Filename: "{app}\GastroInsightAI.exe"; Tasks: desktopicon
 

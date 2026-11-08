@@ -272,7 +272,7 @@ def receipt(request, order_id):
     return render(request, "operations/receipt.html", {
         "order": order, "session": session, "table": session.table, "venue": session.table.venue,
         "items": _Item.objects.filter(order=order), "payment": payment, "url": url,
-        "qr_svg": _safe(segno.make(url, error="m").svg_inline(omitsize=True, scale=5, dark="#111111", light="#ffffff")),
+        "qr_svg": _safe(segno.make(url, error="m").svg_inline(omitsize=True, scale=5, dark="#111111", light="#ffffff")),  # nosec B308 B703 - SVG del QR generado con segno, sin HTML del usuario
     })
 
 

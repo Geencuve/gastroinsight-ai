@@ -1,4 +1,4 @@
-﻿"""Descarga los modelos de visión usados por GastroInsight AI."""
+"""Descarga los modelos de visión usados por GastroInsight AI."""
 import hashlib
 import sys
 import urllib.request
@@ -26,8 +26,10 @@ MODELS = {
 
 
 def download(url, target):
+    if not url.startswith("https://"):
+        raise ValueError("Solo se permiten descargas https.")
     request = urllib.request.Request(url, headers={"User-Agent": "GastroInsightAI/1.0"})
-    with urllib.request.urlopen(request, timeout=120) as response:
+    with urllib.request.urlopen(request, timeout=120) as response:  # nosec B310 - URLs https fijas de este archivo
         target.write_bytes(response.read())
 
 
