@@ -1,27 +1,147 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Códigos QR de opinión | GastroInsight AI{% endblock %}
 
 {% block content %}
 <section class="page-header no-print">
     <div>
-        <h1>Códigos QR de opinión</h1>
-        <p class="muted">Imprime y deja un código en cada mesa: el cliente califica su atención desde el celular, sin cuenta.</p>
+        <h1>📱 Códigos QR de opinión</h1>
+        <p class="muted">Imprime y deja un código en cada mesa: el cliente califica su atención desde el celular, sin cuenta ni aplicación.</p>
     </div>
-    <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
 </section>
 
-<div class="qr-grid">
-    {% for card in cards %}
-        <article class="qr-card">
-            <h3>{{ card.table.venue.name }}</h3>
-            <p><strong>Mesa {{ card.table.code }}</strong></p>
-            {{ card.svg }}
-            <p>Escanea y cuéntanos cómo estuvo todo ⭐</p>
-            <p class="no-print"><a href="{{ card.url }}" target="_blank">Probar enlace</a></p>
-        </article>
-    {% empty %}
-        <p class="muted">No hay mesas activas.</p>
-    {% endfor %}
-</div>
+<section class="card page-panel qr-panel" data-qr-print>
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">🪑</span><strong>{{ cards|length }}</strong><span>Mesas</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">✅</span><strong data-qr-selected>{{ cards|length }}</strong><span>Para imprimir</span></div>
+        <button type="button" class="mini-kpi mini-kpi-action" data-qr-go><span class="mini-kpi-icon">🖨</span><strong>Imprimir</strong><span>Seleccionados</span></button>
+    </div>
+
+    <div class="mgmt-toolbar">
+        <input type="search" class="orders-search mgmt-search" placeholder="🔎 Buscar mesa" data-qr-search aria-label="Buscar mesa">
+        <div class="status-chips" data-qr-chips></div>
+        <div class="status-chips">
+            <button type="button" class="status-chip" data-qr-all="1">☑ Todas</button>
+            <button type="button" class="status-chip" data-qr-all="0">☐ Ninguna</button>
+        </div>
+    </div>
+    <div class="qr-sizes">
+        <span>Tamaño de impresión:</span>
+        <div class="status-chips" data-qr-sizes>
+            <button type="button" class="status-chip is-active" data-size="6">6 por hoja · mesa</button>
+            <button type="button" class="status-chip" data-size="4">4 por hoja · grande</button>
+            <button type="button" class="status-chip" data-size="1">1 por hoja · póster</button>
+        </div>
+    </div>
+
+    <div class="qr-grid">
+        {% for card in cards %}
+            <article class="qr-card" data-zone="{{ card.table.zone_name|default:'Sin zona' }}" data-venue="{{ card.table.venue.name }}"
+                     data-search="{{ card.table.code|lower }} {{ card.table.zone_name|lower }}">
+                <label class="qr-include no-print"><input type="checkbox" checked data-qr-check> Incluir</label>
+                <h3>{{ card.table.venue.name }}</h3>
+                <p class="qr-mesa"><strong>Mesa {{ card.table.code }}</strong></p>
+                {{ card.svg }}
+                <p class="qr-cta">Escanea y cuéntanos cómo estuvo todo ⭐</p>
+                <p class="no-print qr-try"><a href="{{ card.url }}" target="_blank">🔗 Probar enlace</a>{% if card.table.zone_name %} · {{ card.table.zone_name }}{% endif %}</p>
+            </article>
+        {% empty %}
+            <div class="mgmt-empty">No hay mesas activas. Créalas en Centro de gestión → 🪑 Mesas y zonas.</div>
+        {% endfor %}
+    </div>
+    <p class="mgmt-empty" data-qr-empty hidden>Ninguna mesa coincide con el filtro.</p>
+</section>
+
+<script>
+(function () {
+    const root = document.querySelector("[data-qr-print]");
+    const cards = [...root.querySelectorAll(".qr-card")];
+    const counter = root.querySelector("[data-qr-selected]");
+    const search = root.querySelector("[data-qr-search]");
+    const chipsBar = root.querySelector("[data-qr-chips]");
+    const empty = root.querySelector("[data-qr-empty]");
+    let filter = "*", size = 6;
+
+    // Píldoras por zona (y por local si hay varios)
+    const venues = [...new Set(cards.map((c) => c.dataset.venue))];
+    const groups = new Map();
+    cards.forEach((c) => {
+        const key = venues.length > 1 ? c.dataset.venue + " · " + c.dataset.zone : c.dataset.zone;
+        c.dataset.group = key;
+        groups.set(key, (groups.get(key) || 0) + 1);
+    });
+    if (groups.size > 1) {
+        chipsBar.innerHTML = `<button type="button" class="status-chip is-active" data-group="*">Todas <b>${cards.length}</b></button>`
+            + [...groups].map(([g, n]) => `<button type="button" class="status-chip" data-group="${g.replace(/"/g, "&quot;")}">${g} <b>${n}</b></button>`).join("");
+        chipsBar.addEventListener("click", (e) => {
+            const b = e.target.closest("[data-group]");
+            if (!b) return;
+            chipsBar.querySelectorAll("[data-group]").forEach((x) => x.classList.toggle("is-active", x === b));
+            filter = b.dataset.group;
+            apply();
+        });
+    }
+    const visible = () => cards.filter((c) => !c.hidden);
+    const selected = () => visible().filter((c) => c.querySelector("[data-qr-check]").checked);
+    function apply() {
+        const text = search.value.trim().toLowerCase();
+        cards.forEach((c) => { c.hidden = (filter !== "*" && c.dataset.group !== filter) || (text && !c.dataset.search.includes(text)); });
+        empty.hidden = !cards.length || visible().length > 0;
+        count();
+    }
+    function count() {
+        counter.textContent = selected().length;
+        cards.forEach((c) => c.classList.toggle("is-excluded", !c.querySelector("[data-qr-check]").checked));
+    }
+    search.addEventListener("input", apply);
+    root.addEventListener("change", (e) => { if (e.target.matches("[data-qr-check]")) count(); });
+    root.querySelectorAll("[data-qr-all]").forEach((b) => b.addEventListener("click", () => {
+        visible().forEach((c) => { c.querySelector("[data-qr-check]").checked = b.dataset.qrAll === "1"; });
+        count();
+    }));
+    root.querySelector("[data-qr-sizes]").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-size]");
+        if (!b) return;
+        root.querySelectorAll("[data-size]").forEach((x) => x.classList.toggle("is-active", x === b));
+        size = +b.dataset.size;
+    });
+
+    // Impresión en una ventana propia (A4), independiente de los estilos de la plataforma
+    const LAYOUT = { 6: { cols: 2, h: "91mm", qr: "52mm", title: "11pt", mesa: "16pt" },
+                     4: { cols: 2, h: "137mm", qr: "80mm", title: "13pt", mesa: "22pt" },
+                     1: { cols: 1, h: "273mm", qr: "150mm", title: "20pt", mesa: "40pt" } };
+    const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+    root.querySelector("[data-qr-go]").addEventListener("click", () => {
+        const list = selected();
+        if (!list.length) { alert("Marca al menos una mesa con «Incluir»."); return; }
+        const L = LAYOUT[size];
+        const items = list.map((c) => `<div class="qr"><div class="venue">${esc(c.querySelector("h3").textContent.trim())}</div>`
+            + `<div class="mesa">${esc(c.querySelector(".qr-mesa").textContent.trim())}</div>${c.querySelector("svg").outerHTML}`
+            + `<div class="cta">Escanea y cuéntanos cómo estuvo todo ⭐</div><div class="small">Sin cuenta ni aplicación · menos de 1 minuto</div></div>`).join("");
+        const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Códigos QR de opinión</title><style>
+            @page { size: A4; margin: 10mm; }
+            * { box-sizing: border-box; }
+            body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111; background: #fff; }
+            .sheet { display: grid; grid-template-columns: repeat(${L.cols}, 1fr); }
+            .qr { height: ${L.h}; padding: 5mm; border: 1px dashed #9ca3af; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+            .qr svg { width: ${L.qr}; height: ${L.qr}; margin: 3mm 0; }
+            .venue { font-size: ${L.title}; font-weight: 700; }
+            .mesa { font-size: ${L.mesa}; font-weight: 800; margin-top: 1mm; }
+            .cta { font-size: ${L.title}; }
+            .small { font-size: 8pt; color: #555; margin-top: 1mm; }
+            .tip { font-size: 9pt; color: #555; margin: 0 0 4mm; }
+            @media print { .tip { display: none; } }
+        </style></head><body><p class="tip">Si no se abre la impresión, presiona Ctrl + P. Usa papel A4 y escala 100 %.</p><div class="sheet">${items}</div></body></html>`;
+        const w = window.open("", "_blank");
+        if (!w) { alert("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para este sitio."); return; }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+        w.focus();
+        w.onafterprint = () => w.close();
+        setTimeout(() => w.print(), 300);
+    });
+    apply();
+})();
+</script>
 {% endblock %}

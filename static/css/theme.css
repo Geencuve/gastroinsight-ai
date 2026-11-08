@@ -3109,3 +3109,52 @@ html[data-theme] .dish-preview[hidden] { display: none; }
 /* Mosaico de acción secundario (violeta) */
 html[data-theme] .mini-kpi-action.mini-kpi-alt { background: var(--accent-2) !important; }
 html[data-theme] a.mini-kpi { text-decoration: none; }
+
+/* =========================================================
+   Evaluaciones v2: mosaicos, filtros y grupos por día
+   ========================================================= */
+html[data-theme] .eval-panel { padding: 1.1rem 1.2rem !important; }
+html[data-theme] .eval-summary { margin-bottom: 0.9rem; }
+html[data-theme] .eval-toolbar { gap: 0.5rem 0.9rem; }
+html[data-theme] .eval-note { text-align: center; font-size: 0.78rem; color: var(--muted); margin: -0.4rem 0 0.8rem; }
+html[data-theme] .eval-panel table { font-size: 0.86rem; }
+html[data-theme] .eval-panel tr[hidden] { display: none; }
+html[data-theme] tr.eval-day td { padding: 0.55rem 0.8rem; background: var(--surface-2); border-top: 1px solid var(--border); cursor: pointer; user-select: none; font-size: 0.84rem; }
+html[data-theme] tr.eval-day:hover td { background: var(--surface-3); }
+html[data-theme] tr.eval-day strong { text-transform: capitalize; color: var(--text-strong); }
+html[data-theme] .eval-day-meta { color: var(--muted); }
+html[data-theme] .eval-caret { display: inline-block; margin-right: 0.45rem; color: var(--accent); transition: transform 0.15s ease; }
+html[data-theme] tr.eval-day.is-collapsed .eval-caret { transform: rotate(-90deg); }
+html[data-theme] .eval-stars { display: block; color: #f59e0b; letter-spacing: 0.08em; font-size: 0.9rem; white-space: nowrap; }
+html[data-theme] .eval-stars i { font-style: normal; color: var(--border-strong); }
+html[data-theme] .eval-pill { display: inline-block; margin-top: 0.15rem; padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+html[data-theme] .eval-r5, html[data-theme] .eval-r4 { background: var(--success-soft); color: var(--success); }
+html[data-theme] .eval-r3 { background: var(--info-soft); color: var(--info); }
+html[data-theme] .eval-r2 { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .eval-r1 { background: var(--danger-soft); color: var(--danger); }
+html[data-theme] .eval-comment { font-style: italic; color: var(--text); }
+html[data-theme] .eval-table { display: inline-block; padding: 0.12rem 0.55rem; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); font-weight: 700; font-size: 0.78rem; white-space: nowrap; }
+html[data-theme] td.eval-id { color: var(--muted); font-size: 0.76rem; }
+html[data-theme] tr.eval-empty td { text-align: center; padding: 1.2rem; color: var(--muted); }
+
+/* =========================================================
+   Códigos QR v2: selección, filtros y tarjetas
+   ========================================================= */
+html[data-theme] .qr-panel .orders-summary { margin-bottom: 0.9rem; }
+html[data-theme] .qr-sizes { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; margin: -0.2rem 0 1rem; font-size: 0.82rem; color: var(--muted); }
+html[data-theme] .qr-panel .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.8rem; }
+html[data-theme] .qr-panel .qr-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; padding: 2rem 0.9rem 0.9rem; border-radius: 16px; background: #ffffff; color: #111827; text-align: center; border: 2px solid transparent; transition: opacity 0.15s ease, border-color 0.15s ease; }
+html[data-theme] .qr-panel .qr-card:hover { border-color: var(--accent); }
+html[data-theme] .qr-panel .qr-card[hidden] { display: none; }
+html[data-theme] .qr-panel .qr-card.is-excluded { opacity: 0.4; }
+html[data-theme] .qr-panel .qr-card h3 { margin: 0; font-size: 0.86rem; color: #374151; }
+html[data-theme] .qr-panel .qr-card h3::after { display: none; }
+html[data-theme] .qr-panel .qr-card p { margin: 0; }
+html[data-theme] .qr-panel .qr-mesa strong { font-size: 1.15rem; color: #111827; }
+html[data-theme] .qr-panel .qr-card svg { width: 150px; height: 150px; margin: 0.35rem 0; }
+html[data-theme] .qr-panel .qr-cta { font-size: 0.8rem; color: #374151; }
+html[data-theme] .qr-panel .qr-try { font-size: 0.76rem; color: #6b7280; margin-top: 0.2rem; }
+html[data-theme] .qr-panel .qr-try a { color: #0891b2; font-weight: 700; text-decoration: none; }
+html[data-theme] .qr-include { position: absolute; top: 0.5rem; left: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: #ecfeff; color: #0e7490; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+html[data-theme] .qr-include input { accent-color: #0891b2; margin: 0; }
+html[data-theme] .qr-card.is-excluded .qr-include { background: #f3f4f6; color: #6b7280; }
