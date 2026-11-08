@@ -359,7 +359,7 @@
 
     /* ---------------- Ayuda por página (botón ⓘ junto al título) ---------------- */
     const PAGE_HELP = {
-        "/": "Tu día en números: ventas, mesas y satisfacción. «Para atender ahora» muestra lo urgente; las pestañas reúnen ideas de venta, marketing y experiencia.",
+        "/": "Tu día en números. La campana 🔔 de arriba a la derecha reúne lo urgente; toca una sugerencia para voltearla y ver qué hacer.",
         "/garzon/": "Tus alertas ordenadas por urgencia. Presiona «Voy» para avisar que la atiendes: desaparece para todo el equipo. Con «Conectar celular» las recibes en tu teléfono.",
         "/sala/": "Cada mesa con su estado por color. Registra llegadas en la lista de espera, asigna mesas libres y marca cuándo una mesa pide la cuenta.",
         "/cocina/": "Comandas por tiempo desde la confirmación (amarillo desde 10 min, rojo desde 20). Avanza cada una: Comenzar → Listo → Entregado. Lo agregado después de confirmar llega aparte.",

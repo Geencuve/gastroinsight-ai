@@ -1,5 +1,6 @@
-﻿<div class="waiter-grid">
+<div class="waiter-grid">
     <section class="waiter-alerts">
+        <h2 class="waiter-title">🔔 Alertas{% if alerts %} <span class="waiter-count">{{ alerts|length }}</span>{% endif %}</h2>
         {% for a in alerts %}
             <article class="alert-card level-{{ a.level }}">
                 <span class="alert-icon">{{ a.icon }}</span>
@@ -10,13 +11,14 @@
                 <form method="post" action="{{ a.ack_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Voy</button></form>
             </article>
         {% empty %}
-            <div class="waiter-empty">✅ Todo en orden. Te avisaremos cuando una mesa te necesite.</div>
+            <div class="waiter-empty"><span class="waiter-empty-icon">✅</span><strong>Todo en orden</strong><small>Te avisaremos cuando una mesa te necesite.</small></div>
         {% endfor %}
         {% if recent %}
-            <p class="waiter-recent">Atendidas recientemente: {% for n in recent %}{{ n.title }}{% if n.acknowledged_by %} ({{ n.acknowledged_by.first_name|default:n.acknowledged_by.username }}){% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+            <div class="waiter-recent"><p class="waiter-subtitle">Atendidas recientemente</p>{% for n in recent %}<span class="recent-chip">✓ {{ n.title }}{% if n.acknowledged_by %} · {{ n.acknowledged_by.first_name|default:n.acknowledged_by.username }}{% endif %}</span>{% endfor %}</div>
         {% endif %}
     </section>
     <section class="waiter-tables">
+        <h2 class="waiter-title">🪑 Mesas</h2>
         <div class="floor-summary">{% for label, css, count in counts %}{% if count %}<span class="floor-chip state-{{ css }}"><i></i>{{ label }} <strong>{{ count }}</strong></span>{% endif %}{% endfor %}<span class="floor-chip">⏳ Esperando mesa <strong>{{ waitlist|length }}</strong></span></div>
         <div class="mini-tables">
             {% for c in cards %}
