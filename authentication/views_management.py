@@ -70,7 +70,7 @@ def home(request):
         "alert_forms": _alert_forms(venues),
         "api_keys": __import__("operations.models", fromlist=["x"]).ApiKey.objects.filter(venue__in=venues).select_related("venue", "created_by"),
         "api_base": request.build_absolute_uri("/api/v1/"),
-        "venues_list": venues,
+        "venues_list": venues, "role_guide": _role_guide(actor),
         "security_warnings": __import__("core.security_checks", fromlist=["x"]).security_warnings_detailed(request.user, {u.pk for u in users}),
         "staff_form": StaffCreateForm(actor=actor, venues=venues), "table_form": TableForm(venues=venues),
         "camera_form": CameraForm(venues=venues),
@@ -210,6 +210,15 @@ def camera_discover(request):
         "devices": devices, "searched": request.GET.get("buscar") == "1", "tested": tested, "busy": busy,
         "venues": venues, "tables": RestaurantTable.objects.filter(venue__in=venues).order_by("code"),
     })
+
+
+def _role_guide(actor):
+    """Qué puede hacer cada rol que este administrador puede asignar (para la ayuda de Personal)."""
+    from .forms_management import LABELS, assignable_roles
+    from .roles import PROFILE_CAPABILITIES
+
+    return [{"key": r, "label": LABELS.get(r, r), "caps": [cap for cap, roles in PROFILE_CAPABILITIES if r in roles]}
+            for r in assignable_roles(actor)]
 
 
 def _alert_forms(venues):

@@ -1,23 +1,32 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Editar cuenta | GastroInsight AI{% endblock %}
 
 {% block content %}
-<section class="card" style="max-width: 640px; margin: 1rem auto;">
-    <p class="muted"><a href="{% url 'management:home' %}">← Centro de gestión</a></p>
-    <h1>{{ target.get_full_name|default:target.username }}</h1>
-    <p class="muted">@{{ target.username }} · último ingreso {{ target.last_login|date:"d-m-Y H:i"|default:"—" }}</p>
-    <form method="post" class="mgmt-form">
+<section class="card page-panel staff-edit">
+    <p class="muted staff-edit-back"><a href="{% url 'management:home' %}">← Centro de gestión</a></p>
+    <div class="mgmt-person staff-edit-head">
+        <span class="mgmt-avatar role-{{ target.profile.role }}">{{ target.first_name|default:target.username|first|upper }}</span>
+        <div><h2>{{ target.get_full_name|default:target.username }}</h2>
+            <small>@{{ target.username }} · {{ target.profile.get_role_display }} · último ingreso {{ target.last_login|date:"d-m-Y H:i"|default:"nunca" }}</small></div>
+    </div>
+    <form method="post" class="mgmt-form mgmt-form-steps">
         {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
-                {% for e in field.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
-            </div>
-        {% endfor %}
-        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+        {% for e in form.non_field_errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+        <fieldset><legend><b>1</b> Qué hace y dónde</legend>
+            {% include "authentication/management/_field.html" with field=form.role %}
+            <p class="mgmt-role-hint" data-role-hint></p>
+            {% include "authentication/management/_field.html" with field=form.venues hint="Sin local, la persona entra pero no ve datos." %}
+            {% include "authentication/management/_field.html" with field=form.zones %}
+        </fieldset>
+        <fieldset><legend><b>2</b> Acceso</legend>
+            {% include "authentication/management/_field.html" with field=form.is_active label="Cuenta activa" hint="Apágala si la persona ya no trabaja aquí: no podrá entrar, pero se conserva su historial." %}
+            <div class="form-group"><label for="{{ form.new_password.id_for_label }}">{{ form.new_password.label }}</label>
+                <div class="mgmt-pass">{{ form.new_password }}<button type="button" class="btn btn-small" data-pass-generate title="Generar una contraseña segura">🎲 Generar</button></div>
+                <small class="muted">Déjala vacía para mantener la actual.</small>
+                {% for e in form.new_password.errors %}<p class="form-error">{{ e }}</p>{% endfor %}</div>
+        </fieldset>
+        <div class="mgmt-dialog-actions"><button class="btn btn-primary" type="submit">💾 Guardar cambios</button></div>
     </form>
 </section>
 {% endblock %}

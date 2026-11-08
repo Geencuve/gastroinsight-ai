@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Tutorial de la API | GastroInsight AI{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>📘 Tutorial de la API de integración</h1>
+        <p class="muted">Conecta tu sistema de caja o un nodo de cámara con GastroInsight en 4 pasos. No necesitas instalar nada especial.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'management:home' %}">← Centro de gestión</a>
+</section>
+
+<section class="card page-panel tut-panel" data-api-tutorial data-api-base="{{ api_base }}">
+    <div class="mgmt-uses">
+        <article><span>💵</span><strong>Sistema de caja (POS)</strong><p>Cada venta pagada llega sola a reportes, explorador y journey. <a href="#tut-ventas">Paso 3 →</a></p></article>
+        <article><span>📷</span><strong>Nodo de cámara</strong><p>Un equipo en otra sala envía números (personas, IEO, atención), nunca video. <a href="#tut-telemetria">Paso 4 →</a></p></article>
+        <article><span>📊</span><strong>Tablero externo</strong><p>Verifica la conexión y el local de la clave. <a href="#tut-estado">Paso 2 →</a></p></article>
+    </div>
+
+    <div class="tut-setup">
+        <div class="tut-setup-row">
+            <label>🔑 Tu clave <input type="password" data-tut-key placeholder="Pega aquí tu clave gi_… (no se guarda)" autocomplete="off" spellcheck="false"></label>
+            <label>🌐 Dirección del servidor <input type="text" data-tut-base value="{{ api_base }}" spellcheck="false"></label>
+        </div>
+        <small class="muted">Los ejemplos de abajo se completan solos con tu clave y la dirección. La clave queda solo en esta pestaña del navegador. Desde otro equipo usa la IP de este computador en la red WiFi (por ejemplo <code>http://192.168.1.10:8000/api/v1/</code>) o la dirección del túnel.</small>
+        <div class="tut-langs">
+            <span>Lenguaje de los ejemplos:</span>
+            <div class="status-chips" data-tut-langs>
+                <button type="button" class="status-chip is-active" data-lang="powershell">PowerShell (Windows)</button>
+                <button type="button" class="status-chip" data-lang="python">Python</button>
+                <button type="button" class="status-chip" data-lang="js">JavaScript</button>
+                <button type="button" class="status-chip" data-lang="curl">curl (Linux / Mac)</button>
+            </div>
+        </div>
+    </div>
+
+    {# ---------- Paso 1 ---------- #}
+    <details class="tut-step" open>
+        <summary><b>1</b> Crea una clave para el sistema que vas a conectar</summary>
+        <div class="tut-body">
+            <ol class="tut-list">
+                <li>Ve a <strong>Centro de gestión → 🔌 Integraciones → ＋ Nueva clave</strong>.</li>
+                <li>Ponle el nombre del sistema (por ejemplo «Caja principal») y elige el local.</li>
+                <li><strong>Copia la clave apenas aparezca</strong> arriba de la página: empieza con <code>gi_</code> y no se vuelve a mostrar. Si la pierdes, revócala y crea otra.</li>
+            </ol>
+            <p class="mgmt-tip">{% if active_keys %}✅ Tienes {{ active_keys }} clave(s) activa(s).{% else %}ℹ️ Aún no tienes claves activas.{% endif %} Cada clave solo puede leer y escribir en <strong>su</strong> local. Usa una clave distinta por sistema: así puedes revocar una sin afectar a las demás.</p>
+            <a class="btn btn-primary tut-btn" href="{% url 'management:home' %}" data-tut-goto-integrations>🔌 Ir a Integraciones</a>
+        </div>
+    </details>
+
+    {# ---------- Paso 2 ---------- #}
+    <details class="tut-step" id="tut-estado">
+        <summary><b>2</b> Prueba la conexión <span class="tut-method get">GET</span><code>/estado/</code></summary>
+        <div class="tut-body">
+            <p>Confirma que la clave funciona y muestra a qué local pertenece. Siempre empieza por aquí.</p>
+            <div class="tut-try">
+                <button type="button" class="btn btn-primary tut-btn" data-tut-try>▶ Probar ahora desde el navegador</button>
+                <pre class="tut-result" data-tut-result hidden></pre>
+            </div>
+            <div class="tut-code" data-lang="powershell"><pre><code>$clave = "gi_TU_CLAVE"
+$base  = "{{ api_base }}"
+$h     = @{ Authorization = "Bearer $clave" }
+
+Invoke-RestMethod "$($base)estado/" -Headers $h</code></pre></div>
+            <div class="tut-code" data-lang="python" hidden><pre><code>import requests  # pip install requests
+
+CLAVE = "gi_TU_CLAVE"
+BASE = "{{ api_base }}"
+H = {"Authorization": f"Bearer {CLAVE}"}
+
+r = requests.get(BASE + "estado/", headers=H, timeout=10)
+print(r.status_code, r.json())</code></pre></div>
+            <div class="tut-code" data-lang="js" hidden><pre><code>// Node 18+ o el navegador
+const CLAVE = "gi_TU_CLAVE";
+const BASE = "{{ api_base }}";
+
+const r = await fetch(BASE + "estado/", { headers: { Authorization: `Bearer ${CLAVE}` } });
+console.log(r.status, await r.json());</code></pre></div>
+            <div class="tut-code" data-lang="curl" hidden><pre><code>curl -H "Authorization: Bearer gi_TU_CLAVE" {{ api_base }}estado/</code></pre></div>
+            <p class="tut-label">Respuesta esperada (200):</p>
+            <pre class="tut-json">{"ok": true, "local": "{{ venues_list.0.name|default:'Mi local' }}", "clave": "Caja principal", "version": "v1"}</pre>
+        </div>
+    </details>
+
+    {# ---------- Paso 3 ---------- #}
+    <details class="tut-step" id="tut-ventas">
+        <summary><b>3</b> Envía una venta pagada <span class="tut-method post">POST</span><code>/ventas/</code></summary>
+        <div class="tut-body">
+            <p class="tut-hint">↪ Continúa el ejemplo del paso 2: usa la clave y la dirección ya definidas ahí.</p>
+            <p>Tu sistema de caja llama a esta dirección <strong>cada vez que se paga un pedido</strong>. GastroInsight crea la atención, el pedido pagado y sus platos.</p>
+            <div class="table-responsive"><table class="tut-fields">
+                <thead><tr><th>Campo</th><th>¿Obligatorio?</th><th>Qué es</th><th>Ejemplo</th></tr></thead>
+                <tbody>
+                    <tr><td><code>pedido_externo</code></td><td>Sí</td><td>Número del pedido en tu caja. Si lo envías dos veces, no se duplica: reintentar es seguro.</td><td><code>"POS-1001"</code></td></tr>
+                    <tr><td><code>mesa</code></td><td>Sí</td><td>Código de la mesa tal como está en GastroInsight.</td><td><code>"{{ example_table }}"</code></td></tr>
+                    <tr><td><code>items</code></td><td>Sí</td><td>Lista de 1 a 100 platos, cada uno con <code>plato</code> (nombre exacto de la carta, sin importar mayúsculas) y <code>cantidad</code> (1 a 999).</td><td><code>[{"plato": "…", "cantidad": 2}]</code></td></tr>
+                    <tr><td><code>medio_pago</code></td><td>No</td><td>{{ payment_methods|join:", " }}.</td><td><code>"débito"</code></td></tr>
+                    <tr><td><code>comensales</code></td><td>No</td><td>Personas en la mesa (1 a 50). Por defecto, 1.</td><td><code>2</code></td></tr>
+                    <tr><td><code>fecha_pago</code></td><td>No</td><td>Fecha y hora ISO 8601 con zona horaria. Por defecto, el momento del envío.</td><td><code>"2026-11-07T20:15:00-03:00"</code></td></tr>
+                </tbody>
+            </table></div>
+            {% if tables %}<p class="tut-hint">🪑 Mesas de tu local: {% for t in tables %}<code>{{ t }}</code>{% if not forloop.last %} {% endif %}{% endfor %}</p>{% endif %}
+            <div class="tut-code" data-lang="powershell"><pre><code>$venta = @{
+    pedido_externo = "POS-1001"
+    mesa           = "{{ example_table }}"
+    medio_pago     = "débito"
+    comensales     = 2
+    items          = @(
+        @{ plato = "{{ example_dish }}"; cantidad = 2 }{% if example_dish_2 %}
+        @{ plato = "{{ example_dish_2 }}"; cantidad = 1 }{% endif %}
+    )
+} | ConvertTo-Json -Depth 4
+
+# Se envía como UTF-8 para que lleguen bien los tildes y la ñ
+Invoke-RestMethod "$($base)ventas/" -Method Post -Headers $h `
+    -ContentType "application/json; charset=utf-8" `
+    -Body ([Text.Encoding]::UTF8.GetBytes($venta))</code></pre></div>
+            <div class="tut-code" data-lang="python" hidden><pre><code>venta = {
+    "pedido_externo": "POS-1001",
+    "mesa": "{{ example_table }}",
+    "medio_pago": "débito",
+    "comensales": 2,
+    "items": [
+        {"plato": "{{ example_dish }}", "cantidad": 2},{% if example_dish_2 %}
+        {"plato": "{{ example_dish_2 }}", "cantidad": 1},{% endif %}
+    ],
+}
+r = requests.post(BASE + "ventas/", json=venta, headers=H, timeout=10)
+print(r.status_code, r.json())</code></pre></div>
+            <div class="tut-code" data-lang="js" hidden><pre><code>const venta = {
+  pedido_externo: "POS-1001",
+  mesa: "{{ example_table }}",
+  medio_pago: "débito",
+  comensales: 2,
+  items: [
+    { plato: "{{ example_dish }}", cantidad: 2 },{% if example_dish_2 %}
+    { plato: "{{ example_dish_2 }}", cantidad: 1 },{% endif %}
+  ],
+};
+const r = await fetch(BASE + "ventas/", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${CLAVE}`, "Content-Type": "application/json" },
+  body: JSON.stringify(venta),
+});
+console.log(r.status, await r.json());</code></pre></div>
+            <div class="tut-code" data-lang="curl" hidden><pre><code>curl -X POST {{ api_base }}ventas/ \
+  -H "Authorization: Bearer gi_TU_CLAVE" \
+  -H "Content-Type: application/json" \
+  -d '{"pedido_externo": "POS-1001", "mesa": "{{ example_table }}", "medio_pago": "débito", "comensales": 2,
+       "items": [{"plato": "{{ example_dish }}", "cantidad": 2}]}'</code></pre></div>
+            <p class="tut-label">Respuestas:</p>
+            <pre class="tut-json">201 → {"ok": true, "pedido": 512, "total": 37800}
+200 → {"ok": true, "duplicado": true, "pedido": 512}     ← ya se había recibido, no se crea de nuevo
+400 → {"ok": false, "error": "Hay platos que no existen en la carta del local.", "detalles": {"desconocidos": ["Lomo"]}}</pre>
+            <p class="mgmt-tip">💡 Escribe los platos <strong>con el mismo nombre que en Carta y fotos</strong>. Si tu caja usa otros nombres, crea una tabla de equivalencias en tu sistema antes de enviar.</p>
+        </div>
+    </details>
+
+    {# ---------- Paso 4 ---------- #}
+    <details class="tut-step" id="tut-telemetria">
+        <summary><b>4</b> Envía lecturas de un nodo de cámara <span class="tut-method post">POST</span><code>/telemetria/</code></summary>
+        <div class="tut-body">
+            <p class="tut-hint">↪ Continúa el ejemplo del paso 2: usa la clave y la dirección ya definidas ahí.</p>
+            <p>Un equipo con cámara (por ejemplo, un mini PC en la terraza) analiza la imagen <strong>en el mismo equipo</strong> y envía solo números, cada 10 a 30 segundos.</p>
+            <div class="table-responsive"><table class="tut-fields">
+                <thead><tr><th>Campo</th><th>¿Obligatorio?</th><th>Qué es</th><th>Rango</th></tr></thead>
+                <tbody>
+                    <tr><td><code>camara</code></td><td>Sí</td><td>Número (ID) de la cámara registrada en GastroInsight. Ver la lista de abajo.</td><td>entero</td></tr>
+                    <tr><td><code>rostros</code></td><td>No</td><td>Rostros detectados.</td><td>0 a 100</td></tr>
+                    <tr><td><code>personas</code></td><td>No</td><td>Personas sentadas (si no lo envías, se usa <code>rostros</code>).</td><td>0 a 100</td></tr>
+                    <tr><td><code>ibe</code></td><td>No</td><td>Valencia de las expresiones: −1 muy negativa, 0 neutra, 1 muy positiva.</td><td>−1 a 1</td></tr>
+                    <tr><td><code>atencion</code></td><td>No</td><td>Proporción de rostros que miran alrededor buscando atención.</td><td>0 a 1</td></tr>
+                    <tr><td><code>ieo</code></td><td>No</td><td>Índice de Experiencia Observable ya calculado. Si no lo envías, se calcula con <code>ibe</code> y <code>atencion</code>.</td><td>0 a 100</td></tr>
+                    <tr><td><code>mesa</code></td><td>No</td><td>Código de mesa, solo si es distinta a la asignada a la cámara.</td><td>texto</td></tr>
+                    <tr><td><code>momento</code></td><td>No</td><td>Fecha y hora ISO 8601 de la lectura. Por defecto, ahora.</td><td>texto</td></tr>
+                </tbody>
+            </table></div>
+            {% if cameras %}
+                <p class="tut-label">📷 Cámaras de tu local (usa el número de la izquierda):</p>
+                <div class="tut-cams">{% for c in cameras %}<span><b>{{ c.pk }}</b>{{ c.name }}{% if c.table %} · mesa {{ c.table.code }}{% elif c.is_entrance %} · entrada{% elif c.is_checkout %} · caja{% endif %}</span>{% endfor %}</div>
+            {% else %}
+                <p class="mgmt-tip">ℹ️ Primero registra la cámara en <strong>Centro de gestión → 📷 Cámaras</strong> para obtener su número.</p>
+            {% endif %}
+            <div class="tut-code" data-lang="powershell"><pre><code>$lectura = @{ camara = {{ example_camera }}; rostros = 2; ibe = 0.4; atencion = 0.1 } | ConvertTo-Json
+Invoke-RestMethod "$($base)telemetria/" -Method Post -Headers $h `
+    -ContentType "application/json" -Body $lectura</code></pre></div>
+            <div class="tut-code" data-lang="python" hidden><pre><code>import time
+
+while True:
+    lectura = {"camara": {{ example_camera }}, "rostros": 2, "ibe": 0.4, "atencion": 0.1}  # tus valores reales
+    r = requests.post(BASE + "telemetria/", json=lectura, headers=H, timeout=10)
+    print(r.status_code, r.json())
+    time.sleep(15)  # una lectura cada 15 s (máximo 120 solicitudes por minuto)</code></pre></div>
+            <div class="tut-code" data-lang="js" hidden><pre><code>const lectura = { camara: {{ example_camera }}, rostros: 2, ibe: 0.4, atencion: 0.1 };
+const r = await fetch(BASE + "telemetria/", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${CLAVE}`, "Content-Type": "application/json" },
+  body: JSON.stringify(lectura),
+});
+console.log(r.status, await r.json());</code></pre></div>
+            <div class="tut-code" data-lang="curl" hidden><pre><code>curl -X POST {{ api_base }}telemetria/ \
+  -H "Authorization: Bearer gi_TU_CLAVE" \
+  -H "Content-Type: application/json" \
+  -d '{"camara": {{ example_camera }}, "rostros": 2, "ibe": 0.4, "atencion": 0.1}'</code></pre></div>
+            <p class="tut-label">Respuesta (201):</p>
+            <pre class="tut-json">{"ok": true, "evento": 9876, "ieo": 74.5}</pre>
+            <p class="mgmt-tip">🔒 Nunca envíes imágenes ni video: la API solo acepta JSON con números (máximo 256 KB). El análisis visual queda sujeto a la política de privacidad del local.</p>
+        </div>
+    </details>
+
+    {# ---------- Errores ---------- #}
+    <details class="tut-step">
+        <summary><b>?</b> Si algo falla: qué significa cada respuesta</summary>
+        <div class="tut-body">
+            <p>Todas las respuestas son JSON. Si algo falla, llegan <code>"ok": false</code> y un <code>"error"</code> en español que dice qué corregir.</p>
+            <div class="table-responsive"><table class="tut-fields">
+                <thead><tr><th>Código</th><th>Qué pasó</th><th>Cómo se arregla</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="tut-code-ok">200 / 201</span></td><td>Todo bien (201 = se creó algo nuevo).</td><td>—</td></tr>
+                    <tr><td><span class="tut-code-err">400</span></td><td>Falta un campo, un número está fuera de rango o un plato no existe.</td><td>Lee el mensaje <code>error</code> y <code>detalles</code>.</td></tr>
+                    <tr><td><span class="tut-code-err">401</span></td><td>Falta la clave, está mal copiada o fue revocada.</td><td>Revisa la cabecera <code>Authorization: Bearer gi_…</code> (con el espacio).</td></tr>
+                    <tr><td><span class="tut-code-err">404</span></td><td>La mesa o la cámara no existen en el local de esa clave.</td><td>Usa los códigos de mesa y los números de cámara de este tutorial.</td></tr>
+                    <tr><td><span class="tut-code-err">405</span></td><td>Método equivocado.</td><td><code>/estado/</code> usa GET; <code>/ventas/</code> y <code>/telemetria/</code> usan POST. No olvides la barra <code>/</code> final.</td></tr>
+                    <tr><td><span class="tut-code-err">409</span></td><td>La clave no tiene responsable.</td><td>Crea una clave nueva desde el Centro de gestión.</td></tr>
+                    <tr><td><span class="tut-code-err">413</span></td><td>El envío supera los 256 KB.</td><td>Divide el envío en partes más pequeñas.</td></tr>
+                    <tr><td><span class="tut-code-err">415</span></td><td>No se envió JSON.</td><td>Agrega <code>Content-Type: application/json</code>.</td></tr>
+                    <tr><td><span class="tut-code-err">429</span></td><td>Más de 120 solicitudes en un minuto.</td><td>Espera unos segundos y reintenta; espacia las lecturas.</td></tr>
+                </tbody>
+            </table></div>
+        </div>
+    </details>
+
+    {# ---------- Buenas prácticas ---------- #}
+    <details class="tut-step">
+        <summary><b>✓</b> Lista de verificación antes de dejarlo funcionando</summary>
+        <div class="tut-body">
+            <ul class="tut-checklist">
+                <li>La prueba del paso 2 responde <code>"ok": true</code> con el nombre de tu local.</li>
+                <li>La clave está guardada en la configuración del otro sistema, <strong>no escrita en el código</strong> ni compartida por chat.</li>
+                <li>Se envió una venta de prueba y aparece en <strong>Explorador de ventas</strong>.</li>
+                <li>Si un envío falla por la red, el sistema lo reintenta: <code>pedido_externo</code> evita duplicados.</li>
+                <li>Las fechas llevan zona horaria (en Chile continental, <code>-03:00</code> en verano y <code>-04:00</code> en invierno).</li>
+                <li>Fuera de la red del local se usa HTTPS (por ejemplo, con el túnel), para que la clave no viaje sin cifrar.</li>
+                <li>Si la clave se filtra, revócala en <strong>Integraciones</strong> y crea otra.</li>
+            </ul>
+        </div>
+    </details>
+</section>
+{% endblock %}

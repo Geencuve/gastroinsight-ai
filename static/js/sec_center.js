@@ -7,7 +7,7 @@
     const grid = panel.querySelector(".sec-grid");
     const chips = panel.querySelector(".sec-chips");
     const toggle = panel.querySelector(".sec-toggle");
-    const KEY = "gi-sec-collapsed";
+    const KEY = "gi-sec-open"; // contraídas por defecto
 
     // Píldoras con contador que filtran al instante
     const LEVELS = [["all", "Todas"], ["danger", "🔴 Críticas"], ["warning", "🟠 Importantes"], ["info", "🔵 Informativas"]];
@@ -34,12 +34,12 @@
     function setCollapsed(collapsed) {
         grid.hidden = collapsed;
         panel.classList.toggle("is-collapsed", collapsed);
-        toggle.textContent = collapsed ? "Mostrar ▾" : "Ocultar ▴";
+        toggle.textContent = collapsed ? "Ver detalles ▾" : "Ocultar ▴";
         toggle.setAttribute("aria-expanded", String(!collapsed));
-        try { localStorage.setItem(KEY, collapsed ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
+        try { localStorage.setItem(KEY, collapsed ? "0" : "1"); } catch (e) { /* sin almacenamiento */ }
     }
     toggle.addEventListener("click", () => setCollapsed(!grid.hidden));
-    try { if (localStorage.getItem(KEY) === "1") setCollapsed(true); } catch (e) { /* sin almacenamiento */ }
+    try { if (localStorage.getItem(KEY) === "1") setCollapsed(false); } catch (e) { /* sin almacenamiento */ }
 
     // Ficha flotante con la solución sugerida
     const dialog = document.createElement("dialog");

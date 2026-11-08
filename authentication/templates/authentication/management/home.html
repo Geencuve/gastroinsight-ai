@@ -11,13 +11,13 @@
 </section>
 
 {% if security_warnings %}
-    <section class="card page-panel sec-panel" id="sec-panel">
+    <section class="card page-panel sec-panel is-collapsed" id="sec-panel">
         <div class="sec-head">
             <h2>🛡️ Advertencias de seguridad</h2>
             <div class="status-chips sec-chips" role="toolbar" aria-label="Filtrar advertencias"></div>
-            <button type="button" class="sec-toggle" aria-expanded="true">Ocultar ▴</button>
+            <button type="button" class="sec-toggle" aria-expanded="false">Ver detalles ▾</button>
         </div>
-        <div class="sec-grid">
+        <div class="sec-grid" hidden>
             {% for w in security_warnings %}
                 <button type="button" class="sec-item sec-{{ w.level }}" data-sec-level="{{ w.level }}" data-sec-index="{{ forloop.counter0 }}">
                     <span class="sec-dot" aria-hidden="true"></span>
@@ -50,13 +50,14 @@
 {% else %}
     <section class="card page-panel sec-panel sec-ok"><p>🛡️ <strong>Sin advertencias de seguridad.</strong> La configuración revisada está en orden.</p></section>
 {% endif %}
+
 <div class="orders-summary mgmt-summary">
     <div class="mini-kpi"><span class="mini-kpi-icon">👥</span><strong>{{ kpis.staff }}</strong><span>Personal activo</span><small>Cuentas que administras</small></div>
     <div class="mini-kpi"><span class="mini-kpi-icon">🪑</span><strong>{{ kpis.tables }}</strong><span>Mesas</span><small>{{ kpis.zones }} zona(s)</small></div>
     <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ kpis.cameras }}</strong><span>Cámaras</span><small>{{ kpis.entrances }} de entrada</small></div>
 </div>
 
-<section class="card page-panel mgmt-panel">
+<section class="card page-panel mgmt-panel" data-mgmt-v2>
 <div data-tabs="gestion">
     <div class="tab-bar" role="tablist">
         <button type="button" data-tab-button role="tab">👥 Personal</button>
@@ -66,140 +67,181 @@
         <button type="button" data-tab-button role="tab">🔌 Integraciones</button>
     </div>
 
-    <div class="tab-panel mgmt-split" data-tab-panel>
-        <section class="card mgmt-scroll">
-            <h2>Personal</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Persona</th><th>Rol</th><th>Locales</th><th>Zonas</th><th>Último ingreso</th><th></th></tr></thead>
-                    <tbody>
-                        {% for u in users %}
-                            <tr class="{% if not u.is_active %}muted{% endif %}">
-                                <td><strong>{{ u.get_full_name|default:u.username }}</strong><br><small class="muted">@{{ u.username }}{% if not u.is_active %} · inactiva{% endif %}</small></td>
-                                <td><span class="role-badge role-{{ u.profile.role }}">{{ u.profile.get_role_display }}</span></td>
-                                <td>{% for v in u.profile.venues.all %}{{ v.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="table-alert">Sin local</span>{% endfor %}</td>
-                                <td>{{ u.profile.zones|default:"Todas" }}</td>
-                                <td>{{ u.last_login|date:"d-m H:i"|default:"—" }}</td>
-                                <td>{% if u != request.user %}<a class="btn btn-small" href="{% url 'management:staff_edit' u.id %}">Editar</a>{% if u.profile.role in service_roles and u.is_active %} <a class="btn btn-small" href="{% url 'management:staff_qr' u.id %}" title="Código QR para conectar su celular">📱 QR</a>{% endif %}{% endif %}</td>
-                            </tr>
-                        {% empty %}
-                            <tr><td colspan="6" class="muted">Aún no hay personal en tus locales.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        <section class="card mgmt-scroll">
-            <h2>Agregar persona</h2>
-            <form method="post" action="{% url 'management:staff_create' %}" class="mgmt-form">
-                {% csrf_token %}
-                {% for field in staff_form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
-                    </div>
-                {% endfor %}
-                <button class="btn btn-primary" type="submit">Crear cuenta</button>
-            </form>
-        </section>
+    {# ---------------- Personal ---------------- #}
+    <div class="tab-panel mgmt-tab" data-tab-panel>
+        <p class="mgmt-intro">👥 Las personas que usan GastroInsight en tus locales. Cada rol ve solo las pantallas de su trabajo.</p>
+        <div class="mgmt-toolbar">
+            <input type="search" class="orders-search mgmt-search" placeholder="🔎 Buscar por nombre o usuario" data-mgmt-search="staff" aria-label="Buscar personal">
+            <div class="status-chips" data-mgmt-chips="staff"></div>
+            <button type="button" class="btn btn-primary mgmt-add" data-open-dialog="dlg-staff">＋ Agregar persona</button>
+        </div>
+        <div class="table-responsive mgmt-table">
+            <table>
+                <thead><tr><th>Persona</th><th>Rol</th><th>Locales</th><th>Zonas</th><th>Último ingreso</th><th class="mgmt-actions-col">Acciones</th></tr></thead>
+                <tbody data-mgmt-list="staff">
+                    {% for u in users %}
+                        {% with vs=u.profile.venues.all %}
+                        <tr class="{% if not u.is_active %}muted{% endif %}" data-filter="{{ u.profile.role }}{% if u.is_active and not vs %} sin-local{% endif %}{% if not u.is_active %} inactiva{% endif %}" data-search="{{ u.get_full_name|lower }} {{ u.username|lower }}" data-label="{{ u.profile.get_role_display }}">
+                            <td><div class="mgmt-person"><span class="mgmt-avatar role-{{ u.profile.role }}">{{ u.first_name|default:u.username|first|upper }}</span>
+                                <div><strong>{{ u.get_full_name|default:u.username }}</strong><small>@{{ u.username }}{% if u == request.user %} · tú{% endif %}{% if not u.is_active %} · inactiva{% endif %}</small></div></div></td>
+                            <td><span class="role-badge role-{{ u.profile.role }}">{{ u.profile.get_role_display }}</span></td>
+                            <td>{% for v in vs %}<span class="mgmt-venue">{{ v.name }}</span>{% empty %}<span class="table-alert">⚠️ Sin local</span>{% endfor %}</td>
+                            <td>{{ u.profile.zones|default:"Todas" }}</td>
+                            <td>{{ u.last_login|date:"d-m H:i"|default:"Nunca" }}</td>
+                            <td class="mgmt-actions">{% if u != request.user %}<a class="btn btn-small" href="{% url 'management:staff_edit' u.id %}" title="Cambiar rol, locales, contraseña o desactivar">✏️ Editar</a>{% if u.profile.role in service_roles and u.is_active %}<a class="btn btn-small" href="{% url 'management:staff_qr' u.id %}" title="Código QR para conectar su celular">📱 QR</a>{% endif %}{% else %}<span class="muted">Tu cuenta</span>{% endif %}</td>
+                        </tr>
+                        {% endwith %}
+                    {% empty %}
+                        <tr><td colspan="6" class="muted">Aún no hay personal en tus locales. Usa «＋ Agregar persona».</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="mgmt-empty" data-mgmt-empty="staff" hidden>Nadie coincide con la búsqueda.</p>
+        </div>
+        {% if role_guide %}
+            <details class="mgmt-help">
+                <summary>❓ ¿Qué puede hacer cada rol?</summary>
+                <div class="mgmt-role-grid">
+                    {% for r in role_guide %}
+                        <article class="mgmt-role-card"><span class="role-badge role-{{ r.key }}">{{ r.label }}</span>
+                            <ul>{% for c in r.caps %}<li>{{ c }}</li>{% empty %}<li class="muted">Solo sus pantallas de trabajo.</li>{% endfor %}</ul></article>
+                    {% endfor %}
+                </div>
+            </details>
+        {% endif %}
     </div>
 
-    <div class="tab-panel mgmt-split" data-tab-panel>
-        <section class="card mgmt-scroll">
-            <h2>Mesas por zona</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Local</th><th>Zona</th><th>Mesa</th><th>Capacidad</th><th>Cámara</th></tr></thead>
-                    <tbody>
-                        {% for t in tables %}
-                            <tr><td>{{ t.venue.name }}</td><td>{{ t.zone_name|default:"—" }}</td><td><strong>{{ t.code }}</strong></td><td>{{ t.capacity }}</td>
-                                <td>{% for c in cameras %}{% if c.table_id == t.id %}📷 {{ c.name }}{% endif %}{% endfor %}</td></tr>
-                        {% empty %}
-                            <tr><td colspan="5" class="muted">Aún no hay mesas.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        <section class="card mgmt-scroll">
-            <h2>Agregar mesa</h2>
-            <form method="post" action="{% url 'management:table_create' %}" class="mgmt-form">
-                {% csrf_token %}
-                {% for field in table_form %}<div class="form-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
-                <button class="btn btn-primary" type="submit">Crear mesa</button>
-            </form>
-            {% if zones %}<p class="muted">Zonas actuales: {{ zones|join:", " }}</p>{% endif %}
-        </section>
-    </div>
-
-    <div class="tab-panel mgmt-split" data-tab-panel>
-        <section class="card mgmt-scroll">
-            <h2>Cámaras <a class="btn btn-small btn-primary" href="{% url 'management:camera_discover' %}" style="float: right;">🔍 Detectar cámaras</a></h2>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Cámara</th><th>Local</th><th>Mesa</th><th>Zona</th><th>Tipo</th><th>Estado</th></tr></thead>
-                    <tbody>
-                        {% for c in cameras %}
-                            <tr><td><strong>{{ c.name }}</strong>{% if c.is_entrance %} <span class="tag-synthetic">entrada</span>{% endif %}{% if c.is_checkout %} <span class="tag-synthetic">caja</span>{% endif %}</td><td>{{ c.venue.name }}</td>
-                                <td>{{ c.table.code|default:"—" }}</td><td>{{ c.zone_name|default:"—" }}</td><td>{{ c.get_source_type_display }}</td>
-                                <td>{% if c.is_active %}Activa{% else %}<span class="muted">Inactiva</span>{% endif %}</td></tr>
-                        {% empty %}
-                            <tr><td colspan="6" class="muted">Aún no hay cámaras.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        <section class="card mgmt-scroll">
-            <h2>Registrar cámara</h2>
-            <form method="post" action="{% url 'management:camera_create' %}" class="mgmt-form">
-                {% csrf_token %}
-                {% for field in camera_form %}<div class="form-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
-                <button class="btn btn-primary" type="submit">Registrar cámara</button>
-            </form>
-            <p class="muted">Una cámara solo se analiza con una política de privacidad y una autorización vigentes.</p>
-        </section>
-    </div>
-
-    <div class="tab-panel" data-tab-panel>
-        <section class="card mgmt-scroll">
-            <h2>🔔 Umbrales de alerta por local</h2>
-            <p class="muted">Una alerta sostenida se activa solo si al menos el 80% de las lecturas del período supera el umbral. Índice de impaciencia = 60% búsqueda de atención + 40% (100 − IEO), siempre por mesa.</p>
-            {% for venue, form in alert_forms %}
-                <form method="post" action="{% url 'management:alert_settings' venue.id %}" class="alert-settings">
-                    {% csrf_token %}
-                    <h3>{{ venue.name }}</h3>
-                    <div class="alert-settings-grid">
-                        {% for field in form %}
-                            <label>{{ field.label }}{{ field }}{% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}</label>
+    {# ---------------- Mesas y zonas ---------------- #}
+    <div class="tab-panel mgmt-tab" data-tab-panel>
+        <p class="mgmt-intro">🪑 Las mesas de cada zona. Asigna una cámara a una mesa para medir la experiencia de quienes se sientan ahí.</p>
+        <div class="mgmt-toolbar">
+            <div class="status-chips" data-mgmt-chips="tables"></div>
+            <button type="button" class="btn btn-primary mgmt-add" data-open-dialog="dlg-table">＋ Agregar mesa</button>
+        </div>
+        {% regroup tables by zone_name as zone_groups %}
+        <div data-mgmt-list="tables">
+            {% for group in zone_groups %}
+                <section class="mgmt-zone" data-filter="{{ group.grouper|default:'Sin zona' }}" data-label="{{ group.grouper|default:'Sin zona' }}">
+                    <h3 class="mgmt-zone-title">{{ group.grouper|default:"Sin zona" }} <small>{{ group.list|length }} mesa(s)</small></h3>
+                    <div class="mgmt-table-tiles">
+                        {% for t in group.list %}
+                            <article class="mgmt-table-tile">
+                                <strong>{{ t.code }}</strong>
+                                <span>👤 × {{ t.capacity }}</span>
+                                {% for c in cameras %}{% if c.table_id == t.id %}<small class="mgmt-cam-tag" title="{{ c.name }}">📷 {{ c.name }}</small>{% endif %}{% endfor %}
+                                {% if venues_list|length > 1 %}<small class="muted">{{ t.venue.name }}</small>{% endif %}
+                            </article>
                         {% endfor %}
                     </div>
-                    <button class="btn btn-primary btn-small" type="submit">Guardar umbrales</button>
-                </form>
+                </section>
+            {% empty %}
+                <p class="mgmt-empty">Aún no hay mesas. Usa «＋ Agregar mesa».</p>
             {% endfor %}
-        </section>
+        </div>
     </div>
 
-    <div class="tab-panel mgmt-split" data-tab-panel>
-        <section class="card mgmt-scroll">
-            <h2>🔌 Claves de API</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Nombre</th><th>Local</th><th>Clave</th><th>Último uso</th><th>Estado</th><th></th></tr></thead>
-                    <tbody>
-                        {% for k in api_keys %}
-                            <tr><td><strong>{{ k.name }}</strong><br><small class="muted">por {{ k.created_by.username|default:"—" }}</small></td>
-                                <td>{{ k.venue.name }}</td><td><code>{{ k.prefix }}…</code></td><td>{{ k.last_used_at|date:"d-m H:i"|default:"Nunca" }}</td>
-                                <td>{% if k.is_active %}<span class="tag-synthetic">activa</span>{% else %}<span class="muted">revocada</span>{% endif %}</td>
-                                <td>{% if k.is_active %}<form method="post" action="{% url 'management:api_key_revoke' k.id %}">{% csrf_token %}<button class="btn btn-small" type="submit">Revocar</button></form>{% endif %}</td></tr>
-                        {% empty %}
-                            <tr><td colspan="6" class="muted">Aún no hay claves de integración.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <h3>Ejemplos</h3>
+    {# ---------------- Cámaras ---------------- #}
+    <div class="tab-panel mgmt-tab" data-tab-panel>
+        <p class="mgmt-intro">📷 Cada cámara mide una mesa, la entrada o la caja. Solo se guardan números, nunca imágenes.</p>
+        <div class="mgmt-toolbar">
+            <div class="status-chips" data-mgmt-chips="cameras"></div>
+            <a class="btn btn-primary mgmt-add" href="{% url 'management:camera_discover' %}">🔍 Detectar cámaras</a>
+            <button type="button" class="btn mgmt-add" data-open-dialog="dlg-camera">✍️ Registrar a mano</button>
+        </div>
+        <div class="mgmt-cam-grid" data-mgmt-list="cameras">
+            {% for c in cameras %}
+                <article class="mgmt-cam-card{% if not c.is_active %} is-off{% endif %}"
+                         data-filter="{% if c.is_entrance %}entrada{% elif c.is_checkout %}caja{% elif c.table %}mesa{% else %}sin-uso{% endif %}{% if not c.is_active %} inactiva{% endif %}"
+                         data-label="{% if c.is_entrance %}🚶 Entrada{% elif c.is_checkout %}💵 Caja{% elif c.table %}🪑 Mesa{% else %}❔ Sin asignar{% endif %}">
+                    <span class="mgmt-cam-icon">{% if c.is_entrance %}🚶{% elif c.is_checkout %}💵{% elif c.table %}🪑{% else %}📷{% endif %}</span>
+                    <div class="mgmt-cam-body">
+                        <strong>{{ c.name }}</strong>
+                        <span>{% if c.is_entrance %}Entrada{% elif c.is_checkout %}Caja{% elif c.table %}Mesa {{ c.table.code }}{% else %}Sin asignar{% endif %}{% if c.zone_name %} · {{ c.zone_name }}{% endif %}</span>
+                        <small>{{ c.get_source_type_display }}{% if venues_list|length > 1 %} · {{ c.venue.name }}{% endif %}</small>
+                    </div>
+                    <span class="mgmt-state {% if c.is_active %}is-on{% endif %}">{% if c.is_active %}Activa{% else %}Inactiva{% endif %}</span>
+                </article>
+            {% empty %}
+                <div class="mgmt-empty">Aún no hay cámaras. Usa «🔍 Detectar cámaras»: encuentra las conectadas y te guía para asignarlas.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# ---------------- Alertas ---------------- #}
+    <div class="tab-panel mgmt-tab" data-tab-panel>
+        <h2 class="mgmt-tab-title">🔔 Umbrales de alerta por local</h2>
+        <p class="mgmt-intro">Aquí decides <strong>cuándo GastroInsight avisa al personal</strong> (en la campana y en «Mis alertas») según lo que miden las cámaras en cada mesa. Valores más bajos avisan antes; valores más altos avisan menos.</p>
+        <p class="mgmt-glossary"><strong>IEO</strong> = Índice de Experiencia Observable (0 a 100), estimado por mesa sin identificar personas. Una alerta sostenida exige que al menos el 80% de las lecturas del período supere el umbral.</p>
+        {% for venue, form in alert_forms %}
+            <form method="post" action="{% url 'management:alert_settings' venue.id %}" class="alert-settings alert-rules" data-alert-form>
+                {% csrf_token %}
+                {% if alert_forms|length > 1 %}<h3>{{ venue.name }}</h3>{% endif %}
+                <div class="alert-rule-grid">
+                    <article class="alert-rule alert-rule-danger">
+                        <header><span>😤</span><strong>Mesa impaciente</strong></header>
+                        <p>Avisar si el índice de impaciencia supera {{ form.impatience_pct }} % durante {{ form.impatience_minutes }} minutos seguidos.</p>
+                        <small>Índice = 60% búsqueda de atención + 40% (100 − IEO), siempre por mesa.</small>
+                        {% for e in form.impatience_pct.errors %}<p class="form-error">{{ e }}</p>{% endfor %}{% for e in form.impatience_minutes.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </article>
+                    <article class="alert-rule alert-rule-danger">
+                        <header><span>😟</span><strong>Posible disconformidad</strong></header>
+                        <p>Avisar si el IEO baja de {{ form.discomfort_ieo }} durante {{ form.discomfort_minutes }} minutos.</p>
+                        <small>0 minutos = aviso inmediato.</small>
+                        {% for e in form.discomfort_ieo.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+                    </article>
+                    <article class="alert-rule alert-rule-warning">
+                        <header><span>⏱️</span><strong>Mesa sin atención</strong></header>
+                        <p>Avisar si una mesa pasa {{ form.waiting_minutes }} minutos sin actividad de pedidos.</p>
+                        <small>Ayuda a que ninguna mesa quede olvidada.</small>
+                    </article>
+                    <article class="alert-rule alert-rule-success">
+                        <header><span>😊</span><strong>Buen momento para ofrecer</strong></header>
+                        <p>Avisar si el IEO sube de {{ form.approval_ieo }}: la mesa está a gusto.</p>
+                        <small>Sugiere ofrecer postre o café.</small>
+                    </article>
+                </div>
+                <div class="alert-rule-actions">
+                    <button type="button" class="btn" data-alert-defaults>↺ Valores recomendados</button>
+                    <button class="btn btn-primary" type="submit">💾 Guardar umbrales</button>
+                </div>
+            </form>
+        {% endfor %}
+    </div>
+
+    {# ---------------- Integraciones ---------------- #}
+    <div class="tab-panel mgmt-tab" data-tab-panel>
+        <p class="mgmt-intro">🔌 Conecta otros sistemas del local con GastroInsight para no digitar dos veces. Cada sistema usa su propia clave secreta y solo envía números, nunca imágenes.</p>
+        <div class="mgmt-uses">
+            <article><span>💵</span><strong>Sistema de caja (POS)</strong><p>Envía cada venta para que aparezca en reportes, en el explorador y en el journey del cliente.</p></article>
+            <article><span>📷</span><strong>Nodo de cámara</strong><p>Un equipo con cámara en otra sala envía sus lecturas (personas, IEO, atención) sin enviar video.</p></article>
+            <article><span>📊</span><strong>Tablero externo</strong><p>Consulta el estado del local en tiempo real desde otra aplicación.</p></article>
+        </div>
+        <ol class="mgmt-steps">
+            <li><b>1</b>Crea una clave para el sistema</li>
+            <li><b>2</b>Cópiala: se muestra una sola vez</li>
+            <li><b>3</b>Pégala en el otro sistema</li>
+        </ol>
+        <div class="mgmt-toolbar">
+            <h3 class="mgmt-sub-title">🔑 Claves de API</h3>
+            <button type="button" class="btn btn-primary mgmt-add" data-open-dialog="dlg-api">＋ Nueva clave</button>
+        </div>
+        <div class="table-responsive mgmt-table">
+            <table>
+                <thead><tr><th>Nombre</th><th>Local</th><th>Clave</th><th>Último uso</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                    {% for k in api_keys %}
+                        <tr><td><strong>{{ k.name }}</strong><br><small class="muted">por {{ k.created_by.username|default:"—" }}</small></td>
+                            <td>{{ k.venue.name }}</td><td><code>{{ k.prefix }}…</code></td><td>{{ k.last_used_at|date:"d-m H:i"|default:"Nunca" }}</td>
+                            <td>{% if k.is_active %}<span class="mgmt-state is-on">Activa</span>{% else %}<span class="mgmt-state">Revocada</span>{% endif %}</td>
+                            <td>{% if k.is_active %}<form method="post" action="{% url 'management:api_key_revoke' k.id %}" onsubmit="return confirm('¿Revocar la clave «{{ k.name|escapejs }}»? El sistema que la usa dejará de conectarse.');">{% csrf_token %}<button class="btn btn-small" type="submit">🚫 Revocar</button></form>{% endif %}</td></tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="muted">Aún no hay claves de integración. Solo las necesitas si conectarás otro sistema.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <details class="mgmt-help">
+            <summary>🧑‍💻 Ejemplos técnicos (para quien instale la integración)</summary>
             <pre class="api-example">curl -H "Authorization: Bearer gi_…" {{ api_base }}estado/
 
 curl -X POST {{ api_base }}telemetria/ -H "Authorization: Bearer gi_…" -H "Content-Type: application/json" \
@@ -208,18 +250,102 @@ curl -X POST {{ api_base }}telemetria/ -H "Authorization: Bearer gi_…" -H "Con
 curl -X POST {{ api_base }}ventas/ -H "Authorization: Bearer gi_…" -H "Content-Type: application/json" \
      -d '{"pedido_externo": "POS-1001", "mesa": "M01", "medio_pago": "débito",
           "items": [{"plato": "Lomo vetado con papas rústicas", "cantidad": 2}]}'</pre>
-        </section>
-        <section class="card mgmt-scroll">
-            <h2>Nueva clave</h2>
-            <form method="post" action="{% url 'management:api_key_create' %}" class="mgmt-form">
-                {% csrf_token %}
-                <label for="api-name">Nombre</label><input id="api-name" name="name" maxlength="80" placeholder="Ej. Caja principal o Nodo cámara terraza" required>
-                <label for="api-venue">Local</label><select id="api-venue" name="venue">{% for v in venues_list %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}</select>
-                <button class="btn btn-primary" type="submit">Crear clave</button>
-            </form>
-            <p class="muted">🔒 La clave se muestra una sola vez; solo se guarda su huella SHA-256. Cada clave accede únicamente a su local. La API recibe números, nunca imágenes.</p>
-        </section>
+            <p class="muted">Límite: 120 solicitudes por minuto y 256 KB por solicitud. Cada clave accede únicamente a su local.</p>
+        </details>
     </div>
 </div>
 </section>
+
+{# ---------------- Ventanas flotantes (fuera de las pestañas para que se muestren) ---------------- #}
+<dialog class="gi-modal mgmt-dialog" id="dlg-staff">
+    <div class="gi-modal-bar"><strong>＋ Agregar persona</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'management:staff_create' %}" class="mgmt-form mgmt-form-steps">
+            {% csrf_token %}
+            <h2 class="sr-only">Agregar persona</h2>
+            <fieldset><legend><b>1</b> ¿Quién es?</legend>
+                <div class="mgmt-row2">{% include "authentication/management/_field.html" with field=staff_form.first_name %}{% include "authentication/management/_field.html" with field=staff_form.last_name %}</div>
+            </fieldset>
+            <fieldset><legend><b>2</b> ¿Con qué entra?</legend>
+                <div class="mgmt-row2">
+                    {% include "authentication/management/_field.html" with field=staff_form.username hint="Sin espacios. Ej.: maria.p" %}
+                    <div class="form-group"><label for="{{ staff_form.password.id_for_label }}">{{ staff_form.password.label }}</label>
+                        <div class="mgmt-pass">{{ staff_form.password }}<button type="button" class="btn btn-small" data-pass-generate title="Generar una contraseña segura">🎲 Generar</button></div>
+                        <small class="muted">Anótala y entrégasela; podrá cambiarla después.</small></div>
+                </div>
+            </fieldset>
+            <fieldset><legend><b>3</b> ¿Qué hará y dónde?</legend>
+                {% include "authentication/management/_field.html" with field=staff_form.role %}
+                <p class="mgmt-role-hint" data-role-hint></p>
+                {% include "authentication/management/_field.html" with field=staff_form.venues hint="Sin local, la persona entra pero no ve datos." %}
+                {% include "authentication/management/_field.html" with field=staff_form.zones %}
+            </fieldset>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear cuenta</button></div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-table">
+    <div class="gi-modal-bar"><strong>＋ Agregar mesa</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'management:table_create' %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "authentication/management/_field.html" with field=table_form.venue %}
+            <div class="mgmt-row2">
+                {% include "authentication/management/_field.html" with field=table_form.code hint="Ej.: M05 o T02" %}
+                {% include "authentication/management/_field.html" with field=table_form.capacity hint="Personas que caben" %}
+            </div>
+            {% include "authentication/management/_field.html" with field=table_form.zone_name hint="Escribe una existente o una nueva" %}
+            {% if zones %}<div class="mgmt-zone-picks">{% for z in zones %}<button type="button" class="status-chip" data-zone-pick="{{ z }}">{{ z }}</button>{% endfor %}</div>{% endif %}
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear mesa</button></div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-camera">
+    <div class="gi-modal-bar"><strong>✍️ Registrar cámara a mano</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <p class="mgmt-tip">💡 Más fácil: <a href="{% url 'management:camera_discover' %}">🔍 Detectar cámaras</a> las encuentra y prueba por ti.</p>
+        <form method="post" action="{% url 'management:camera_create' %}" class="mgmt-form mgmt-form-steps">
+            {% csrf_token %}
+            <fieldset><legend><b>1</b> La cámara</legend>
+                <div class="mgmt-row2">{% include "authentication/management/_field.html" with field=camera_form.name hint="Ej.: Cámara terraza" %}{% include "authentication/management/_field.html" with field=camera_form.venue %}</div>
+                <div class="mgmt-row2">{% include "authentication/management/_field.html" with field=camera_form.source_type %}{% include "authentication/management/_field.html" with field=camera_form.source label="Fuente" %}</div>
+                <p class="mgmt-role-hint" data-source-hint></p>
+            </fieldset>
+            <fieldset><legend><b>2</b> ¿Qué mide?</legend>
+                <div class="mgmt-uso" role="radiogroup" aria-label="Uso de la cámara">
+                    <label><input type="radio" name="_uso" value="mesa" checked><span>🪑 Una mesa</span></label>
+                    <label><input type="radio" name="_uso" value="entrada"><span>🚶 La entrada</span></label>
+                    <label><input type="radio" name="_uso" value="caja"><span>💵 La caja</span></label>
+                </div>
+                <div class="mgmt-row2" data-uso-mesa>{% include "authentication/management/_field.html" with field=camera_form.table %}{% include "authentication/management/_field.html" with field=camera_form.zone_name label="Zona (opcional)" %}</div>
+                <div class="mgmt-switches">
+                    <div class="mgmt-switches" data-uso-flags>
+                        {% include "authentication/management/_field.html" with field=camera_form.is_entrance label="Cámara de entrada" hint="Cuenta llegadas y espera" %}
+                        {% include "authentication/management/_field.html" with field=camera_form.is_checkout label="Cámara de caja" hint="Mide la experiencia al pagar" %}
+                    </div>
+                    {% include "authentication/management/_field.html" with field=camera_form.is_active label="Activa" hint="Si la apagas, deja de analizarse sin borrarla" %}
+                </div>
+            </fieldset>
+            <p class="muted mgmt-note">🔒 Una cámara solo se analiza con una política de privacidad y una autorización vigentes.</p>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Registrar cámara</button></div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-api">
+    <div class="gi-modal-bar"><strong>＋ Nueva clave de integración</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'management:api_key_create' %}" class="mgmt-form">
+            {% csrf_token %}
+            <h2 class="sr-only">Nueva clave</h2>
+            <div class="form-group"><label for="api-name">¿Qué sistema la usará?</label><input id="api-name" name="name" maxlength="80" placeholder="Ej. Caja principal o Nodo cámara terraza" required></div>
+            <div class="form-group"><label for="api-venue">Local</label><select id="api-venue" name="venue">{% for v in venues_list %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}</select></div>
+            <p class="mgmt-tip">🔒 La clave aparecerá una sola vez arriba de la página: cópiala en ese momento. Solo se guarda su huella SHA-256 y puedes revocarla cuando quieras.</p>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear clave</button></div>
+        </form>
+    </div>
+</dialog>
+{{ role_guide|json_script:"mgmt-role-guide" }}
 {% endblock %}
