@@ -3221,3 +3221,25 @@ html[data-theme] a.priv-law { display: block; color: var(--text); text-decoratio
 html[data-theme] a.priv-law:hover { transform: translateY(-2px); border-color: var(--accent); }
 html[data-theme] .priv-link { display: inline-block; margin-top: 0.55rem; font-size: 0.78rem; font-weight: 700; color: var(--accent); }
 html[data-theme] .priv-status small a { color: var(--accent); font-weight: 700; text-decoration: none; }
+
+/* =========================================================
+   Auditoría v2: filtros delgados, acciones por color y grupos por día
+   ========================================================= */
+html[data-theme] .audit-filter-card { padding: 0.75rem 1rem !important; }
+html[data-theme] .audit-filters { display: flex !important; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 0.45rem 0.55rem; }
+html[data-theme] .audit-filters > * { margin: 0 !important; }
+html[data-theme] .audit-filters input, html[data-theme] .audit-filters select { height: 38px; padding: 0.3rem 0.75rem !important; border-radius: 999px !important; font-size: 0.84rem !important; width: auto; min-width: 150px; }
+html[data-theme] .audit-filters input[type=search], html[data-theme] .audit-filters input[type=text] { min-width: 230px; }
+html[data-theme] .audit-filters label { font-size: 0.72rem; }
+html[data-theme] .audit-periods { flex-basis: 100%; justify-content: center; margin-bottom: 0.2rem !important; }
+html[data-theme] .audit-filters .status-chip[hidden] { display: none; }
+html[data-theme] .audit-user { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; white-space: nowrap; }
+html[data-theme] .audit-user .mgmt-avatar { width: 26px; height: 26px; font-size: 0.75rem; }
+html[data-theme] td.audit-ip { font-size: 0.74rem; color: var(--muted); font-family: ui-monospace, Consolas, monospace; }
+html[data-theme] .audit-done, html[data-theme] .audit-login { background: var(--success-soft); color: var(--success); }
+html[data-theme] .audit-warn { background: var(--warning-soft); color: var(--warning); }
+html[data-theme] .audit-bad { background: var(--danger-soft); color: var(--danger); }
+html[data-theme] .audit-info { background: var(--info-soft); color: var(--info); }
+html[data-theme] .audit-logout { background: var(--surface-3); color: var(--muted); }
+html[data-theme] .audit-export { background: color-mix(in srgb, var(--accent-2) 14%, transparent); color: var(--accent-2); }
+html[data-theme] .audit-panel table { font-size: 0.84rem; }
