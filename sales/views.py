@@ -518,3 +518,15 @@ def order_cancel(request, order_id):
         "sales:order_detail",
         order_id=order.id,
     )
+
+
+# Versión 2.0: garzón, caja y supervisor también operan pedidos (detectado por la auditoría por rol).
+_legacy_user_can_operate_sales = user_can_operate_sales
+
+
+def user_can_operate_sales(user, *args, **kwargs):  # noqa: F811
+    from authentication.permissions import get_or_create_profile
+
+    if user.is_authenticated and get_or_create_profile(user).role in ("operator", "waiter", "cashier", "supervisor"):
+        return True
+    return _legacy_user_can_operate_sales(user, *args, **kwargs)

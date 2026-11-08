@@ -126,7 +126,7 @@ def service_session_list(request):
     can_operate = (
         profile.is_platform_admin
         or profile.is_venue_admin
-        or profile.role == profile.Role.OPERATOR
+        or profile.role in OPERATIONAL_ROLES
     )
 
     return render(
@@ -160,7 +160,7 @@ def service_session_create(request):
     can_operate = (
         profile.is_platform_admin
         or profile.is_venue_admin
-        or profile.role == profile.Role.OPERATOR
+        or profile.role in OPERATIONAL_ROLES
     )
 
     if not can_operate:
@@ -342,7 +342,7 @@ def evaluation_list(request):
     can_register = (
         profile.is_platform_admin
         or profile.is_venue_admin
-        or profile.role == profile.Role.OPERATOR
+        or profile.role in OPERATIONAL_ROLES
     )
 
     return render(
@@ -372,7 +372,7 @@ def evaluation_create(request):
     can_register = (
         profile.is_platform_admin
         or profile.is_venue_admin
-        or profile.role == profile.Role.OPERATOR
+        or profile.role in OPERATIONAL_ROLES
     )
 
     if not can_register:
@@ -430,3 +430,7 @@ def evaluation_create(request):
         "operations/evaluation_form.html",
         {"form": form},
     )
+
+
+# Roles que operan atenciones y evaluaciones (versión 2.0).
+OPERATIONAL_ROLES = ("operator", "waiter", "cashier", "supervisor")
