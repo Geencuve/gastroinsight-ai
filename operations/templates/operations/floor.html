@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Mapa de sala | GastroInsight AI{% endblock %}
 
@@ -8,7 +8,7 @@
         <h1>🗺️ Mapa de sala</h1>
         <p class="muted">Estado de cada mesa, lista de espera y alertas. Se actualiza cada 10 segundos.</p>
     </div>
-    <a class="btn btn-secondary" href="{% url 'operations:session_create' %}">＋ Abrir atención</a>
+    
 </section>
 <div id="floor-board" data-url="{% url 'floor:board' %}">{% include "operations/_floor_board.html" %}</div>
 <script>

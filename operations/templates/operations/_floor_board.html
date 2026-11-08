@@ -67,5 +67,6 @@
         {% empty %}
             <p class="muted">Nadie esperando mesa.</p>
         {% endfor %}
+        <a class="btn btn-secondary waitlist-open" href="{% url 'operations:session_create' %}">＋ Abrir atención</a>
     </aside>
 </div>

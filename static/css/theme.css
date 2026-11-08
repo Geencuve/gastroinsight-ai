@@ -1818,3 +1818,20 @@ html[data-theme] .mini-table strong { font-size: 1.15rem; color: var(--text-stro
 html[data-theme] .mini-table small { font-size: 0.74rem !important; text-align: center; }
 html[data-theme] .mini-badge { top: 8px !important; right: 8px !important; }
 @media (max-width: 760px) { html[data-theme] .waiter-alerts, html[data-theme] .waiter-tables { max-height: none; min-height: 0; } }
+
+/* «Abrir atención» bajo la lista de espera */
+html[data-theme] .waitlist-open { display: flex; width: 100%; margin-top: 0.9rem; border-style: dashed !important; }
+html[data-theme] .waitlist-open:hover { border-color: var(--accent) !important; color: var(--accent); }
+
+/* =========================================================
+   Ventanas flotantes centradas (título, descripción y formulario)
+   ========================================================= */
+html[data-theme] .gi-modal-bar { position: relative; justify-content: center !important; padding-left: 3.2rem !important; padding-right: 3.2rem !important; text-align: center; }
+html[data-theme] .gi-modal-close { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); }
+html[data-theme] .gi-modal-body { display: flex; flex-direction: column; align-items: center; }
+html[data-theme] .gi-modal-body > *, html[data-theme] .gi-modal-body .card { width: 100%; max-width: 520px !important; margin-left: auto !important; margin-right: auto !important; }
+html[data-theme] .gi-modal-body .receipt-wrap, html[data-theme] .gi-modal-body .journey-card, html[data-theme] .gi-modal-body .pair-card { max-width: none !important; }
+html[data-theme] .gi-modal-body > p, html[data-theme] .gi-modal-body .card > p:first-of-type, html[data-theme] .gi-modal-body .card > p.muted { text-align: center; }
+html[data-theme] .gi-modal-body form { width: 100%; max-width: 520px; margin: 0 auto; }
+html[data-theme] .gi-modal-body form label { text-align: left; }
+html[data-theme] .gi-modal-body form .btn-primary[type="submit"], html[data-theme] .gi-modal-body form button[type="submit"]:only-of-type { width: 100%; }
