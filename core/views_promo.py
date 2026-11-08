@@ -1,4 +1,4 @@
-﻿from urllib.parse import urlencode
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -97,7 +97,8 @@ def resolve_promo(params, venues, dishes):
 def promo_generator(request):
     venues, dishes = _dishes_for(request)
     promo = resolve_promo(request.GET, venues, dishes)
-    image_url = reverse("core:promo_image") + "?" + urlencode(promo["query"])
+    extra = {k: request.GET[k] for k in ("fuente", "foto") if request.GET.get(k)}
+    image_url = reverse("core:promo_image") + "?" + urlencode({**promo["query"], **extra})
     return render(request, "core/promo_generator.html", {
         "promo": promo,
         "dishes": dishes,
@@ -105,6 +106,11 @@ def promo_generator(request):
         "weekdays": list(enumerate(w.capitalize() for w in WEEKDAYS)),
         "image_url": image_url,
         "download_url": image_url + "&descargar=1",
+        "photo_source": request.GET.get("fuente", "plato"),
+        "photo_name": request.GET.get("foto", ""),
+        "recent_photos": __import__("core.promo_uploads", fromlist=["x"]).recent(request.user),
+        "dish_has_photo": bool(promo["dish"] and promo["dish"].image),
+        "current_query": request.GET.urlencode(),
         "caption": build_caption(promo["headline"], promo["title"], promo["offer"], promo["price"],
                                  promo["venue"].name if promo["venue"] else ""),
     })
@@ -119,7 +125,7 @@ def promo_image(request):
         headline=promo["headline"], title=promo["title"], offer=promo["offer"],
         price=promo["price"], old_price=promo["old_price"],
         venue_name=promo["venue"].name if promo["venue"] else "",
-        image_path=dish.image.path if dish and dish.image else None, story=promo["story"],
+        image_path=_photo(request, dish), story=promo["story"],
     )
     response = HttpResponse(data, content_type="image/jpeg")
     if request.GET.get("descargar"):
@@ -131,3 +137,36 @@ def promo_image(request):
                 description=f"Descargó una pieza promocional: {promo['headline']} - {promo['title']}.",
             )
     return response
+
+
+def _photo(request, dish):
+    """Fuente de la imagen: foto del plato (por defecto), imagen propia subida o solo ilustración."""
+    from .promo_uploads import path_for
+
+    source = request.GET.get("fuente", "plato")
+    if source == "ninguna":
+        return None
+    if source == "subida":
+        path = path_for(request.user, request.GET.get("foto"))
+        if path:
+            return str(path)
+    return dish.image.path if dish and dish.image else None
+
+
+@login_required
+def promo_upload(request):
+    from django.contrib import messages
+    from django.http import QueryDict
+    from django.shortcuts import redirect
+
+    from .promo_uploads import save_upload
+
+    query = QueryDict(request.POST.get("query", ""), mutable=True)
+    if request.method == "POST" and request.FILES.get("foto"):
+        try:
+            query["foto"] = save_upload(request.user, request.FILES["foto"])
+            query["fuente"] = "subida"
+            messages.success(request, "Imagen subida. La vista previa ya la usa.")
+        except ValueError as error:
+            messages.error(request, str(error))
+    return redirect(f"{reverse('core:promo_generator')}?{query.urlencode()}")

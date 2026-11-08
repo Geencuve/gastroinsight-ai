@@ -2572,3 +2572,159 @@ html[data-theme] .ex-stat {
 html[data-theme] .ex-stat strong { font: 800 0.98rem "Space Grotesk", sans-serif; color: var(--text-strong); }
 html[data-theme] .ex-stat small { font-size: 0.76rem; color: var(--muted); }
 @media (max-width: 760px) { html[data-theme] .ex-filters .ex-clear { margin-left: 0; } }
+
+/* Promociones: la vista previa se ajusta a la pantalla manteniendo su proporción */
+html[data-theme] .promo-fit { width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; display: block; transition: max-width 0.2s ease; }
+html[data-theme] canvas.promo-fit, html[data-theme] img.promo-fit, html[data-theme] svg.promo-fit { object-fit: contain; }
+
+/* Promociones: la pieza se escala completa (sin forzar el ancho) */
+html[data-theme] .promo-fit { width: auto !important; max-width: 100%; transition: none; }
+
+/* Promociones: vista previa como imagen adaptable (no deforma la página) */
+html[data-theme] .promo-fit { width: 100% !important; max-width: 100% !important; zoom: 1 !important; }
+html[data-theme] .promo-img {
+    display: block; width: auto; max-width: 100%; height: auto; margin: 0 auto 0.8rem; border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.25); object-fit: contain; background: var(--surface-2);
+}
+
+/* =========================================================
+   Promociones: vista previa reducida y proporcional (nunca se agranda)
+   ========================================================= */
+html[data-theme] .promo-preview { text-align: center; }
+html[data-theme] .promo-preview img, html[data-theme] .promo-preview img.promo-fit {
+    width: auto !important; height: auto !important; zoom: 1 !important;
+    max-width: min(100%, 480px) !important; max-height: calc(100vh - 360px) !important; min-height: 0 !important;
+    margin: 0 auto !important; display: block; object-fit: contain;
+}
+html[data-theme] .promo-preview.is-story img { max-width: min(100%, 300px) !important; }
+html[data-theme] .promo-preview .promo-img { display: none !important; }
+@media (max-height: 760px) { html[data-theme] .promo-preview img { max-height: calc(100vh - 300px) !important; } }
+
+/* =========================================================
+   Promociones: vista previa reducida y proporcional (nunca se agranda)
+   ========================================================= */
+html[data-theme] .promo-preview { text-align: center; }
+html[data-theme] .promo-preview img, html[data-theme] .promo-preview img.promo-fit {
+    width: auto !important; height: auto !important; zoom: 1 !important;
+    max-width: min(100%, 480px) !important; max-height: calc(100vh - 360px) !important; min-height: 0 !important;
+    margin: 0 auto !important; display: block; object-fit: contain;
+}
+html[data-theme] .promo-preview.is-story img { max-width: min(100%, 300px) !important; }
+html[data-theme] .promo-preview .promo-img { display: none !important; }
+@media (max-height: 760px) { html[data-theme] .promo-preview img { max-height: calc(100vh - 300px) !important; } }
+
+/* =========================================================
+   Promociones: fuente de la imagen como tarjetas seleccionables, subida y recientes
+   ========================================================= */
+html[data-theme] .promo-source > label:first-child { display: block; margin-bottom: 0.45rem; }
+html[data-theme] .source-options { display: grid; gap: 0.4rem; }
+html[data-theme] .promo-form .source-opt, html[data-theme] .source-opt {
+    display: grid !important; grid-template-columns: 20px 1fr; grid-template-rows: auto auto; column-gap: 0.6rem; row-gap: 0.05rem;
+    align-items: center; text-align: left !important; padding: 0.6rem 0.75rem; margin: 0; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+    text-transform: none !important; letter-spacing: 0 !important; font-size: 0.86rem !important; color: var(--text-strong) !important;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+html[data-theme] .source-opt input[type="radio"] { grid-row: 1 / span 2; grid-column: 1; width: 16px; height: 16px; margin: 0; accent-color: var(--accent); justify-self: center; }
+html[data-theme] .source-opt span { grid-column: 2; font-weight: 700; }
+html[data-theme] .source-opt small { grid-column: 2; color: var(--muted); font-size: 0.74rem; font-weight: 500; }
+html[data-theme] .source-opt:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+html[data-theme] .source-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+html[data-theme] .recent-photos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.35rem; margin-top: 0.55rem; }
+html[data-theme] .recent-photo { aspect-ratio: 1; padding: 0; border-radius: 10px; border: 2px solid transparent; background-size: cover; background-position: center; cursor: pointer; }
+html[data-theme] .recent-photo.is-active, html[data-theme] .recent-photo:hover { border-color: var(--accent); }
+html[data-theme] .promo-source:not(:has(input[value="subida"]:checked)) .recent-photos { display: none; }
+
+html[data-theme] .promo-upload { margin-top: 0.7rem; }
+html[data-theme] .promo-layout:not(:has(input[name="fuente"][value="subida"]:checked)) .promo-upload { display: none; }
+html[data-theme] .upload-drop {
+    display: flex !important; flex-direction: column; align-items: center; gap: 0.2rem; padding: 0.9rem; border-radius: 14px; cursor: pointer;
+    border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, var(--border)); background: var(--surface); text-align: center !important;
+    text-transform: none !important; letter-spacing: 0 !important;
+}
+html[data-theme] .upload-drop:hover { background: var(--accent-soft); }
+html[data-theme] .upload-drop span { font-weight: 700; color: var(--text-strong); font-size: 0.9rem; }
+html[data-theme] .upload-drop small { color: var(--muted); font-size: 0.72rem; font-weight: 500; }
+
+/* =========================================================
+   Promociones: formulario como barra de herramientas superior y vista previa en dos columnas
+   ========================================================= */
+html[data-theme] .promo-layout { grid-template-columns: 1fr !important; gap: 0.9rem !important; }
+html[data-theme] .promo-layout > .card:first-child { padding: 0.7rem 0.9rem !important; }
+html[data-theme] .promo-form { display: flex !important; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.6rem !important; }
+html[data-theme] .promo-form .form-group { flex: 1 1 165px; min-width: 150px; margin: 0 !important; }
+html[data-theme] .promo-form .form-group[hidden], html[data-theme] .promo-form .form-group[style*="none"] { display: none !important; }
+html[data-theme] .promo-form .form-group > label {
+    display: block; margin-bottom: 0.2rem; font-size: 0.62rem !important; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--muted) !important;
+}
+html[data-theme] .promo-form input:not([type="radio"]):not([type="file"]), html[data-theme] .promo-form select {
+    height: 36px; min-height: 36px !important; width: 100%; box-sizing: border-box; padding: 0 0.8rem !important;
+    border-radius: 999px !important; font-size: 0.84rem !important;
+}
+html[data-theme] .promo-form > button[type="submit"], html[data-theme] .promo-form .btn-primary {
+    flex: none; height: 36px; padding: 0 1.1rem !important; border-radius: 999px !important; font-size: 0.84rem; width: auto !important;
+}
+
+/* Fuente de la imagen como píldoras en fila */
+html[data-theme] .promo-form .promo-source { flex: 2 1 380px; }
+html[data-theme] .promo-source .source-options { display: flex !important; flex-wrap: wrap; gap: 0.35rem; }
+html[data-theme] .promo-form .source-opt, html[data-theme] .source-opt {
+    display: inline-flex !important; align-items: center; gap: 0.4rem; height: 36px; padding: 0 0.85rem !important; border-radius: 999px !important;
+}
+html[data-theme] .source-opt input[type="radio"] { width: 14px; height: 14px; grid-row: auto; }
+html[data-theme] .source-opt small { display: none !important; }
+html[data-theme] .source-opt span { font-size: 0.82rem; white-space: nowrap; }
+html[data-theme] .recent-photos { grid-template-columns: repeat(6, 36px) !important; }
+
+/* Subida en la misma barra */
+html[data-theme] .promo-upload { margin-top: 0.55rem !important; }
+html[data-theme] .upload-drop { flex-direction: row !important; justify-content: center; gap: 0.6rem !important; padding: 0.5rem 0.9rem !important; border-radius: 999px !important; }
+
+/* Vista previa: imagen a la izquierda; botones, texto y consejo a la derecha */
+html[data-theme] .promo-layout > .card:last-child {
+    display: grid !important; grid-template-columns: minmax(240px, 460px) 1fr; column-gap: 1.3rem; row-gap: 0.6rem; align-items: start;
+}
+html[data-theme] .promo-layout > .card:last-child > .promo-preview { grid-column: 1; grid-row: 1 / span 12; }
+html[data-theme] .promo-layout > .card:last-child > :not(.promo-preview) { grid-column: 2; margin-top: 0 !important; }
+html[data-theme] .promo-layout > .card:last-child .promo-actions { margin: 0 !important; }
+html[data-theme] .promo-preview img, html[data-theme] .promo-preview img.promo-fit { max-width: 100% !important; max-height: calc(100vh - 300px) !important; }
+@media (max-width: 900px) {
+    html[data-theme] .promo-layout > .card:last-child { grid-template-columns: 1fr; }
+    html[data-theme] .promo-layout > .card:last-child > * { grid-column: 1 !important; grid-row: auto !important; }
+}
+
+/* =========================================================
+   Promociones: barra que se contrae, imagen centrada y texto sugerido flotante
+   ========================================================= */
+html[data-theme] .promo-more { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.6rem; padding-top: 0.55rem; border-top: 1px dashed var(--border); }
+html[data-theme] .promo-more[hidden] { display: none !important; }
+html[data-theme] .promo-more .form-group { flex: 1 1 165px; min-width: 150px; margin: 0 !important; }
+html[data-theme] .promo-more .promo-source { flex: 2 1 380px; }
+html[data-theme] .promo-more-toggle { flex: none; height: 36px; padding: 0 1rem !important; border-radius: 999px !important; font-size: 0.84rem; margin-left: auto; }
+html[data-theme] .promo-more-toggle[aria-expanded="true"] { border-color: var(--accent) !important; }
+html[data-theme] .promo-upload.is-collapsed { display: none !important; }
+
+html[data-theme] .promo-layout > .card.promo-stage { display: flex !important; flex-direction: column; align-items: center; gap: 0.8rem; }
+html[data-theme] .promo-stage > * { grid-column: auto !important; grid-row: auto !important; }
+html[data-theme] .promo-stage .promo-preview { width: 100%; display: flex; justify-content: center; }
+html[data-theme] .promo-stage .promo-preview img, html[data-theme] .promo-stage .promo-preview img.promo-fit { max-height: calc(100vh - 290px) !important; max-width: min(100%, 460px) !important; }
+html[data-theme] .promo-stage .promo-preview.is-story img { max-width: min(100%, 280px) !important; }
+html[data-theme] .promo-stage .promo-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 0 !important; }
+html[data-theme] .promo-stage .promo-actions .btn { border-radius: 999px; }
+html[data-theme] .caption-open[aria-expanded="true"] { border-color: var(--accent) !important; background: var(--accent-soft); }
+
+html[data-theme] .caption-pop {
+    position: fixed; right: 1.4rem; bottom: 5.4rem; z-index: 1300; width: min(420px, calc(100vw - 2.4rem)); padding: 0.85rem 0.95rem;
+    border-radius: 18px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+    animation: sn-grow 0.2s ease;
+}
+html[data-theme] .caption-pop[hidden] { display: none; }
+html[data-theme] .caption-pop header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.55rem; }
+html[data-theme] .caption-pop header strong { font-size: 0.95rem; color: var(--text-strong); }
+html[data-theme] .caption-close { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); cursor: pointer; }
+html[data-theme] .caption-body .promo-caption { margin: 0; font-size: 0.86rem; }
+html[data-theme] .caption-body p { margin: 0.55rem 0 0; font-size: 0.78rem; color: var(--muted); }
+html[data-theme] .caption-pop footer { display: flex; justify-content: flex-end; margin-top: 0.65rem; }
+html[data-theme] .caption-pop footer .btn { border-radius: 999px; }

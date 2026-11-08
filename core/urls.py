@@ -15,4 +15,5 @@ urlpatterns = [
     path("legal/toma-de-conocimiento/", views_legal.acceptance, name="legal_acceptance"),
     path("promociones/", views_promo.promo_generator, name="promo_generator"),
     path("promociones/imagen/", views_promo.promo_image, name="promo_image"),
+    path("promociones/subir/", views_promo.promo_upload, name="promo_upload"),
 ]

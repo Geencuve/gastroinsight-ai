@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Promociones | GastroInsight AI{% endblock %}
 
@@ -73,8 +73,38 @@
                     <option value="historia" {% if promo.story %}selected{% endif %}>Historia (1080×1920)</option>
                 </select>
             </div>
+            <div class="form-group promo-source">
+                <label>Imagen de la promoción</label>
+                <div class="source-options">
+                    <label class="source-opt"><input type="radio" name="fuente" value="plato" {% if photo_source == "plato" %}checked{% endif %}><span>📷 Foto del plato</span><small>{% if dish_has_photo %}Se usa la foto de la carta{% else %}Sin foto en la carta: se usa la ilustración{% endif %}</small></label>
+                    <label class="source-opt"><input type="radio" name="fuente" value="subida" {% if photo_source == "subida" %}checked{% endif %}><span>⬆️ Imagen propia</span><small>Sube una foto o elige una reciente</small></label>
+                    <label class="source-opt"><input type="radio" name="fuente" value="ninguna" {% if photo_source == "ninguna" %}checked{% endif %}><span>🎨 Solo ilustración</span><small>Diseño sin fotografía</small></label>
+                </div>
+                <input type="hidden" name="foto" value="{{ photo_name }}">
+                {% if recent_photos %}<div class="recent-photos">{% for p in recent_photos %}<button type="button" class="recent-photo{% if p.name == photo_name %} is-active{% endif %}" data-photo="{{ p.name }}" style="background-image:url('{{ p.url }}')" aria-label="Usar esta imagen"></button>{% endfor %}</div>{% endif %}
+            </div>
             <button class="btn btn-primary" type="submit">Actualizar vista previa</button>
         </form>
+        <form method="post" enctype="multipart/form-data" action="{% url 'core:promo_upload' %}" class="promo-upload" id="promo-upload">
+            {% csrf_token %}
+            <input type="hidden" name="query" value="{{ current_query }}">
+            <label class="upload-drop"><input type="file" name="foto" accept="image/jpeg,image/png,image/webp" hidden>
+                <span>⬆️ Subir imagen</span><small>JPG, PNG o WebP · máx. 6 MB · evita fotos con personas identificables</small></label>
+        </form>
+        <script>
+            (function () {
+                const upload = document.getElementById("promo-upload");
+                const form = document.getElementById("promo-form");
+                if (upload) upload.querySelector("input[type=file]").addEventListener("change", () => upload.submit());
+                document.querySelectorAll(".recent-photo").forEach((b) => b.addEventListener("click", () => {
+                    form.querySelector("input[name=foto]").value = b.dataset.photo;
+                    const own = form.querySelector("input[name=fuente][value=subida]");
+                    if (own) own.checked = true;
+                    form.submit();
+                }));
+                document.querySelectorAll("input[name=fuente]").forEach((r) => r.addEventListener("change", () => form.submit()));
+            })();
+        </script>
     </section>
 
     <section class="card">
