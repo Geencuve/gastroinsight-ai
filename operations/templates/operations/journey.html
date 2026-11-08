@@ -15,6 +15,13 @@
 </section>
 
 <section class="card journey-card">
+    <h2>Experiencia por etapa</h2>
+    <div class="orders-summary journey-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">📍</span><strong>{% if pain %}{{ pain.ieo|floatformat:0 }}{% else %}—{% endif %}</strong><span>{% if pain %}{{ pain.label }}{% else %}Sin punto de dolor{% endif %}</span><small class="kpi-tag-bad">Punto de dolor</small></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🏆</span><strong>{% if best %}{{ best.ieo|floatformat:0 }}{% else %}—{% endif %}</strong><span>{% if best %}{{ best.label }}{% else %}Sin datos{% endif %}</span><small>Mejor etapa</small></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🧾</span><strong>{{ sessions|length }}</strong><span>Atenciones analizadas</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📅</span><strong>{% if days == 1 %}Hoy{% else %}{{ days }}{% endif %}</strong><span>{% if days == 1 %}Período{% else %}Días analizados{% endif %}</span></div>
+    </div>
     {% localize off %}<svg viewBox="0 0 900 330" class="journey-svg" role="img" aria-label="Curva de experiencia por etapa">
         <rect x="0" y="40" width="900" height="110" class="journey-zone-pos"/>
         <rect x="0" y="150" width="900" height="100" class="journey-zone-neg"/>

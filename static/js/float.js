@@ -1,4 +1,4 @@
-﻿/* GastroInsight AI · Ventanas flotantes: las acciones secundarias se abren sobre la pantalla actual. */
+/* GastroInsight AI · Ventanas flotantes: las acciones secundarias se abren sobre la pantalla actual. */
 (function () {
     "use strict";
     if (document.body.dataset.embed === "1") return;
@@ -36,6 +36,13 @@
         title.textContent = content.title;
         body.innerHTML = content.html;
         body.dataset.url = url;
+        body.querySelectorAll('[onclick*="print"]').forEach((button) => {
+            button.removeAttribute("onclick");
+            button.addEventListener("click", () => {
+                const target = url + (url.includes("?") ? "&" : "?") + "imprimir=1&embed=1";
+                window.open(target, "gi-print", "width=480,height=760");
+            });
+        });
         body.querySelectorAll("form").forEach((form) => form.addEventListener("submit", (event) => submit(event, form)));
         if (!dialog.open) dialog.showModal();
     }

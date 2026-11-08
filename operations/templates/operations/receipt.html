@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load gi_format %}
 
 {% block title %}Boleta · Pedido #{{ order.id }} | GastroInsight AI{% endblock %}
@@ -33,4 +33,10 @@
         <footer><small>Comprobante de consumo. No reemplaza la boleta electrónica del SII.</small></footer>
     </article>
 </div>
+<script>
+    if (new URLSearchParams(location.search).get("imprimir") === "1") {
+        window.addEventListener("load", () => setTimeout(() => window.print(), 300));
+        window.addEventListener("afterprint", () => window.close());
+    }
+</script>
 {% endblock %}
