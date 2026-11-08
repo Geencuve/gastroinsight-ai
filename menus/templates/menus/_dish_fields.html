@@ -1,0 +1,15 @@
+<div class="mgmt-row2">
+    {% include "authentication/management/_field.html" with field=form.name %}
+    {% include "authentication/management/_field.html" with field=form.category %}
+</div>
+<div class="mgmt-row2">
+    {% include "authentication/management/_field.html" with field=form.price %}
+    <div class="form-group">{% include "authentication/management/_field.html" with field=form.is_available hint="Si lo apagas, no aparece en la carta pública" %}</div>
+</div>
+{% include "authentication/management/_field.html" with field=form.description %}
+<div class="form-group dish-photo-field">
+    <label for="{{ form.image.id_for_label }}">{% if edit %}Cambiar foto (opcional){% else %}Foto (opcional){% endif %}</label>
+    {{ form.image }}
+    <img class="dish-preview" data-dish-preview alt="Vista previa" hidden>
+    <small class="muted">JPG o PNG, máximo 5 MB.{% if edit %} Si no eliges una, se mantiene la actual.{% endif %}</small>
+</div>

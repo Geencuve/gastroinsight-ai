@@ -1,19 +1,89 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ menu.name }} | GastroInsight AI{% endblock %}
 
 {% block content %}
 <section class="page-header">
     <div>
-        <a href="{% url 'menus:list' %}">← Cartas</a>
-        <h1>{{ menu.name }}</h1>
+        <h1>📖 {{ menu.name }}</h1>
         <p class="muted">{{ menu.venue.name }}{% if menu.description %} · {{ menu.description }}{% endif %}</p>
     </div>
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <a class="btn btn-secondary" href="{{ public_url }}" target="_blank">Ver carta pública</a>
-        <a class="btn btn-secondary" href="{% url 'feedback:qr' %}">Códigos QR de opinión</a>
+    <div class="menu-header-actions">
+        <a class="btn btn-secondary" href="{% url 'menus:list' %}">← Cartas</a>
+        <a class="btn btn-secondary" href="{{ public_url }}" target="_blank">👁 Ver carta pública</a>
+        <a class="btn btn-secondary" href="{% url 'feedback:qr' %}">📱 Códigos QR</a>
     </div>
 </section>
 
-{% include "menus/_dish_grid.html" with show_upload=can_manage %}
+<section class="card page-panel menus-panel" data-menu-detail>
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">🍽️</span><strong>{{ stats.total }}</strong><span>Platos disponibles</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🏷️</span><strong>{{ categories|length }}</strong><span>Categorías</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ stats.photos }}</strong><span>Con foto</span></div>
+        {% if can_manage and stats.hidden %}<div class="mini-kpi"><span class="mini-kpi-icon">🙈</span><strong>{{ stats.hidden }}</strong><span>No disponibles</span></div>{% endif %}
+        {% if can_manage %}<button type="button" class="mini-kpi mini-kpi-action" data-open-dialog="dlg-dish"><span class="mini-kpi-icon">＋</span><strong>Agregar</strong><span>Plato</span></button>{% endif %}
+    </div>
+    <div class="mgmt-toolbar">
+        <input type="search" class="orders-search mgmt-search" placeholder="🔎 Buscar plato" data-dish-search aria-label="Buscar plato">
+        {% if can_manage %}<button type="button" class="status-chip chip-warn" data-dish-nophoto>📷 Solo sin foto</button>{% endif %}
+    </div>
+    {% include "menus/_dish_grid.html" with show_upload=can_manage %}
+</section>
+
+{% if can_manage %}
+<datalist id="dish-categories">{% for c in categories %}<option value="{{ c }}">{% endfor %}<option value="Entrada"><option value="Fondo"><option value="Postre"><option value="Bebida"></datalist>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-dish">
+    <div class="gi-modal-bar"><strong>＋ Agregar plato a «{{ menu.name }}»</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" enctype="multipart/form-data" action="{% url 'menus:dish_create' menu.id %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "menus/_dish_fields.html" with form=dish_form %}
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Agregar plato</button></div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="gi-modal mgmt-dialog" id="dlg-dish-edit">
+    <div class="gi-modal-bar"><strong>✏️ Editar plato</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" enctype="multipart/form-data" action="" class="mgmt-form" data-dish-edit-form>
+            {% csrf_token %}
+            {% include "menus/_dish_fields.html" with form=edit_form edit=True %}
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">💾 Guardar cambios</button></div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+(function () {
+    const dialog = document.getElementById("dlg-dish-edit");
+    const form = dialog.querySelector("form");
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-dish-edit]");
+        if (!button) return;
+        const card = button.closest(".dish-card");
+        form.action = card.dataset.editUrl;
+        form.elements.name.value = card.dataset.name;
+        form.elements.category.value = card.dataset.categoryName;
+        form.elements.price.value = card.dataset.price;
+        form.elements.description.value = card.dataset.description;
+        form.elements.is_available.checked = card.dataset.available === "1";
+        form.elements.image.value = "";
+        const preview = form.querySelector("[data-dish-preview]");
+        const current = card.querySelector(".dish-media img");
+        preview.hidden = !current;
+        if (current) preview.src = current.src;
+        dialog.querySelector(".gi-modal-bar strong").textContent = "✏️ Editar «" + card.dataset.name + "»";
+        dialog.showModal();
+    });
+    document.addEventListener("change", (event) => {
+        const input = event.target.closest('dialog input[type="file"][name="image"]');
+        if (!input || !input.files[0]) return;
+        const preview = input.closest("form").querySelector("[data-dish-preview]");
+        if (preview) { preview.src = URL.createObjectURL(input.files[0]); preview.hidden = false; }
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

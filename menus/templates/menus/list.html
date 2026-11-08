@@ -1,36 +1,65 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Menús | GastroInsight AI{% endblock %}
+{% block title %}Carta y fotos | GastroInsight AI{% endblock %}
 
 {% block content %}
 <section class="page-header">
     <div>
-        <h1>Cartas</h1>
-        <p class="muted">Gestiona los platos, sus fotos y la carta pública de cada local.</p>
+        <h1>📖 Carta y fotos</h1>
+        <p class="muted">Los platos de cada local, sus precios y fotos. La carta pública se actualiza sola.</p>
     </div>
-    <a class="btn btn-secondary" href="{% url 'feedback:qr' %}">Códigos QR de opinión</a>
 </section>
 
-{% if items %}
-    <div class="menu-grid">
-        {% for item in items %}
-            <a class="dish-card menu-card" href="{% url 'menus:detail' item.menu.id %}">
-                <div class="dish-media">
-                    {% if item.cover %}
-                        <img src="{{ item.cover.image.url }}" alt="{{ item.menu.name }}">
-                    {% else %}
-                        <div class="dish-placeholder">📖</div>
-                    {% endif %}
-                </div>
-                <div class="dish-body">
-                    <h3>{{ item.menu.name }}</h3>
-                    <p class="dish-meta">{{ item.menu.venue.name }} · {{ item.menu.dish_count }} plato{{ item.menu.dish_count|pluralize }}</p>
-                    {% if item.menu.description %}<p class="dish-desc">{{ item.menu.description }}</p>{% endif %}
-                </div>
-            </a>
-        {% endfor %}
+<section class="card page-panel menus-panel" data-menus-v2>
+    <div class="orders-summary">
+        <div class="mini-kpi"><span class="mini-kpi-icon">📖</span><strong>{{ totals.menus }}</strong><span>Cartas</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">🍽️</span><strong>{{ totals.dishes }}</strong><span>Platos disponibles</span></div>
+        <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ totals.photos }}</strong><span>Con foto</span><small>{{ totals.photo_pct }} %</small></div>
+        {% if totals.missing %}<div class="mini-kpi"><span class="mini-kpi-icon">⚠️</span><strong>{{ totals.missing }}</strong><span>Sin foto</span></div>{% endif %}
+        {% if menu_form %}<button type="button" class="mini-kpi mini-kpi-action" data-open-dialog="dlg-menu"><span class="mini-kpi-icon">＋</span><strong>Nueva</strong><span>Carta</span></button>{% endif %}
+        <a class="mini-kpi mini-kpi-action mini-kpi-alt" href="{% url 'feedback:qr' %}" title="Códigos QR para que los clientes opinen desde la mesa"><span class="mini-kpi-icon">📱</span><strong>QR</strong><span>Opinión para imprimir</span></a>
     </div>
-{% else %}
-    <p class="muted">No hay menús activos registrados.</p>
+
+    {% if items %}
+        <div class="menus-grid">
+            {% for item in items %}
+                <article class="menu-tile">
+                    <a class="menu-tile-media" href="{% url 'menus:detail' item.menu.id %}">
+                        {% if item.cover %}<img src="{{ item.cover.image.url }}" alt="{{ item.menu.name }}" loading="lazy">{% else %}<span class="menu-tile-placeholder">📖</span>{% endif %}
+                        <span class="menu-tile-count">🍽️ {{ item.menu.dish_count }} plato{{ item.menu.dish_count|pluralize }}</span>
+                    </a>
+                    <div class="menu-tile-body">
+                        <h3><a href="{% url 'menus:detail' item.menu.id %}">{{ item.menu.name }}</a></h3>
+                        <p class="muted">{{ item.menu.venue.name }}</p>
+                        {% if item.menu.description %}<p class="dish-desc">{{ item.menu.description }}</p>{% endif %}
+                        <div class="menu-photo-bar" title="Platos con foto"><span style="width: {{ item.photo_pct }}%"></span></div>
+                        <small class="muted">📷 {{ item.menu.photo_count }} de {{ item.menu.dish_count }} con foto{% if item.missing %} · faltan {{ item.missing }}{% endif %}</small>
+                        <div class="menu-tile-actions">
+                            <a class="btn btn-primary btn-small" href="{% url 'menus:detail' item.menu.id %}">{% if item.can_manage %}✏️ Platos y fotos{% else %}Ver platos{% endif %}</a>
+                            <a class="btn btn-small" href="{% url 'menus:public' item.menu.venue_id %}" target="_blank">👁 Carta pública</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="mgmt-empty">Aún no hay cartas.{% if menu_form %} Crea la primera con «＋ Nueva carta».{% endif %}</div>
+    {% endif %}
+</section>
+
+{% if menu_form %}
+<dialog class="gi-modal mgmt-dialog" id="dlg-menu">
+    <div class="gi-modal-bar"><strong>＋ Nueva carta</strong><button type="button" class="gi-modal-close" data-close-dialog aria-label="Cerrar">✕</button></div>
+    <div class="gi-modal-body">
+        <form method="post" action="{% url 'menus:create' %}" class="mgmt-form">
+            {% csrf_token %}
+            {% include "authentication/management/_field.html" with field=menu_form.venue %}
+            {% include "authentication/management/_field.html" with field=menu_form.name %}
+            {% include "authentication/management/_field.html" with field=menu_form.description %}
+            <p class="mgmt-tip">💡 Después de crearla te llevamos a la carta para que agregues sus platos y fotos.</p>
+            <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear carta</button></div>
+        </form>
+    </div>
+</dialog>
 {% endif %}
 {% endblock %}

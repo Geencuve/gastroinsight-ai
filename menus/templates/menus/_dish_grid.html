@@ -1,16 +1,20 @@
-﻿{% load gi_format %}
+{% load gi_format %}
 {% if categories|length > 1 %}
-    <div class="chip-row">
-        <button type="button" class="chip is-active" data-filter="all">Todo</button>
+    <div class="status-chips dish-chips" data-dish-chips>
+        <button type="button" class="status-chip is-active" data-filter="all">Todo</button>
         {% for category in categories %}
-            <button type="button" class="chip" data-filter="{{ category|slugify }}">{{ category }}</button>
+            <button type="button" class="status-chip" data-filter="{{ category|slugify }}">{{ category }}</button>
         {% endfor %}
     </div>
 {% endif %}
 
 <div class="dish-grid">
     {% for card in cards %}
-        <article class="dish-card" data-category="{{ card.dish.category|default:'Otros'|slugify }}">
+        <article class="dish-card{% if not card.dish.is_available %} is-off-dish{% endif %}" data-category="{{ card.dish.category|default:'Otros'|slugify }}"
+                 data-search="{{ card.dish.name|lower }} {{ card.dish.category|lower }}" data-photo="{% if card.dish.image %}1{% else %}0{% endif %}"
+                 {% if show_upload %}data-edit-url="{% url 'menus:dish_edit' card.dish.menu_id card.dish.id %}" data-name="{{ card.dish.name }}"
+                 data-category-name="{{ card.dish.category }}" data-price="{{ card.dish.price|floatformat:0 }}"
+                 data-description="{{ card.dish.description }}" data-available="{{ card.dish.is_available|yesno:'1,0' }}"{% endif %}>
             <div class="dish-media">
                 {% if card.dish.image %}
                     <img src="{{ card.dish.image.url }}" alt="{{ card.dish.name }}" loading="lazy">
@@ -18,6 +22,17 @@
                     <div class="dish-placeholder">🍽️</div>
                 {% endif %}
                 {% if card.is_top %}<span class="dish-badge">🔥 Más pedido</span>{% endif %}
+                {% if not card.dish.is_available %}<span class="dish-badge dish-badge-off">🙈 No disponible</span>{% endif %}
+                {% if show_upload %}
+                    <form method="post" enctype="multipart/form-data" class="dish-upload dish-photo-overlay"
+                          action="{% url 'menus:dish_image' card.dish.menu_id card.dish.id %}">
+                        {% csrf_token %}
+                        <label class="dish-photo-btn">
+                            📷 {% if card.dish.image %}Cambiar foto{% else %}Subir foto{% endif %}
+                            <input type="file" name="image" accept="image/*" hidden onchange="this.form.submit()">
+                        </label>
+                    </form>
+                {% endif %}
             </div>
             <div class="dish-body">
                 <div class="dish-head">
@@ -29,31 +44,47 @@
                     {% if card.rating %} · ⭐ {{ card.rating|floatformat:1 }} ({{ card.rating_count }}){% endif %}
                 </p>
                 {% if card.dish.description %}<p class="dish-desc">{{ card.dish.description }}</p>{% endif %}
-                {% if show_upload %}
-                    <form method="post" enctype="multipart/form-data" class="dish-upload"
-                          action="{% url 'menus:dish_image' card.dish.menu_id card.dish.id %}">
-                        {% csrf_token %}
-                        <label class="btn btn-small">
-                            📷 {% if card.dish.image %}Cambiar foto{% else %}Subir foto{% endif %}
-                            <input type="file" name="image" accept="image/*" hidden onchange="this.form.submit()">
-                        </label>
-                    </form>
-                {% endif %}
+                {% if show_upload %}<div class="dish-manage"><button type="button" class="btn btn-small" data-dish-edit>✏️ Editar</button></div>{% endif %}
             </div>
         </article>
     {% empty %}
-        <p class="muted">No hay platos disponibles.</p>
+        <div class="mgmt-empty">Aún no hay platos.{% if show_upload %} Agrega el primero con «＋ Agregar plato».{% endif %}</div>
     {% endfor %}
 </div>
+<p class="mgmt-empty" data-dish-empty hidden>Ningún plato coincide con el filtro.</p>
 
 <script>
-    document.querySelectorAll(".chip[data-filter]").forEach((chip) => {
-        chip.addEventListener("click", () => {
-            document.querySelectorAll(".chip[data-filter]").forEach((c) => c.classList.toggle("is-active", c === chip));
-            const filter = chip.dataset.filter;
-            document.querySelectorAll(".dish-card").forEach((card) => {
-                card.hidden = filter !== "all" && card.dataset.category !== filter;
-            });
-        });
+(function () {
+    const cards = [...document.querySelectorAll(".dish-grid .dish-card")];
+    const chips = document.querySelector("[data-dish-chips]");
+    const search = document.querySelector("[data-dish-search]");
+    const noPhoto = document.querySelector("[data-dish-nophoto]");
+    const empty = document.querySelector("[data-dish-empty]");
+    let category = "all";
+    if (chips) chips.querySelectorAll("[data-filter]").forEach((chip) => {
+        const n = chip.dataset.filter === "all" ? cards.length : cards.filter((c) => c.dataset.category === chip.dataset.filter).length;
+        chip.insertAdjacentHTML("beforeend", ` <b>${n}</b>`);
     });
+    if (noPhoto) noPhoto.insertAdjacentHTML("beforeend", ` <b>${cards.filter((c) => c.dataset.photo === "0").length}</b>`);
+    function apply() {
+        const text = search ? search.value.trim().toLowerCase() : "";
+        const onlyNoPhoto = noPhoto && noPhoto.classList.contains("is-active");
+        let visible = 0;
+        cards.forEach((card) => {
+            card.hidden = (category !== "all" && card.dataset.category !== category)
+                || (text && !card.dataset.search.includes(text)) || (onlyNoPhoto && card.dataset.photo !== "0");
+            if (!card.hidden) visible += 1;
+        });
+        if (empty) empty.hidden = visible > 0 || !cards.length;
+    }
+    if (chips) chips.addEventListener("click", (event) => {
+        const chip = event.target.closest("[data-filter]");
+        if (!chip) return;
+        chips.querySelectorAll("[data-filter]").forEach((c) => c.classList.toggle("is-active", c === chip));
+        category = chip.dataset.filter;
+        apply();
+    });
+    if (search) search.addEventListener("input", apply);
+    if (noPhoto) noPhoto.addEventListener("click", () => { noPhoto.classList.toggle("is-active"); apply(); });
+})();
 </script>
