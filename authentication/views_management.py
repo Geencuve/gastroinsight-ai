@@ -71,7 +71,7 @@ def home(request):
         "api_keys": __import__("operations.models", fromlist=["x"]).ApiKey.objects.filter(venue__in=venues).select_related("venue", "created_by"),
         "api_base": request.build_absolute_uri("/api/v1/"),
         "venues_list": venues,
-        "security_warnings": __import__("core.security_checks", fromlist=["x"]).security_warnings(),
+        "security_warnings": __import__("core.security_checks", fromlist=["x"]).security_warnings_detailed(request.user, {u.pk for u in users}),
         "staff_form": StaffCreateForm(actor=actor, venues=venues), "table_form": TableForm(venues=venues),
         "camera_form": CameraForm(venues=venues),
         "kpis": {"staff": sum(1 for u in users if u.is_active), "tables": tables.count(), "zones": len(zones),

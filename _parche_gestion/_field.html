@@ -1,0 +1,22 @@
+{% if field.widget_type == "checkbox" %}
+    <label class="mgmt-switch" for="{{ field.id_for_label }}">
+        {{ field }}<span class="mgmt-switch-ui" aria-hidden="true"></span>
+        <span class="mgmt-switch-text">{{ label|default:field.label }}{% if hint %}<small>{{ hint }}</small>{% elif field.help_text %}<small>{{ field.help_text }}</small>{% endif %}</span>
+    </label>
+{% elif field.widget_type == "checkboxselectmultiple" %}
+    <fieldset class="form-group mgmt-chip-field">
+        <legend>{{ label|default:field.label }}</legend>
+        <div class="mgmt-check-chips">
+            {% for option in field %}<label class="mgmt-check-chip">{{ option.tag }}<span>{{ option.choice_label }}</span></label>{% empty %}<span class="muted">No hay opciones.</span>{% endfor %}
+        </div>
+        {% if hint %}<small class="muted">{{ hint }}</small>{% endif %}
+        {% for e in field.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+    </fieldset>
+{% else %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ label|default:field.label }}</label>
+        {{ field }}
+        {% if hint %}<small class="muted">{{ hint }}</small>{% elif field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
+        {% for e in field.errors %}<p class="form-error">{{ e }}</p>{% endfor %}
+    </div>
+{% endif %}

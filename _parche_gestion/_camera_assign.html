@@ -1,0 +1,20 @@
+<form method="post" class="assign-form assign-v2" data-assign>
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="registrar">
+    <input type="hidden" name="source" value="{{ source }}">
+    <div class="assign-row">
+        <label>Nombre<input type="text" name="name" value="{{ suggested }}" maxlength="100" required></label>
+        <label>Local<select name="venue">{% for v in venues %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}</select></label>
+    </div>
+    <span class="assign-label">¿Qué va a medir?</span>
+    <div class="mgmt-uso" role="radiogroup" aria-label="Uso de la cámara">
+        <label><input type="radio" name="uso" value="mesa" checked><span>🪑 Una mesa</span></label>
+        <label><input type="radio" name="uso" value="entrada"><span>🚶 La entrada</span></label>
+        <label><input type="radio" name="uso" value="caja"><span>💵 La caja</span></label>
+    </div>
+    <div class="assign-row" data-uso-mesa>
+        <label>Mesa<select name="table"><option value="">Elige la mesa…</option>{% for t in tables %}<option value="{{ t.id }}">{{ t.code }}{% if t.zone_name %} · {{ t.zone_name }}{% endif %}</option>{% endfor %}</select></label>
+        <label>Zona (opcional)<input type="text" name="zone" placeholder="Ej.: Terraza" maxlength="80"></label>
+    </div>
+    <div class="assign-actions"><button class="btn btn-primary" type="submit">✓ Registrar y asignar</button></div>
+</form>

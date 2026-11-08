@@ -2728,3 +2728,72 @@ html[data-theme] .caption-body .promo-caption { margin: 0; font-size: 0.86rem; }
 html[data-theme] .caption-body p { margin: 0.55rem 0 0; font-size: 0.78rem; color: var(--muted); }
 html[data-theme] .caption-pop footer { display: flex; justify-content: flex-end; margin-top: 0.65rem; }
 html[data-theme] .caption-pop footer .btn { border-radius: 999px; }
+
+/* =========================================================
+   Centro de gestión: advertencias de seguridad accionables
+   ========================================================= */
+html[data-theme] .sec-panel { position: relative; margin-bottom: 0.9rem; }
+html[data-theme] .sec-head { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
+html[data-theme] .sec-head h2 { margin: 0; text-align: center; }
+html[data-theme] .sec-panel.is-collapsed .sec-head { margin-bottom: 0; }
+html[data-theme] .sec-chips .status-chip b { margin-left: 0.25rem; padding: 0 0.42rem; border-radius: 999px; background: var(--surface-2); font-size: 0.76rem; }
+html[data-theme] .sec-chips .status-chip.is-active b { background: rgba(255, 255, 255, 0.22); }
+html[data-theme] .sec-toggle {
+    position: absolute; top: 0.9rem; right: 1rem; padding: 0.3rem 0.8rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--muted); font: 600 0.78rem "Inter", sans-serif; cursor: pointer;
+}
+html[data-theme] .sec-toggle:hover { border-color: var(--accent); color: var(--text); }
+html[data-theme] .sec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 0.55rem; }
+html[data-theme] .sec-grid[hidden], html[data-theme] .sec-item[hidden] { display: none; }
+html[data-theme] .sec-item {
+    --sec-color: var(--info);
+    display: flex; align-items: center; gap: 0.7rem; width: 100%; padding: 0.65rem 0.85rem; text-align: left;
+    border: 1px solid var(--border); border-left: 4px solid var(--sec-color); border-radius: 12px;
+    background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+html[data-theme] .sec-item.sec-danger, html[data-theme] .sec-badge.sec-danger { --sec-color: var(--danger); }
+html[data-theme] .sec-item.sec-warning, html[data-theme] .sec-badge.sec-warning { --sec-color: var(--warning); }
+html[data-theme] .sec-item:hover, html[data-theme] .sec-item:focus-visible {
+    transform: translateY(-1px); border-color: var(--sec-color); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); outline: none;
+}
+html[data-theme] .sec-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--sec-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sec-color) 18%, transparent); }
+html[data-theme] .sec-text { flex: 1; min-width: 0; }
+html[data-theme] .sec-text strong { display: block; font-size: 0.86rem; color: var(--text-strong); }
+html[data-theme] .sec-text small { display: block; margin-top: 0.1rem; font-size: 0.76rem; color: var(--muted); line-height: 1.35; }
+html[data-theme] .sec-go { flex: none; font-size: 0.75rem; font-weight: 700; color: var(--accent); opacity: 0.55; transition: opacity 0.15s ease; }
+html[data-theme] .sec-item:hover .sec-go { opacity: 1; }
+html[data-theme] .sec-ok { text-align: center; }
+html[data-theme] .sec-ok p { margin: 0; color: var(--success); }
+
+/* Ficha flotante con la solución */
+html[data-theme] .sec-modal { width: min(560px, calc(100vw - 2rem)); }
+html[data-theme] .sec-fix { padding: 0.2rem 0.2rem 0.4rem; }
+html[data-theme] .sec-badge {
+    --sec-color: var(--info);
+    display: inline-block; padding: 0.15rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+    color: var(--sec-color); background: color-mix(in srgb, var(--sec-color) 14%, transparent);
+}
+html[data-theme] .sec-fix h3 { margin: 0.55rem 0 0.3rem; font-size: 1.05rem; color: var(--text-strong); }
+html[data-theme] .sec-why { margin: 0 0 0.8rem; font-size: 0.86rem; color: var(--muted); }
+html[data-theme] .sec-fix h4 { margin: 0 0 0.35rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+html[data-theme] .sec-steps { margin: 0 0 0.8rem; padding-left: 1.2rem; font-size: 0.88rem; line-height: 1.5; }
+html[data-theme] .sec-steps li + li { margin-top: 0.25rem; }
+html[data-theme] .sec-cmd {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.55rem 0.5rem 0.8rem; border-radius: 10px;
+    background: var(--surface-2); border: 1px solid var(--border);
+}
+html[data-theme] .sec-cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font-size: 0.82rem; color: var(--text-strong); }
+html[data-theme] .sec-cmd .btn { flex: none; border-radius: 999px; }
+html[data-theme] .sec-cmd-hint { display: block; margin-top: 0.35rem; font-size: 0.74rem; color: var(--muted); }
+html[data-theme] .sec-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+html[data-theme] .sec-actions .btn { border-radius: 999px; }
+
+/* Indicadores y pestañas dentro del recuadro, como en el resto de la plataforma */
+html[data-theme] .mgmt-summary { margin-bottom: 0.9rem; }
+html[data-theme] .mgmt-summary .mini-kpi small { color: var(--muted); font-weight: 600; }
+html[data-theme] .mgmt-panel { padding: 1rem 1.1rem !important; }
+html[data-theme] .mgmt-panel [data-tabs="gestion"] > .tab-bar { justify-content: center; }
+html[data-theme] tr.sec-flash > td { animation: sec-flash 2.4s ease; }
+@keyframes sec-flash { 0%, 60% { background: var(--warning-soft); } 100% { background: transparent; } }
+@media (max-width: 760px) { html[data-theme] .sec-grid { grid-template-columns: 1fr; } html[data-theme] .sec-toggle { position: static; } }
