@@ -27,6 +27,7 @@ class Command(BaseCommand):
 
         call_command("seed_demo_sales", reset=True)
         call_command("seed_demo_vision", reset=True)
+        call_command("seed_demo_journey", reset=True)
         call_command("generate_dish_images")
 
         webcam = Camera.objects.filter(name="Webcam de desarrollo").select_related("venue").first()
@@ -39,3 +40,4 @@ class Command(BaseCommand):
         self.stdout.write(" - Administrador: admin_demo / AdminDemo123!")
         self.stdout.write(" - Operador:      operador_demo / OperadorDemo123!")
         self.stdout.write(" - Inicia el servidor con: python manage.py runserver")
+        self.stdout.write(" - Alerta sostenida en vivo (defensa): python manage.py demo_alerta_sostenida --mesa M04")
