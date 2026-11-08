@@ -15,5 +15,6 @@ urlpatterns = [
     path("camaras/detectar/", views_management.camera_discover, name="camera_discover"),
     path("alertas/<int:venue_id>/", views_management.alert_settings_save, name="alert_settings"),
     path("api/nueva/", views_management.api_key_create, name="api_key_create"),
+    path("api/tutorial/", views_management.api_tutorial, name="api_tutorial"),
     path("api/<int:key_id>/revocar/", views_management.api_key_revoke, name="api_key_revoke"),
 ]

@@ -221,8 +221,10 @@
             <li><b>2</b>Cópiala: se muestra una sola vez</li>
             <li><b>3</b>Pégala en el otro sistema</li>
         </ol>
+        <p class="mgmt-tip tut-cta">📘 ¿Primera vez? Sigue el <a href="{% url 'management:api_tutorial' %}">tutorial paso a paso</a>: ejemplos listos para copiar con los datos de tu local (PowerShell, Python, JavaScript o curl) y un botón para probar la conexión.</p>
         <div class="mgmt-toolbar">
             <h3 class="mgmt-sub-title">🔑 Claves de API</h3>
+            <a class="btn mgmt-add" href="{% url 'management:api_tutorial' %}">📘 Tutorial de la API</a>
             <button type="button" class="btn btn-primary mgmt-add" data-open-dialog="dlg-api">＋ Nueva clave</button>
         </div>
         <div class="table-responsive mgmt-table">
@@ -342,7 +344,7 @@ curl -X POST {{ api_base }}ventas/ -H "Authorization: Bearer gi_…" -H "Content
             <h2 class="sr-only">Nueva clave</h2>
             <div class="form-group"><label for="api-name">¿Qué sistema la usará?</label><input id="api-name" name="name" maxlength="80" placeholder="Ej. Caja principal o Nodo cámara terraza" required></div>
             <div class="form-group"><label for="api-venue">Local</label><select id="api-venue" name="venue">{% for v in venues_list %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}</select></div>
-            <p class="mgmt-tip">🔒 La clave aparecerá una sola vez arriba de la página: cópiala en ese momento. Solo se guarda su huella SHA-256 y puedes revocarla cuando quieras.</p>
+            <p class="mgmt-tip">🔒 La clave aparecerá una sola vez arriba de la página: cópiala en ese momento. Solo se guarda su huella SHA-256 y puedes revocarla cuando quieras. ¿Cómo usarla? Mira el <a href="{% url 'management:api_tutorial' %}">📘 tutorial</a>.</p>
             <div class="mgmt-dialog-actions"><button type="button" class="btn" data-close-dialog>Cancelar</button><button class="btn btn-primary" type="submit">✓ Crear clave</button></div>
         </form>
     </div>
