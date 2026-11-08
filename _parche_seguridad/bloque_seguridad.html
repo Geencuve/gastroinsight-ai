@@ -1,0 +1,45 @@
+{% if security_warnings %}
+    <section class="card page-panel sec-panel" id="sec-panel">
+        <div class="sec-head">
+            <h2>🛡️ Advertencias de seguridad</h2>
+            <div class="status-chips sec-chips" role="toolbar" aria-label="Filtrar advertencias"></div>
+            <button type="button" class="sec-toggle" aria-expanded="true">Ocultar ▴</button>
+        </div>
+        <div class="sec-grid">
+            {% for w in security_warnings %}
+                <button type="button" class="sec-item sec-{{ w.level }}" data-sec-level="{{ w.level }}" data-sec-index="{{ forloop.counter0 }}">
+                    <span class="sec-dot" aria-hidden="true"></span>
+                    <span class="sec-text"><strong>{{ w.title }}</strong><small>{{ w.detail }}</small></span>
+                    <span class="sec-go">Resolver →</span>
+                </button>
+            {% endfor %}
+        </div>
+        {% for w in security_warnings %}
+            <template id="sec-fix-{{ forloop.counter0 }}">
+                <div class="sec-fix">
+                    <span class="sec-badge sec-{{ w.level }}">{{ w.level_label }}</span>
+                    <h3>{{ w.title }}</h3>
+                    {% if w.why %}<p class="sec-why">{{ w.why }}</p>{% endif %}
+                    <h4>Qué hacer</h4>
+                    <ol class="sec-steps">{% for step in w.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+                    {% if w.command %}
+                        <div class="sec-cmd"><code>{{ w.command }}</code><button type="button" class="btn btn-small" data-sec-copy>📋 Copiar</button></div>
+                        <small class="sec-cmd-hint">{{ w.command_hint }}</small>
+                    {% endif %}
+                    <div class="sec-actions">
+                        {% if w.action_url %}<a class="btn btn-primary" href="{{ w.action_url }}">{{ w.action_label }}</a>{% endif %}
+                        {% if w.action_tab is not None %}<button type="button" class="btn btn-primary" data-sec-tab="{{ w.action_tab }}" data-sec-mark="{{ w.action_mark }}">{{ w.action_label }}</button>{% endif %}
+                        <button type="button" class="btn" data-sec-close>Entendido</button>
+                    </div>
+                </div>
+            </template>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="card page-panel sec-panel sec-ok"><p>🛡️ <strong>Sin advertencias de seguridad.</strong> La configuración revisada está en orden.</p></section>
+{% endif %}
+<div class="orders-summary mgmt-summary">
+    <div class="mini-kpi"><span class="mini-kpi-icon">👥</span><strong>{{ kpis.staff }}</strong><span>Personal activo</span><small>Cuentas que administras</small></div>
+    <div class="mini-kpi"><span class="mini-kpi-icon">🪑</span><strong>{{ kpis.tables }}</strong><span>Mesas</span><small>{{ kpis.zones }} zona(s)</small></div>
+    <div class="mini-kpi"><span class="mini-kpi-icon">📷</span><strong>{{ kpis.cameras }}</strong><span>Cámaras</span><small>{{ kpis.entrances }} de entrada</small></div>
+</div>
