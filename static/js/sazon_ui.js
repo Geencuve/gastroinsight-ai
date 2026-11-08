@@ -125,7 +125,7 @@
     function showBrief() {
         document.querySelectorAll(".sazon-nudge").forEach((n) => n.remove());
         const nudge = document.createElement("div");
-        nudge.className = "sazon-nudge";
+        nudge.className = "sazon-nudge is-top";
         document.body.appendChild(nudge);
         expandNudge(nudge, true);
     }
@@ -206,14 +206,20 @@
     // «✨ Pregúntale a Sazón» en el encabezado de cada pantalla
     const header = document.querySelector("main .page-header");
     if (header && toggle && path !== "/" && !path.startsWith("/assistant/") && !header.querySelector(".sazon-ask")) {
-        let row = header.querySelector(".page-actions");
-        if (!row) { row = document.createElement("div"); row.className = "page-actions"; header.appendChild(row); }
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "btn btn-secondary sazon-ask";
-        button.textContent = "✨ Pregúntale a Sazón";
-        button.addEventListener("click", showBrief);
-        row.appendChild(button);
+        button.className = "sazon-ask sazon-ask-top";
+        button.textContent = "✨";
+        button.title = "Pregúntale a Sazón sobre esta pantalla";
+        button.setAttribute("aria-label", button.title);
+        button.addEventListener("click", (event) => { event.stopPropagation(); showBrief(); });
+        const corner = document.querySelector(".top-actions");
+        if (corner) corner.prepend(button);
+        else {
+            let row = header.querySelector(".page-actions");
+            if (!row) { row = document.createElement("div"); row.className = "page-actions"; header.appendChild(row); }
+            row.appendChild(button);
+        }
     }
 
     // Inicio: Sazón presenta las sugerencias

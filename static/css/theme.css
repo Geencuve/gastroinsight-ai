@@ -2323,3 +2323,33 @@ html[data-theme] .sn-figures { list-style: none; margin: 0; padding: 0; display:
 html[data-theme] .sn-figures li { display: flex; flex-direction: column; padding: 0.45rem 0.55rem; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
 html[data-theme] .sn-figures span { font-size: 0.7rem; color: var(--muted); }
 html[data-theme] .sn-figures strong { font: 800 1rem "Space Grotesk", sans-serif; color: var(--text-strong); }
+
+/* «Pregúntale a Sazón» junto a la campana, con su tarjeta debajo */
+html[data-theme] .top-actions .sazon-ask-top {
+    width: 44px; height: 44px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+    background: var(--surface); font-size: 1.15rem; cursor: pointer; display: grid; place-items: center;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); margin: 0 !important;
+}
+html[data-theme] .top-actions .sazon-ask-top:hover { border-color: var(--accent); background: var(--accent-soft); }
+html[data-theme] .sazon-nudge.is-top { top: 4.4rem !important; bottom: auto !important; right: 1.2rem !important; border-radius: 18px; }
+html[data-theme] .sazon-nudge.is-top.is-expanded { animation: sn-grow-top 0.22s ease; }
+@keyframes sn-grow-top { from { opacity: 0.6; transform: scale(0.92); transform-origin: top right; } to { opacity: 1; transform: none; } }
+
+/* =========================================================
+   Ayuda ⓘ: oculta por defecto, tarjeta flotante bajo el título al tocarla
+   ========================================================= */
+html[data-theme] main .page-help[hidden], html[data-theme] body .page-help[hidden] { display: none !important; }
+html[data-theme] main .page-header, html[data-theme] main .home-hero, html[data-theme] .waiter-head { position: relative; }
+html[data-theme] main .page-help.help-pop:not([hidden]) {
+    display: block !important; position: absolute; top: calc(100% - 0.2rem); left: 50%; transform: translateX(-50%); z-index: 60;
+    width: min(460px, calc(100vw - 2rem)); margin: 0 !important; padding: 0.75rem 0.95rem !important; border-radius: 14px;
+    background: var(--surface) !important; border: 1px solid var(--border) !important; border-left: 1px solid var(--border) !important;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22); color: var(--text) !important; font-size: 0.85rem; text-align: center;
+    animation: help-in 0.15s ease;
+}
+html[data-theme] main .page-help.help-pop:not([hidden])::before {
+    content: ""; position: absolute; top: -7px; left: 50%; width: 12px; height: 12px; transform: translateX(-50%) rotate(45deg);
+    background: var(--surface); border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+}
+html[data-theme] main .page-help-toggle[aria-expanded="true"] { background: var(--accent); color: #ffffff; border-color: transparent; }
+@keyframes help-in { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }

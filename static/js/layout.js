@@ -337,3 +337,21 @@
         kpi.prepend(icon);
     });
 })();
+
+/* GastroInsight AI · La ayuda ⓘ de cada pantalla parte oculta y se abre solo al tocarla. */
+(function () {
+    "use strict";
+    const notes = [...document.querySelectorAll("main .page-help")];
+    if (!notes.length) return;
+    notes.forEach((note) => { note.hidden = true; note.classList.add("help-pop"); });
+    const toggles = [...document.querySelectorAll("main .page-help-toggle")];
+    toggles.forEach((toggle) => toggle.setAttribute("aria-expanded", "false"));
+    const sync = () => toggles.forEach((toggle, i) => toggle.setAttribute("aria-expanded", String(!(notes[i] || notes[0]).hidden)));
+    document.addEventListener("click", (event) => {
+        if (event.target.closest(".page-help-toggle")) { setTimeout(sync, 0); return; }
+        if (!event.target.closest(".page-help")) { notes.forEach((note) => { note.hidden = true; }); sync(); }
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") { notes.forEach((note) => { note.hidden = true; }); sync(); }
+    });
+})();
