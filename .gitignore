@@ -108,3 +108,9 @@ parche_*.diff
 modelos_originales/
 evidencias.zip
 evidencias*.zip
+
+# Documentos y builds generados fuera del código
+Claude outputs/
+
+# Documentos y builds generados fuera del código
+Claude outputs/

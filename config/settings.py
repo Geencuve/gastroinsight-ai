@@ -196,3 +196,16 @@ if USE_HTTPS:
 
 # Registro público de cuentas: desactivado en el producto (las crea el administrador del local).
 ALLOW_SELF_REGISTRATION = config("ALLOW_SELF_REGISTRATION", default=False, cast=bool)
+
+# Red local: agrega automáticamente la IP actual de ESTE equipo (celulares por WiFi aunque cambie la IP).
+# Solo añade la dirección del propio servidor. Para desactivarlo: AUTO_LAN_HOST=False en el .env
+if config("AUTO_LAN_HOST", default=True, cast=bool):
+    import socket as _socket
+    try:
+        with _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM) as _sock:
+            _sock.connect(("10.255.255.255", 1))
+            _lan_ip = _sock.getsockname()[0]
+        if _lan_ip not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS = list(ALLOWED_HOSTS) + [_lan_ip]
+    except OSError:
+        pass
