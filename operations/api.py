@@ -1,4 +1,4 @@
-﻿"""
+"""
 API de integración v1 de GastroInsight AI.
 - GET  /api/v1/estado/      verifica la clave.
 - POST /api/v1/telemetria/  métricas agregadas de un nodo de cámara (nunca imágenes).
@@ -96,6 +96,14 @@ def _moment(data, field):
     return moment if timezone.is_aware(moment) else timezone.make_aware(moment)
 
 
+def _vision_authorized(venue):
+    """CR-01: misma regla que la visión local: política habilitada, sin imágenes y autorización vigente."""
+    from privacy.models import PrivacyPolicy
+
+    policy = PrivacyPolicy.objects.filter(venue=venue).prefetch_related("authorizations").first()
+    return bool(policy and policy.is_processing_authorized)
+
+
 def _endpoint(handler):
     @csrf_exempt
     def view(request, *args, **kwargs):
@@ -130,6 +138,9 @@ def telemetry(request, key):
     camera = Camera.objects.filter(pk=camera_id, venue=key.venue).select_related("table").first()
     if camera is None:
         raise ApiError(404, "La cámara no existe en el local de esta clave.")
+    if not _vision_authorized(key.venue):
+        raise ApiError(403, "El local no tiene una política de privacidad habilitada con una "
+                            "autorización vigente: la lectura no se guardó.")
     table = camera.table
     if data.get("mesa"):
         table = RestaurantTable.objects.filter(venue=key.venue, code=str(data["mesa"])[:20]).first()

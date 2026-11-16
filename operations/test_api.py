@@ -1,4 +1,4 @@
-﻿import json
+import json
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -30,6 +30,13 @@ class IntegrationApiTests(TestCase):
         raw, prefix, digest = new_key()
         self.key = ApiKey.objects.create(venue=self.venue, name="Caja", prefix=prefix, key_hash=digest, created_by=self.admin)
         self.auth = {"HTTP_AUTHORIZATION": f"Bearer {raw}"}
+        # CR-01: el local de prueba necesita política habilitada y autorización vigente para enviar telemetría.
+        from privacy.models import PrivacyPolicy, ProcessingAuthorization
+
+        politica, _ = PrivacyPolicy.objects.get_or_create(
+            venue=self.camera.venue, defaults={"purpose": "Indicadores agregados por mesa"})
+        PrivacyPolicy.objects.filter(pk=politica.pk).update(processing_enabled=True, store_original_images=False)
+        ProcessingAuthorization.objects.create(privacy_policy=politica, source_description="Salon principal")
 
     def _post(self, url, data, **extra):
         return self.client.post(url, json.dumps(data), content_type="application/json", **{**self.auth, **extra})
