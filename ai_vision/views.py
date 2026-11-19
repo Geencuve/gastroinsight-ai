@@ -1,6 +1,7 @@
 from collections import Counter
 
 import cv2
+from ai_vision.services.camera_backend import webcam_backend
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -298,7 +299,7 @@ def get_camera_source(camera):
 def generate_camera_frames(camera):
     source = get_camera_source(camera)
     if camera.source_type == Camera.SourceType.WEBCAM:
-        capture = cv2.VideoCapture(source, cv2.CAP_DSHOW)
+        capture = cv2.VideoCapture(source, webcam_backend())
     else:
         capture = cv2.VideoCapture(source)
     if not capture.isOpened():

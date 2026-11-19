@@ -2,6 +2,7 @@ import time
 from decimal import Decimal
 
 import cv2
+from ai_vision.services.camera_backend import webcam_backend
 from django.core.management.base import BaseCommand, CommandError
 from django.db import close_old_connections
 from django.utils import timezone
@@ -150,7 +151,7 @@ class Command(BaseCommand):
 
         source = self.get_capture_source(camera)
         if camera.source_type == Camera.SourceType.WEBCAM:
-            capture = cv2.VideoCapture(source, cv2.CAP_DSHOW)
+            capture = cv2.VideoCapture(source, webcam_backend())
         else:
             capture = cv2.VideoCapture(source)
         if not capture.isOpened():
