@@ -21,6 +21,7 @@ import os
 import re
 import threading
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta
@@ -29,19 +30,26 @@ from pathlib import Path
 import numpy as np
 
 RAIZ = Path(__file__).resolve().parents[2]
+REDIRECCIONES = []
 
 
 def sesion(url, usuario, clave):
-    cj = http.cookiejar.CookieJar()
-    op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
-    html = op.open(url + "/auth/login/", timeout=30).read().decode("utf-8", "replace")
-    token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', html).group(1)
-    datos = urllib.parse.urlencode({"csrfmiddlewaretoken": token, "username": usuario, "password": clave}).encode()
-    req = urllib.request.Request(url + "/auth/login/", data=datos, headers={"Referer": url + "/auth/login/"})
-    r = op.open(req, timeout=30)
-    if "/auth/login/" in r.geturl():
-        raise SystemExit("No se pudo iniciar sesión: revisa usuario y contraseña.")
-    return op
+    """Inicia sesión por el acceso de gestión (administradores y supervisores) o, si no, por el del personal."""
+    for ruta in ("/gestion/acceso/", "/auth/login/"):
+        cj = http.cookiejar.CookieJar()
+        op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+        html = op.open(url + "/auth/login/", timeout=30).read().decode("utf-8", "replace")
+        token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', html).group(1)
+        datos = urllib.parse.urlencode({"csrfmiddlewaretoken": token, "username": usuario, "password": clave}).encode()
+        req = urllib.request.Request(url + ruta, data=datos, headers={"Referer": url + "/auth/login/"})
+        try:
+            r = op.open(req, timeout=30)
+        except urllib.error.HTTPError:
+            continue
+        final = r.geturl()
+        if "/auth/login/" not in final and "/gestion/acceso/" not in final:
+            return op
+    raise SystemExit("No se pudo iniciar sesión por ninguno de los dos accesos: revisa usuario y contraseña.")
 
 
 def medir(op, ruta, url):
@@ -49,7 +57,10 @@ def medir(op, ruta, url):
     try:
         r = op.open(url + ruta, timeout=60)
         r.read()
-        ok = r.status == 200 and "/auth/login/" not in r.geturl()
+        # Debe llegar a la misma página pedida: una redirección (login, términos legales, primer uso) es un error
+        ok = r.status == 200 and urllib.parse.urlparse(r.geturl()).path == urllib.parse.urlparse(url + ruta).path
+        if not ok and not REDIRECCIONES:
+            REDIRECCIONES.append(r.geturl())
     except Exception:
         ok = False
     return (time.perf_counter() - t) * 1000, ok
@@ -104,6 +115,9 @@ def tablero(args, op):
                f"{'Aprobada' if peor <= 3 and not any(f[3] for f in filas) else 'No aprobada'}: percentil 95 de "
                + "; ".join(f"{n.lower()} {p:.2f} s".replace(".", ",") for n, _, p, _ in filas)
                + " (criterio ≤ 3 s). Registro de tiempos en evidencias/E03/tiempos_tablero.json."]
+    if REDIRECCIONES:
+        lineas += ["", f"ATENCIÓN: hubo redirecciones (por ejemplo a {REDIRECCIONES[0]}). Entra una vez con este usuario en el",
+                   "navegador, acepta lo que pida la plataforma (términos legales) y vuelve a ejecutar el script."]
     (salida / "resumen_tablero.txt").write_text("\n".join(lineas) + "\n", encoding="utf-8")
     print("\n".join(lineas))
 

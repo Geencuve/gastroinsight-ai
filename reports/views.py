@@ -1,5 +1,7 @@
 import csv
 
+from django.utils import timezone
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -273,11 +275,11 @@ def build_csv_response(data, filename, title, period_label):
                 service_session.table.code,
                 service_session.guests_count,
                 service_session.get_status_display(),
-                service_session.started_at.strftime(
+                timezone.localtime(service_session.started_at).strftime(
                     "%d-%m-%Y %H:%M"
                 ),
                 (
-                    service_session.ended_at.strftime(
+                    timezone.localtime(service_session.ended_at).strftime(
                         "%d-%m-%Y %H:%M"
                     )
                     if service_session.ended_at
@@ -304,7 +306,7 @@ def build_csv_response(data, filename, title, period_label):
                 evaluation.dish.name if evaluation.dish else "",
                 f"{evaluation.rating}/5",
                 evaluation.comment,
-                evaluation.created_at.strftime(
+                timezone.localtime(evaluation.created_at).strftime(
                     "%d-%m-%Y %H:%M"
                 ),
             ]
