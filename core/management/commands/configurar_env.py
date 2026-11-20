@@ -21,7 +21,11 @@ BOOLEANAS = {"DEBUG", "USE_HTTPS", "ALLOW_SELF_REGISTRATION"}
 def actualizar_env(ruta, clave, valor):
     """Reemplaza (o agrega) CLAVE=valor conservando el resto del archivo y sus finales de línea."""
     ruta = Path(ruta)
-    texto = ruta.read_text(encoding="utf-8-sig") if ruta.exists() else ""
+    texto = ""
+    if ruta.exists():
+        # newline="" conserva los \r\n tal como están en el archivo (en cualquier sistema)
+        with open(ruta, encoding="utf-8-sig", newline="") as archivo:
+            texto = archivo.read()
     salto = "\r\n" if "\r\n" in texto else "\n"
     lineas = texto.splitlines()
     patron = re.compile(rf"^\s*{re.escape(clave)}\s*=")
@@ -32,7 +36,7 @@ def actualizar_env(ruta, clave, valor):
             reemplazada = True
     if not reemplazada:
         lineas.append(f"{clave}={valor}")
-    ruta.write_text(salto.join(lineas) + salto, encoding="utf-8")
+    ruta.write_text(salto.join(lineas) + salto, encoding="utf-8", newline="")
     return reemplazada
 
 
